@@ -108,7 +108,7 @@ export function PublicNavbar() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed inset-0 bg-black/40 dark:bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 md:hidden"
+                        className="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-100 flex items-center justify-center p-4 md:hidden"
                         onClick={toggleMenu} // Close when clicking backdrop
                         style={{ height: '100dvh' }} // Ensure full height on mobile
                     >
@@ -126,7 +126,7 @@ export function PublicNavbar() {
                                 <span className="text-lg font-bold text-zinc-900 dark:text-white">Menu</span>
                                 <button
                                     onClick={toggleMenu}
-                                    className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white hover:bg-zinc-200 dark:bg-zinc-700 transition-colors"
+                                    className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
@@ -135,28 +135,28 @@ export function PublicNavbar() {
                             <div className="space-y-4">
                                 <Link
                                     href="/"
-                                    className="block rounded-lg px-4 py-3 text-lg font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:bg-zinc-800 hover:text-zinc-900 dark:text-white transition-colors"
+                                    className="block rounded-lg px-4 py-3 text-lg font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
                                     onClick={toggleMenu}
                                 >
                                     Home
                                 </Link>
                                 <Link
                                     href="/about"
-                                    className="block rounded-lg px-4 py-3 text-lg font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:bg-zinc-800 hover:text-zinc-900 dark:text-white transition-colors"
+                                    className="block rounded-lg px-4 py-3 text-lg font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
                                     onClick={toggleMenu}
                                 >
                                     About
                                 </Link>
                                 <Link
                                     href="/terms"
-                                    className="block rounded-lg px-4 py-3 text-lg font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:bg-zinc-800 hover:text-zinc-900 dark:text-white transition-colors"
+                                    className="block rounded-lg px-4 py-3 text-lg font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
                                     onClick={toggleMenu}
                                 >
                                     Terms
                                 </Link>
                                 <Link
                                     href="/privacy"
-                                    className="block rounded-lg px-4 py-3 text-lg font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:bg-zinc-800 hover:text-zinc-900 dark:text-white transition-colors"
+                                    className="block rounded-lg px-4 py-3 text-lg font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
                                     onClick={toggleMenu}
                                 >
                                     Privacy

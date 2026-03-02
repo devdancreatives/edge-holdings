@@ -93,7 +93,7 @@ const SidebarContent: React.FC<{
                             'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                             isActive
                                 ? 'bg-linear-to-r from-yellow-500/20 to-yellow-600/20 text-yellow-500 shadow-lg shadow-yellow-500/10'
-                                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800/50 hover:text-zinc-900 dark:text-white hover:translate-x-1'
+                                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white hover:translate-x-1'
                         )}
                     >
                         <Icon size={20} />
@@ -109,10 +109,10 @@ const SidebarContent: React.FC<{
         </div>
 
         {/* Footer - Fixed positioning to ensure visibility above everything */}
-        <div className="fixed bottom-0 left-0 w-64 p-4 pb-[calc(2rem+env(safe-area-inset-bottom))] bg-linear-to-t from-zinc-950 via-zinc-950/95 to-zinc-950/0 backdrop-blur-sm z-50 border-r border-zinc-200 dark:border-zinc-800">
+        <div className="fixed bottom-0 left-0 w-64 p-4 pb-[calc(2rem+env(safe-area-inset-bottom))] bg-linear-to-t from-white via-white/95 to-white/0 dark:from-zinc-950 dark:via-zinc-950/95 dark:to-zinc-950/0 backdrop-blur-sm z-50 border-r border-zinc-200 dark:border-zinc-800">
             <button
                 onClick={handleSignOut}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 dark:hover:text-red-300 transition-all duration-200"
             >
                 <LogOut size={20} />
                 Sign Out
@@ -155,7 +155,7 @@ export function Sidebar() {
             {/* Mobile Menu Button */}
             <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:bg-zinc-800 transition-colors"
+                className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 aria-label="Toggle menu"
             >
                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
