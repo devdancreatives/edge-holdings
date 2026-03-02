@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Settings as SettingsIcon, Bell, Shield, Palette, LogOut, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useMutation } from '@apollo/client/react'
+import { useMutation, useApolloClient } from '@apollo/client/react'
 import { CHANGE_PASSWORD } from '@/graphql/queries'
 import { supabase } from '@/lib/supabase'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
@@ -49,9 +49,12 @@ export default function SettingsPage() {
         }
     }
 
+    const client = useApolloClient()
+
     const handleSignOut = async () => {
         await supabase.auth.signOut()
-        router.push('/')
+        await client.clearStore()
+        router.push('/login')
     }
 
     return (

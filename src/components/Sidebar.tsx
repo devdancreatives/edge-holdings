@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { usePathname, useRouter } from 'next/navigation'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import { useQuery } from '@apollo/client/react'
+import { useQuery, useApolloClient } from '@apollo/client/react'
 import { GET_ME } from '@/graphql/queries'
 
 function cn(...inputs: (string | undefined | null | false)[]) {
@@ -134,9 +134,12 @@ export function Sidebar() {
     })
     const userRole = data?.me?.role || 'user'
 
+    const client = useApolloClient()
+
     const handleSignOut = async () => {
         await supabase.auth.signOut()
-        router.push('/')
+        await client.clearStore()
+        router.push('/login')
     }
 
     const navItems = userRole === 'admin'

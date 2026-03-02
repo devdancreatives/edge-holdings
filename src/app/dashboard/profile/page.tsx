@@ -133,26 +133,7 @@ export default function ProfilePage() {
                             )}
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <button
-                                type="button"
-                                onClick={() => testPush()}
-                                disabled={sendingPush}
-                                className="inline-flex items-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-zinc-900 dark:text-white transition-colors hover:bg-yellow-700 disabled:opacity-50"
-                            >
-                                {sendingPush ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
-                                Test Notification
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => testPush({ variables: { delay: 5 } })}
-                                disabled={sendingPush}
-                                className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-900 dark:text-white transition-colors hover:bg-zinc-200 dark:bg-zinc-700 disabled:opacity-50"
-                            >
-                                {sendingPush ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellOff className="h-4 w-4" />}
-                                Test Background (5s)
-                            </button>
-                        </div>
+                        
                     </div>
                 </form>
             </div>
