@@ -4,11 +4,12 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  // Optional: Verify CRON_SECRET if you added it to vercel.json or middleware
-  // const authHeader = request.headers.get('authorization');
-  // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-  //   return new Response('Unauthorized', { status: 401 });
-  // }
+  const { searchParams } = new URL(request.url);
+  const secret = searchParams.get("secret");
+
+  if (secret !== process.env.CRON_SECRET) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

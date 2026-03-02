@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { Loader2 } from 'lucide-react'
+import { format } from 'date-fns'
 import { CREATE_INVESTMENT, GET_ME, GET_MY_INVESTMENTS, GET_MY_TRANSACTIONS, GET_DASHBOARD_DATA } from '@/graphql/queries'
 
 export default function InvestPage() {
@@ -173,7 +174,7 @@ export default function InvestPage() {
                     </div>
                     <div className="flex justify-between text-zinc-500">
                         <span>Maturity Date:</span>
-                        <span>{maturityDate.toLocaleString()}</span>
+                        <span>{parsedAmount > 0 ? format(maturityDate, 'MMMM do yyyy, h:mmaaaa') : '-'}</span>
                     </div>
                     <div className="flex justify-between font-bold text-zinc-900 dark:text-white border-t border-zinc-200 dark:border-zinc-800 pt-2 mt-2">
                         <span>Est. Total Return:</span>
