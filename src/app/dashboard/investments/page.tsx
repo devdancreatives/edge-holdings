@@ -89,7 +89,9 @@ export default function InvestmentsPage() {
                                     <div className="flex items-center gap-2 text-sm">
                                         <Clock className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
                                         <span className="text-zinc-600 dark:text-zinc-400">Duration:</span>
-                                        <span className="text-zinc-900 dark:text-white font-medium">{investment.durationMonths} months</span>
+                                        <span className="text-zinc-900 dark:text-white font-medium">
+                                            {investment.durationMonths === 0 ? '1 hour (Test)' : `${investment.durationMonths} months`}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm">
                                         <Calendar className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />

@@ -162,7 +162,7 @@ export const typeDefs = `
   }
 
   type Mutation {
-    createInvestment(amount: Float!, durationMonths: Int!): Investment
+    createInvestment(amount: Float!, durationMonths: Int!, durationHours: Int): Investment
     simulateDeposit(amount: Float!, txHash: String!): Deposit
     createMyWallet: Wallet
     requestOtp(email: String!, fullName: String!): Boolean

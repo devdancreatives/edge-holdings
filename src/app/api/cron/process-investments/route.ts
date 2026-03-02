@@ -34,10 +34,19 @@ export async function GET(request: Request) {
 
     // 2. Process each investment
     for (const inv of maturedInvestments) {
-      // Calculate 7% Profit * Duration Months
+      // Calculate Profit
       const ROI_PERCENTAGE_PER_MONTH = 0.07;
-      const profit =
-        inv.amount * ROI_PERCENTAGE_PER_MONTH * inv.duration_months;
+      let profit = 0;
+      let roiPercentageTotal = 0;
+
+      if (inv.duration_months === 0) {
+        // Test Investment: Fixed 0.1% profit
+        roiPercentageTotal = 0.001;
+        profit = inv.amount * roiPercentageTotal;
+      } else {
+        roiPercentageTotal = ROI_PERCENTAGE_PER_MONTH * inv.duration_months;
+        profit = inv.amount * roiPercentageTotal;
+      }
 
       // Update Investment Status -> completed
       const { error: updateError } = await supabase
@@ -61,7 +70,7 @@ export async function GET(request: Request) {
         user_id: inv.user_id,
         date: new Date().toISOString(),
         profit_amount: profit,
-        roi_percentage: ROI_PERCENTAGE_PER_MONTH * inv.duration_months * 100,
+        roi_percentage: roiPercentageTotal * 100,
       });
 
       if (roiError) {
@@ -80,7 +89,10 @@ export async function GET(request: Request) {
           user_id: inv.user_id,
           type: "profit_payout",
           amount: profit,
-          description: `ROI Payout for ${inv.duration_months}-month investment`,
+          description:
+            inv.duration_months === 0
+              ? `ROI Payout for test investment`
+              : `ROI Payout for ${inv.duration_months}-month investment`,
         });
 
         // 2. Principal Return
