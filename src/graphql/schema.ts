@@ -58,6 +58,7 @@ export const typeDefs = `
     amount: Float!
     description: String
     createdAt: DateTime!
+    user: User
   }
 
   type ReferralStats {
@@ -145,6 +146,7 @@ export const typeDefs = `
     adminInvestments: [Investment]
     adminAiStats: AdminAiStats
     adminInvestmentStats: AdminInvestmentStats
+    adminTransactions: [Transaction]
   }
 
   type AdminStats {

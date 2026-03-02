@@ -57,9 +57,10 @@ export async function monitorDeposits(): Promise<DepositResult> {
       return result;
     }
 
-    // Limit scan range to avoid RPC timeouts (max 5000 blocks)
+    // Limit scan range to avoid RPC timeouts (max 200 blocks)
+    // USDT contract is very busy and large ranges cause "limit exceeded" or timeouts
     const fromBlock = scanFrom;
-    const toBlock = Math.min(currentBlock, fromBlock + 5000);
+    const toBlock = Math.min(currentBlock, fromBlock + 200);
 
     // 2. Get all monitored wallets for O(1) lookup
     const { data: wallets } = await supabase
@@ -172,7 +173,10 @@ export async function syncSpecificWallet(userId: string): Promise<number> {
         });
 
         if (error) throw error;
-        if (status === "confirmed") newCount++;
+        if (status === "confirmed") {
+          newCount++;
+          await handleNotifications(userId, parsedTx.amount, tx.hash);
+        }
       } catch (err) {
         console.error(
           `Error syncing tx ${tx.hash} for wallet ${wallet.address}:`,
@@ -262,6 +266,30 @@ async function handleNotifications(
         amount,
         txHash,
       );
+    }
+
+    // Also notify admin
+    try {
+      const { data: admins } = await supabase
+        .from("users")
+        .select("email")
+        .eq("role", "admin");
+
+      if (admins && admins.length > 0) {
+        const { sendAdminDepositAlert } = require("./email");
+        for (const admin of admins) {
+          if (admin.email) {
+            await sendAdminDepositAlert(
+              admin.email,
+              user?.full_name || "User",
+              amount,
+              txHash,
+            );
+          }
+        }
+      }
+    } catch (adminErr) {
+      console.error("Admin notification error:", adminErr);
     }
 
     await sendPushNotification(userId, {
