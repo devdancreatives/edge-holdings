@@ -730,12 +730,27 @@ export const resolvers = {
   Mutation: {
     createInvestment: async (
       _: any,
-      { amount, durationMonths }: any,
+      { amount, durationMonths, durationHours }: any,
       context: any,
     ) => {
       const client = getClient(context);
       const user = await getUser(client);
       if (!user) throw new Error("Unauthorized");
+
+      // Check for Admin only for durationHours
+      if (durationHours !== undefined) {
+        const { data: profile } = await client
+          .from("users")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.role !== "admin") {
+          throw new Error(
+            "Only admins can create test investments (hours based)",
+          );
+        }
+      }
 
       // Calculate 0.1% Fee
       const FEE_PERCENTAGE = 0.001; // 0.1%
@@ -750,7 +765,12 @@ export const resolvers = {
 
       const startDate = new Date();
       const endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + durationMonths);
+
+      if (durationHours !== undefined) {
+        endDate.setHours(endDate.getHours() + durationHours);
+      } else {
+        endDate.setMonth(endDate.getMonth() + durationMonths);
+      }
 
       const { data, error } = await client
         .from("investments")
@@ -758,7 +778,7 @@ export const resolvers = {
           user_id: user.id,
           amount,
           fee: fee, // Record the fee
-          duration_months: durationMonths,
+          duration_months: durationHours !== undefined ? 0 : durationMonths,
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
           status: "active",
@@ -769,17 +789,28 @@ export const resolvers = {
       if (error) throw new Error(error.message);
 
       // Log in transactions ledger
-      await client.from("transactions").insert({
+      const { error: txError } = await client.from("transactions").insert({
         user_id: user.id,
         type: "investment_start",
         amount: amount,
-        description: `Started ${durationMonths}-month investment`,
+        description:
+          durationHours !== undefined
+            ? `Started ${durationHours}-hour test investment`
+            : `Started ${durationMonths}-month investment`,
       });
+
+      if (txError) {
+        console.error("Failed to log transaction:", txError);
+        // Optional: throw new Error(`Investment created but transaction logging failed: ${txError.message}`);
+      }
 
       // Send Push Notification
       await sendPushNotification(user.id, {
         title: "Investment Active",
-        body: `Your investment of $${amount} for ${durationMonths} months is now active.`,
+        body:
+          durationHours !== undefined
+            ? `Your test investment of $${amount} for ${durationHours} hours is now active.`
+            : `Your investment of $${amount} for ${durationMonths} months is now active.`,
         url: "/dashboard/invest",
       });
 
@@ -802,6 +833,18 @@ export const resolvers = {
         .single();
 
       if (error) throw new Error(error.message);
+
+      // Log transaction for simulated deposit
+      const { error: txError } = await client.from("transactions").insert({
+        user_id: user.id,
+        type: "deposit",
+        amount: amount,
+        description: `Simulated deposit via admin - Tx: ${txHash.substring(0, 10)}...`,
+      });
+
+      if (txError)
+        console.error("Failed to log simulated deposit transaction:", txError);
+
       return data;
     },
     createMyWallet: async (_: any, __: any, context: any) => {

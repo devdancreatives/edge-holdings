@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { Loader2 } from 'lucide-react'
-import { CREATE_INVESTMENT, GET_ME, GET_MY_INVESTMENTS } from '@/graphql/queries'
+import { CREATE_INVESTMENT, GET_ME, GET_MY_INVESTMENTS, GET_MY_TRANSACTIONS, GET_DASHBOARD_DATA } from '@/graphql/queries'
 
 export default function InvestPage() {
     const [amount, setAmount] = useState('')
@@ -17,7 +17,9 @@ export default function InvestPage() {
     const [createInvestment, { loading }] = useMutation(CREATE_INVESTMENT, {
         refetchQueries: [
             { query: GET_MY_INVESTMENTS },
-            { query: GET_ME }
+            { query: GET_ME },
+            { query: GET_MY_TRANSACTIONS, variables: { limit: 50 } },
+            { query: GET_DASHBOARD_DATA }
         ],
         onCompleted: () => {
             setSuccess('Investment created successfully!')
@@ -39,7 +41,8 @@ export default function InvestPage() {
             await createInvestment({
                 variables: {
                     amount: parseFloat(amount),
-                    durationMonths: parseInt(duration)
+                    durationMonths: duration === '1h' ? 0 : parseInt(duration),
+                    durationHours: duration === '1h' ? 1 : undefined
                 }
             })
         } catch (err: any) {
@@ -51,11 +54,20 @@ export default function InvestPage() {
     const parsedAmount = parseFloat(amount) || 0
     const fee = parsedAmount * 0.001 // 0.1%
     const totalDeduction = parsedAmount + fee
-    const durationNum = parseInt(duration)
-    const estimatedProfit = parsedAmount * 0.07 * durationNum // 7% per month * duration
+
+    let estimatedProfit = 0
+    let maturityDate = new Date()
+
+    if (duration === '1h') {
+        estimatedProfit = parsedAmount * 0.001 // 0.1% for test
+        maturityDate.setHours(maturityDate.getHours() + 1)
+    } else {
+        const durationNum = parseInt(duration)
+        estimatedProfit = parsedAmount * 0.07 * durationNum // 7% per month * duration
+        maturityDate.setMonth(maturityDate.getMonth() + durationNum)
+    }
+
     const totalReturn = parsedAmount + estimatedProfit
-    const maturityDate = new Date()
-    maturityDate.setMonth(maturityDate.getMonth() + durationNum)
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
@@ -82,23 +94,36 @@ export default function InvestPage() {
 
                     <div>
                         <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                            Duration (Months)
+                            Duration
                         </label>
-                        <div className="mt-2 grid grid-cols-3 gap-3 sm:grid-cols-6">
-                            {[1, 2, 3, 4, 5, 6].map((m) => (
+                        <div className="mt-2 grid grid-cols-3 gap-3 sm:grid-cols-4">
+                            {[1, 2, 3, 6].map((m) => (
                                 <button
                                     key={m}
                                     type="button"
                                     onClick={() => setDuration(m.toString())}
                                     className={`flex flex-col items-center justify-center rounded-lg border px-2 py-3 text-sm font-medium transition-colors ${duration === m.toString()
                                         ? 'border-yellow-500 bg-yellow-500/10 text-yellow-500'
-                                        : 'border-zinc-700 bg-zinc-100 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 hover:text-zinc-900 dark:text-white'
+                                        : 'border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-white hover:bg-zinc-100 hover:text-zinc-900'
                                         }`}
                                 >
                                     <span className="text-lg">{m}</span>
                                     <span className="text-xs">Month{m > 1 ? 's' : ''}</span>
                                 </button>
                             ))}
+                            {userData?.me?.role === 'admin' && (
+                                <button
+                                    type="button"
+                                    onClick={() => setDuration('1h')}
+                                    className={`flex flex-col items-center justify-center rounded-lg border px-2 py-3 text-sm font-medium transition-colors ${duration === '1h'
+                                        ? 'border-purple-500 bg-purple-500/10 text-purple-500'
+                                        : 'border-purple-900/30 bg-purple-900/10 text-purple-400 hover:bg-purple-900/20'
+                                        }`}
+                                >
+                                    <span className="text-lg">1</span>
+                                    <span className="text-xs">Hour (Test)</span>
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -143,12 +168,12 @@ export default function InvestPage() {
                     <div className="py-2"></div>
 
                     <div className="flex justify-between text-green-500">
-                        <span>Est. ROI (7%):</span>
+                        <span>Est. ROI ({duration === '1h' ? '0.1%' : '7%'}):</span>
                         <span>{parsedAmount > 0 ? `+$${estimatedProfit.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between text-zinc-500">
                         <span>Maturity Date:</span>
-                        <span>{maturityDate.toLocaleDateString()}</span>
+                        <span>{maturityDate.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between font-bold text-zinc-900 dark:text-white border-t border-zinc-200 dark:border-zinc-800 pt-2 mt-2">
                         <span>Est. Total Return:</span>
@@ -158,8 +183,8 @@ export default function InvestPage() {
             </div>
 
             <div className="text-xs text-zinc-500 text-center">
-                Funds will be locked for {duration} months. Principal + 7% Profit is returned upon maturity.
+                Funds will be locked for {duration === '1h' ? '1 hour' : `${duration} months`}. Principal + Profit is returned upon maturity.
             </div>
-        </div>
+        </div >
     )
 }

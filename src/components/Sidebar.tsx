@@ -171,7 +171,7 @@ export function Sidebar() {
 
             {/* Sidebar */}
             <div className={cn(
-                "fixed lg:static inset-y-0 left-0 z-40 flex h-[100dvh] w-64 flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white transition-transform duration-300 overflow-hidden",
+                "fixed lg:static inset-y-0 left-0 z-40 flex h-dvh w-64 flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white transition-transform duration-300 overflow-hidden",
                 mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
             )}>
                 <SidebarContent

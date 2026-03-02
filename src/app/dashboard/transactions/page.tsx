@@ -36,7 +36,8 @@ const getTransactionColor = (type: string) => {
 
 export default function TransactionsPage() {
     const { data, loading } = useQuery<any>(GET_MY_TRANSACTIONS, {
-        variables: { limit: 50 }
+        variables: { limit: 50 },
+        fetchPolicy: 'network-only'
     })
     const transactions = data?.myTransactions || []
 
