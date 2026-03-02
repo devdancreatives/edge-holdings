@@ -23,7 +23,7 @@ export function ROIChart({ data }: { data: any[] }) {
                     bottom: 5,
                 }}
             >
-                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-zinc-200 dark:text-zinc-800" />
                 <XAxis
                     dataKey="date"
                     stroke="#71717a"
@@ -32,8 +32,13 @@ export function ROIChart({ data }: { data: any[] }) {
                 />
                 <YAxis stroke="#71717a" fontSize={12} />
                 <Tooltip
-                    contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a' }}
-                    labelStyle={{ color: '#a1a1aa' }}
+                    contentStyle={{
+                        backgroundColor: 'var(--tooltip-bg)',
+                        border: '1px solid var(--tooltip-border)',
+                        borderRadius: '12px'
+                    }}
+                    labelStyle={{ color: 'var(--tooltip-label)' }}
+                    itemStyle={{ color: '#eab308' }}
                 />
                 <Line
                     type="monotone"

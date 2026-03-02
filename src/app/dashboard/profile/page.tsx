@@ -75,7 +75,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="max-w-2xl">
-                <form onSubmit={handleSave} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm space-y-6">
+                <form onSubmit={handleSave} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
                             Email Address
@@ -133,7 +133,7 @@ export default function ProfilePage() {
                             )}
                         </div>
 
-                        
+
                     </div>
                 </form>
             </div>

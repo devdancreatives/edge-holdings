@@ -71,7 +71,7 @@ export default function SettingsPage() {
 
             <div className="grid gap-6">
                 {/* Notifications */}
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm">
                     <div className="flex items-center gap-3 mb-6">
                         <Bell className="h-5 w-5 text-yellow-500" />
                         <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Notifications</h2>
@@ -152,7 +152,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Security */}
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm">
                     <div className="flex items-center gap-3 mb-6">
                         <Shield className="h-5 w-5 text-yellow-500" />
                         <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Security</h2>

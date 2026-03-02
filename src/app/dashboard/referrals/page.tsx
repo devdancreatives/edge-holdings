@@ -62,7 +62,7 @@ export default function ReferralsPage() {
             </div>
 
             {/* Referral Code Card */}
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 p-6 backdrop-blur-sm">
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-3 rounded-lg bg-yellow-500/20">
@@ -113,7 +113,7 @@ export default function ReferralsPage() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6">
                     <div className="flex items-center gap-3 mb-2">
                         <Users className="h-5 w-5 text-blue-500" />
                         <p className="text-sm text-zinc-600 dark:text-zinc-400">Total Referrals</p>
@@ -121,7 +121,7 @@ export default function ReferralsPage() {
                     <p className="text-3xl font-bold text-zinc-900 dark:text-white">{stats?.totalReferrals || 0}</p>
                 </div>
 
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6">
                     <div className="flex items-center gap-3 mb-2">
                         <TrendingUp className="h-5 w-5 text-green-500" />
                         <p className="text-sm text-zinc-600 dark:text-zinc-400">Active Referrals</p>
@@ -129,7 +129,7 @@ export default function ReferralsPage() {
                     <p className="text-3xl font-bold text-zinc-900 dark:text-white">{stats?.activeReferrals || 0}</p>
                 </div>
 
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6">
                     <div className="flex items-center gap-3 mb-2">
                         <DollarSign className="h-5 w-5 text-yellow-500" />
                         <p className="text-sm text-zinc-600 dark:text-zinc-400">Total Earnings</p>
@@ -140,7 +140,7 @@ export default function ReferralsPage() {
 
             {/* Bonus Progress */}
             {nextBonus && (
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                             <Award className="h-5 w-5 text-yellow-500" />
@@ -166,7 +166,7 @@ export default function ReferralsPage() {
             )}
 
             {/* Referrals List */}
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Your Referrals</h2>
                 {referralsLoading ? (
                     <div className="flex justify-center py-8">
@@ -229,7 +229,7 @@ export default function ReferralsPage() {
             </div>
 
             {/* Earnings History */}
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6">
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Earnings History</h2>
                 {earningsLoading ? (
                     <div className="flex justify-center py-8">
