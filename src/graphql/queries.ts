@@ -516,3 +516,18 @@ export const RESOLVE_AI_TRADE = gql`
     resolveAiTrade(amount: $amount, profit: $profit, isWin: $isWin)
   }
 `;
+export const GET_ADMIN_TRANSACTIONS = gql`
+  query GetAdminTransactions {
+    adminTransactions {
+      id
+      type
+      amount
+      description
+      createdAt
+      user {
+        email
+        fullName
+      }
+    }
+  }
+`;

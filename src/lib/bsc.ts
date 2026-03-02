@@ -104,11 +104,14 @@ export async function getWalletTransactions(
 /**
  * Fetch all USDT transfer logs for a block range.
  * High-performance scanning for multiple users.
+ * Automatically fragments requests if block range is too large or if RPC limits are hit.
  */
 export async function getGlobalTransactions(
   fromBlock: number,
   toBlock: number,
 ): Promise<BscScanTransaction[]> {
+  const MAX_BLOCKS_PER_CHUNK = 1000;
+
   try {
     const provider = new ethers.JsonRpcProvider(
       "https://bsc-dataseed.binance.org/",
@@ -117,18 +120,52 @@ export async function getGlobalTransactions(
     const transferTopic =
       "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
+    // If block range is too large, split and recurse
+    if (toBlock - fromBlock > MAX_BLOCKS_PER_CHUNK) {
+      console.log(`Range ${fromBlock}-${toBlock} too large, splitting...`);
+      const mid = Math.floor((fromBlock + toBlock) / 2);
+      const [part1, part2] = await Promise.all([
+        getGlobalTransactions(fromBlock, mid),
+        getGlobalTransactions(mid + 1, toBlock),
+      ]);
+      return [...part1, ...part2];
+    }
+
     console.log(`Scanning BSC logs from ${fromBlock} to ${toBlock}...`);
 
-    const logs = await provider.getLogs({
-      address: USDT_CONTRACT,
-      topics: [transferTopic],
-      fromBlock,
-      toBlock,
-    });
+    let logs;
+    try {
+      logs = await provider.getLogs({
+        address: USDT_CONTRACT,
+        topics: [transferTopic],
+        fromBlock,
+        toBlock,
+      });
+    } catch (rpcError: any) {
+      // If we hit "limit exceeded" or similar, split more aggressively
+      if (
+        rpcError.message?.includes("limit exceeded") ||
+        rpcError.message?.includes("too many results") ||
+        toBlock - fromBlock > 1
+      ) {
+        console.warn(
+          `RPC Limit hit for range ${fromBlock}-${toBlock}, splitting...`,
+        );
+        const mid = Math.floor((fromBlock + toBlock) / 2);
+        const [part1, part2] = await Promise.all([
+          getGlobalTransactions(fromBlock, mid),
+          getGlobalTransactions(mid + 1, toBlock),
+        ]);
+        return [...part1, ...part2];
+      }
+      throw rpcError;
+    }
 
     if (logs.length === 0) return [];
 
-    console.log(`Found ${logs.length} USDT transfers in range.`);
+    console.log(
+      `Found ${logs.length} USDT transfers in range ${fromBlock}-${toBlock}.`,
+    );
 
     // Map logs to BscScanTransaction format
     const transactions: BscScanTransaction[] = logs.map((log) => {
@@ -162,7 +199,10 @@ export async function getGlobalTransactions(
 
     return transactions;
   } catch (error) {
-    console.error("Error fetching global transactions via RPC:", error);
+    console.error(
+      `Error in getGlobalTransactions (${fromBlock}-${toBlock}):`,
+      error,
+    );
     return [];
   }
 }

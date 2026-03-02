@@ -64,7 +64,7 @@ export async function sendOtpEmail(to: string, otp: string) {
     }
 
     console.log(
-      `✅ OTP email sent successfully via Resend to ${to}. MessageId: ${data?.id}`
+      `✅ OTP email sent successfully via Resend to ${to}. MessageId: ${data?.id}`,
     );
     return data;
   } catch (error: any) {
@@ -77,7 +77,7 @@ export async function sendDepositNotification(
   to: string,
   name: string,
   amount: number,
-  txHash: string
+  txHash: string,
 ) {
   console.log(`🚀 Sending deposit notification to: ${to}`);
 
@@ -167,11 +167,93 @@ export async function sendDepositNotification(
     }
 
     console.log(
-      `✅ Deposit notification sent to ${to}. MessageId: ${data?.id}`
+      `✅ Deposit notification sent to ${to}. MessageId: ${data?.id}`,
     );
     return data;
   } catch (error: any) {
     console.error(`❌ Error sending deposit notification:`, error.message);
+    return null;
+  }
+}
+
+export async function sendAdminDepositAlert(
+  to: string,
+  userName: string,
+  amount: number,
+  txHash: string,
+) {
+  console.log(`🚀 Sending admin deposit alert to: ${to}`);
+
+  const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #09090b; margin: 0; padding: 0; color: #e4e4e7; }
+            .container { max-width: 600px; margin: 40px auto; background: #18181b; border-radius: 16px; overflow: hidden; border: 1px solid #27272a; }
+            .header { background: #27272a; padding: 30px; text-align: center; }
+            .header h1 { margin: 0; font-size: 20px; font-weight: bold; color: #eab308; }
+            .content { padding: 40px 30px; }
+            .text { color: #a1a1aa; font-size: 16px; line-height: 1.5; margin-bottom: 20px; }
+            .stats-box { background: #27272a; border-radius: 12px; padding: 20px; margin: 20px 0; }
+            .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #3f3f46; }
+            .stat-row:last-child { border-bottom: none; }
+            .stat-label { color: #a1a1aa; }
+            .stat-value { color: #ffffff; font-weight: 500; }
+            .footer { background: #09090b; padding: 20px; text-align: center; color: #52525b; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Admin Alert: New Deposit</h1>
+            </div>
+            <div class="content">
+              <p class="text">A new USDT deposit has been confirmed on the platform.</p>
+              
+              <div class="stats-box">
+                <div class="stat-row">
+                  <span class="stat-label">User</span>
+                  <span class="stat-value">${userName}</span>
+                </div>
+                <div class="stat-row">
+                  <span class="stat-label">Amount</span>
+                  <span class="stat-value">$${amount.toLocaleString()} USDT</span>
+                </div>
+                <div class="stat-row">
+                  <span class="stat-label">Hash</span>
+                  <span class="stat-value" style="font-family: monospace; font-size: 12px;">${txHash.substring(0, 10)}...</span>
+                </div>
+              </div>
+
+              <div style="text-align: center; margin-top: 30px;">
+                <a href="https://bscscan.com/tx/${txHash}" style="color: #eab308; text-decoration: none; font-size: 14px;">View on BscScan</a>
+              </div>
+            </div>
+            <div class="footer">
+              <p>© EdgePoint Holdings Admin Dashboard</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "EdgePoint Admin <noreply@kraftkonect.com>",
+      to: [to],
+      subject: `🚨 Admin Alert: New Deposit - $${amount.toLocaleString()} USDT`,
+      html,
+    });
+
+    if (error) {
+      console.error(`❌ Failed to send admin alert to ${to}:`, error);
+      return null;
+    }
+
+    return data;
+  } catch (error: any) {
+    console.error(`❌ Error sending admin alert:`, error.message);
     return null;
   }
 }

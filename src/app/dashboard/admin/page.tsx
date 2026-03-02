@@ -105,6 +105,16 @@ export default function AdminDashboard() {
                             </div>
                             <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">View user details and balances</p>
                         </Link>
+                        <Link
+                            href="/dashboard/admin/transactions"
+                            className="block p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 transition-colors border border-zinc-700"
+                        >
+                            <div className="flex items-center justify-between">
+                                <span className="font-medium text-zinc-900 dark:text-white">All Transactions</span>
+                                <ArrowUpRight className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                            </div>
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Audit all platform-wide activities</p>
+                        </Link>
                     </div>
                 </div>
                 <div className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">

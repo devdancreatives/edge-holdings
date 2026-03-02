@@ -624,6 +624,25 @@ export const resolvers = {
       };
     },
 
+    adminTransactions: async (_: any, __: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const serviceClient = getServiceClient();
+
+      const { data } = await serviceClient
+        .from("transactions")
+        .select("*, user:user_id(email, full_name)")
+        .order("created_at", { ascending: false });
+      return data;
+    },
+
     // End of New Admin Resolvers
   },
   Investment: {
@@ -633,6 +652,10 @@ export const resolvers = {
     createdAt: (parent: any) => parent.created_at,
     profitPercent: (parent: any) => parent.profitPercent || 0,
     expectedProfit: (parent: any) => parent.expectedProfit || 0,
+  },
+  Transaction: {
+    createdAt: (parent: any) => parent.created_at,
+    user: (parent: any) => parent.user, // For admin view if pre-stitched, or we could add a resolver here
   },
   Chat: {
     userId: (parent: any) => parent.user_id,
@@ -706,9 +729,6 @@ export const resolvers = {
     user: (parent: any) => parent.user,
   },
 
-  Transaction: {
-    createdAt: (parent: any) => parent.created_at,
-  },
   Referral: {
     totalEarned: (parent: any) => parent.total_earned,
     createdAt: (parent: any) => parent.created_at,
