@@ -768,6 +768,14 @@ export const resolvers = {
 
       if (error) throw new Error(error.message);
 
+      // Log in transactions ledger
+      await client.from("transactions").insert({
+        user_id: user.id,
+        type: "investment_start",
+        amount: amount,
+        description: `Started ${durationMonths}-month investment`,
+      });
+
       // Send Push Notification
       await sendPushNotification(user.id, {
         title: "Investment Active",

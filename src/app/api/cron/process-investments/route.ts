@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
   try {
@@ -74,6 +74,23 @@ export async function GET(request: Request) {
           error: roiError.message,
         });
       } else {
+        // Log Transactions
+        // 1. Profit Payout
+        await supabase.from("transactions").insert({
+          user_id: inv.user_id,
+          type: "profit_payout",
+          amount: profit,
+          description: `ROI Payout for ${inv.duration_months}-month investment`,
+        });
+
+        // 2. Principal Return
+        await supabase.from("transactions").insert({
+          user_id: inv.user_id,
+          type: "deposit", // Using 'deposit' as a proxy for 'credit' since it shows as '+'
+          amount: inv.amount,
+          description: `Principal returned from matured investment`,
+        });
+
         results.push({ id: inv.id, status: "success", profit });
       }
     }
@@ -86,7 +103,7 @@ export async function GET(request: Request) {
     console.error("Cron job failed:", error);
     return NextResponse.json(
       { error: "Internal Server Error", details: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
