@@ -14,7 +14,7 @@ export default function WalletPage() {
     // Use Apollo hooks instead of fetch
     const { data, loading } = useQuery<any>(GET_ME)
 
-    const [syncDeposits] = useMutation(SYNC_MY_DEPOSITS, {
+    const [syncDeposits] = useMutation<{ syncMyDeposits: number }>(SYNC_MY_DEPOSITS, {
         refetchQueries: [{ query: GET_ME }],
         onCompleted: (data) => {
             setSyncing(false)
