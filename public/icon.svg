@@ -1,4 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="16" fill="#EAB308" />
-  <path d="M23 10L9 22H23V24H7V22L21 10H7V8H23V10Z" fill="#000000" />
-</svg>
+<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#0F172A"/><text x="16" y="22" font-family="Arial, sans-serif" font-weight="900" font-size="16" fill="#EAB308" text-anchor="middle">EH</text></svg>
