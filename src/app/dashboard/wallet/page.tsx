@@ -2,15 +2,41 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
-import { Wallet as WalletIcon, Copy, Check, Plus, Loader2, ExternalLink } from 'lucide-react'
-import { GET_ME, CREATE_MY_WALLET, REQUEST_WITHDRAWAL, GET_MY_WITHDRAWALS } from '@/graphql/queries'
+import { Wallet as WalletIcon, Copy, Check, Plus, Loader2, ExternalLink, RefreshCw } from 'lucide-react'
+import { GET_ME, CREATE_MY_WALLET, REQUEST_WITHDRAWAL, GET_MY_WITHDRAWALS, SYNC_MY_DEPOSITS } from '@/graphql/queries'
+import { toast } from 'sonner'
 
 export default function WalletPage() {
     const [creating, setCreating] = useState(false)
     const [copied, setCopied] = useState(false)
+    const [syncing, setSyncing] = useState(false)
 
     // Use Apollo hooks instead of fetch
     const { data, loading } = useQuery<any>(GET_ME)
+
+    const [syncDeposits] = useMutation(SYNC_MY_DEPOSITS, {
+        refetchQueries: [{ query: GET_ME }],
+        onCompleted: (data) => {
+            setSyncing(false)
+            const count = data?.syncMyDeposits || 0
+            if (count > 0) {
+                toast.success(`Found and credited ${count} new deposit(s)!`)
+            } else {
+                toast.info('No new deposits found. If you just sent it, please wait a few minutes for blockchain confirmations.')
+            }
+        },
+        onError: (error) => {
+            console.error('Sync error:', error)
+            setSyncing(false)
+            toast.error('Failed to sync: ' + error.message)
+        }
+    })
+
+    const handleSync = async () => {
+        setSyncing(true)
+        await syncDeposits()
+    }
+
     const [createWallet] = useMutation(CREATE_MY_WALLET, {
         refetchQueries: [{ query: GET_ME }],
         onCompleted: () => {
@@ -108,13 +134,23 @@ export default function WalletPage() {
                     </div>
                 </div>
                 {wallet && (
-                    <button
-                        onClick={() => setShowWithdrawModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white font-medium transition-colors border border-zinc-700"
-                    >
-                        <ExternalLink className="h-4 w-4" />
-                        Withdraw
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSync}
+                            disabled={syncing}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 font-medium transition-colors border border-yellow-500/30 disabled:opacity-50"
+                        >
+                            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+                            {syncing ? 'Checking...' : 'Check for Deposits'}
+                        </button>
+                        <button
+                            onClick={() => setShowWithdrawModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white font-medium transition-colors border border-zinc-700"
+                        >
+                            <ExternalLink className="h-4 w-4" />
+                            Withdraw
+                        </button>
+                    </div>
                 )}
             </div>
 

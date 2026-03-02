@@ -348,6 +348,12 @@ export const CHANGE_PASSWORD = gql`
   }
 `;
 
+export const SYNC_MY_DEPOSITS = gql`
+  mutation SyncMyDeposits {
+    syncMyDeposits
+  }
+`;
+
 export const GET_ADMIN_STATS = gql`
   query GetAdminStats {
     adminStats {

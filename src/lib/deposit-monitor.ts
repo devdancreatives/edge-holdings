@@ -42,13 +42,23 @@ export async function monitorDeposits(): Promise<DepositResult> {
     const lastBlock = config ? parseInt(config.value as string) : 0;
     const currentBlock = await getCurrentBlockNumber();
 
-    if (currentBlock <= lastBlock) {
+    // 1b. Automatic Jump Logic
+    // If we are more than 100,000 blocks behind, jump to caught up - 5000 blocks
+    let scanFrom = lastBlock + 1;
+    if (currentBlock - lastBlock > 100000) {
+      console.log(
+        `[DEPOSIT MONITOR] Lag too large (${currentBlock - lastBlock}). Jumping to ${currentBlock - 5000}`,
+      );
+      scanFrom = currentBlock - 5000;
+    }
+
+    if (currentBlock <= lastBlock && currentBlock - lastBlock <= 100000) {
       console.log("No new blocks to scan.");
       return result;
     }
 
     // Limit scan range to avoid RPC timeouts (max 5000 blocks)
-    const fromBlock = lastBlock + 1;
+    const fromBlock = scanFrom;
     const toBlock = Math.min(currentBlock, fromBlock + 5000);
 
     // 2. Get all monitored wallets for O(1) lookup
@@ -123,6 +133,58 @@ export async function monitorDeposits(): Promise<DepositResult> {
   } catch (error) {
     console.error("Error in monitorDeposits:", error);
     return result;
+  }
+}
+
+/**
+ * Scan specific wallet transactions (lookback ~2 hours via RPC logs)
+ * This is used for manual user-triggered sync.
+ */
+export async function syncSpecificWallet(userId: string): Promise<number> {
+  try {
+    const { data: wallet } = await supabase
+      .from("wallets")
+      .select("address")
+      .eq("user_id", userId)
+      .single();
+
+    if (!wallet) return 0;
+
+    const { getWalletTransactions } = require("./bsc");
+    const transactions = await getWalletTransactions(wallet.address);
+    const minConfirmations = getMinConfirmations();
+
+    let newCount = 0;
+
+    for (const tx of transactions) {
+      try {
+        const confirmations = parseInt(tx.confirmations);
+        const status =
+          confirmations >= minConfirmations ? "confirmed" : "pending";
+        const parsedTx = parseTransaction(tx);
+
+        const { error } = await supabase.rpc("process_bsc_deposit", {
+          p_user_id: userId,
+          p_amount: parsedTx.amount,
+          p_tx_hash: tx.hash,
+          p_status: status,
+          p_confirmations: confirmations,
+        });
+
+        if (error) throw error;
+        if (status === "confirmed") newCount++;
+      } catch (err) {
+        console.error(
+          `Error syncing tx ${tx.hash} for wallet ${wallet.address}:`,
+          err,
+        );
+      }
+    }
+
+    return newCount;
+  } catch (error) {
+    console.error("Error in syncSpecificWallet:", error);
+    return 0;
   }
 }
 

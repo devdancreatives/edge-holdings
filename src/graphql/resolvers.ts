@@ -1280,6 +1280,14 @@ export const resolvers = {
 
       return message;
     },
+    syncMyDeposits: async (_: any, __: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      const { syncSpecificWallet } = require("@/lib/deposit-monitor");
+      return await syncSpecificWallet(user.id);
+    },
 
     adminUpdateUser: async (_: any, { id, input }: any, context: any) => {
       const client = getClient(context);

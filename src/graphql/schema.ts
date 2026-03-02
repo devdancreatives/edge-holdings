@@ -172,6 +172,7 @@ export const typeDefs = `
     createChat(initialMessage: String!): Chat
     sendMessage(chatId: ID!, content: String!): ChatMessage
     changePassword(password: String!): Boolean
+    syncMyDeposits: Int
     
     # Admin Mutations
     adminDistributeProfit(amount: Float!): String
