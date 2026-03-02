@@ -126,8 +126,16 @@ export const GET_MY_WITHDRAWALS = gql`
 
 // Mutations
 export const CREATE_INVESTMENT = gql`
-  mutation CreateInvestment($amount: Float!, $durationMonths: Int!) {
-    createInvestment(amount: $amount, durationMonths: $durationMonths) {
+  mutation CreateInvestment(
+    $amount: Float!
+    $durationMonths: Int!
+    $durationHours: Int
+  ) {
+    createInvestment(
+      amount: $amount
+      durationMonths: $durationMonths
+      durationHours: $durationHours
+    ) {
       id
       amount
       durationMonths
@@ -337,6 +345,12 @@ export const SEND_MESSAGE = gql`
 export const CHANGE_PASSWORD = gql`
   mutation ChangePassword($password: String!) {
     changePassword(password: $password)
+  }
+`;
+
+export const SYNC_MY_DEPOSITS = gql`
+  mutation SyncMyDeposits {
+    syncMyDeposits
   }
 `;
 

@@ -3,6 +3,7 @@ import { getBscAddress } from "@/lib/wallet";
 import { sendOtpEmail } from "@/lib/email";
 import { createClient } from "@supabase/supabase-js";
 import { sendPushNotification } from "@/lib/push-notifications";
+import { syncSpecificWallet } from "@/lib/deposit-monitor";
 
 const getClient = (context: any) => {
   // Handle both standard Request (App Router) and NextApiRequest (Pages Router)
@@ -1279,6 +1280,13 @@ export const resolvers = {
         .eq("id", chatId);
 
       return message;
+    },
+    syncMyDeposits: async (_: any, __: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      return await syncSpecificWallet(user.id);
     },
 
     adminUpdateUser: async (_: any, { id, input }: any, context: any) => {

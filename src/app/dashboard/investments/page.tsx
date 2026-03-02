@@ -3,6 +3,7 @@
 import { useQuery } from '@apollo/client/react'
 import { TrendingUp, Calendar, DollarSign, Loader2, Clock } from 'lucide-react'
 import { GET_MY_INVESTMENTS } from '@/graphql/queries'
+import { format } from 'date-fns'
 
 export default function InvestmentsPage() {
     const { data, loading } = useQuery<any>(GET_MY_INVESTMENTS)
@@ -97,14 +98,14 @@ export default function InvestmentsPage() {
                                         <Calendar className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
                                         <span className="text-zinc-600 dark:text-zinc-400">Started:</span>
                                         <span className="text-zinc-900 dark:text-white font-medium">
-                                            {new Date(investment.startDate).toLocaleDateString()}
+                                            {format(new Date(investment.startDate), 'MMMM do yyyy, h:mm a')}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm">
                                         <Calendar className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
-                                        <span className="text-zinc-600 dark:text-zinc-400">Ends:</span>
-                                        <span className="text-zinc-900 dark:text-white font-medium">
-                                            {new Date(investment.endDate).toLocaleDateString()}
+                                        <span className="text-zinc-600 dark:text-zinc-400">Expires:</span>
+                                        <span className="text-yellow-500 font-bold">
+                                            {format(new Date(investment.endDate), 'MMMM do yyyy, h:mm a')}
                                         </span>
                                     </div>
                                 </div>
