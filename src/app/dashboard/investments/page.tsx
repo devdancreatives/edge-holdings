@@ -53,7 +53,7 @@ export default function InvestmentsPage() {
             </div>
 
             {investments.length === 0 ? (
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-12 text-center backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-12 text-center backdrop-blur-sm">
                     <TrendingUp className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
                     <p className="text-zinc-600 dark:text-zinc-400">No investments yet</p>
                     <p className="text-sm text-zinc-500 mt-2">Start investing to see your portfolio here</p>
@@ -66,7 +66,7 @@ export default function InvestmentsPage() {
                         return (
                             <div
                                 key={investment.id}
-                                className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-yellow-500/30 transition-all group"
+                                className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm hover:border-yellow-500/30 transition-all group"
                             >
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">

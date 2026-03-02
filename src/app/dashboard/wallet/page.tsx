@@ -132,7 +132,7 @@ export default function WalletPage() {
             )}
 
             {!wallet ? (
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-12 text-center backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-12 text-center backdrop-blur-sm">
                     <div className="max-w-md mx-auto">
                         <div className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800/50 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                             <WalletIcon className="h-10 w-10 text-zinc-500" />
@@ -162,7 +162,7 @@ export default function WalletPage() {
                 </div>
             ) : (
                 <div className="space-y-6">
-                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm">
                         <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Wallet Address</h2>
                         <div className="space-y-4">
                             <div>
@@ -207,7 +207,7 @@ export default function WalletPage() {
                     </div>
 
                     {/* Withdrawal History */}
-                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 overflow-hidden">
+                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 overflow-hidden">
                         <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
                             <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Withdrawal History</h2>
                         </div>
@@ -273,7 +273,7 @@ export default function WalletPage() {
                         </ul>
                     </div>
 
-                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm">
                         <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">View on Blockchain</h3>
                         <a
                             href={`https://bscscan.com/address/${wallet.address}`}

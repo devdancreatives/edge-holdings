@@ -55,7 +55,7 @@ export default function DepositsPage() {
             </div>
 
             {deposits.length === 0 ? (
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-12 text-center backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-12 text-center backdrop-blur-sm">
                     <div className="max-w-md mx-auto">
                         <div className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800/50 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                             <TrendingDown className="h-10 w-10 text-zinc-500" />
@@ -71,7 +71,7 @@ export default function DepositsPage() {
                     {deposits.map((deposit: any) => (
                         <div
                             key={deposit.id}
-                            className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-zinc-700 transition-all"
+                            className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm hover:border-zinc-300 dark:hover:border-zinc-700 transition-all"
                         >
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <div className="flex items-start gap-4">

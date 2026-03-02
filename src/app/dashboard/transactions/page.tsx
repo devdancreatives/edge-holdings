@@ -61,7 +61,7 @@ export default function TransactionsPage() {
                 </div>
             </div>
 
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 backdrop-blur-sm overflow-hidden">
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 backdrop-blur-sm overflow-hidden">
                 {transactions.length === 0 ? (
                     <div className="p-12 text-center">
                         <FileText className="h-12 w-12 text-zinc-600 mx-auto mb-4" />

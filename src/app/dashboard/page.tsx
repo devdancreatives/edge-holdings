@@ -41,7 +41,7 @@ export default function DashboardPage() {
 
             {/* Stats Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-yellow-500/30 transition-all">
+                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm hover:border-yellow-500/30 transition-all">
                     <div className="flex items-center justify-between mb-4">
                         <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Available Balance</p>
                         <div className="p-2 rounded-lg bg-yellow-500/10 group-hover:bg-yellow-500/20 transition-all">
@@ -54,7 +54,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-green-500/30 transition-all">
+                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm hover:border-green-500/30 transition-all">
                     <div className="flex items-center justify-between mb-4">
                         <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Profit</p>
                         <div className="p-2 rounded-lg bg-green-500/10 group-hover:bg-green-500/20 transition-all">
@@ -67,7 +67,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-blue-500/30 transition-all">
+                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm hover:border-blue-500/30 transition-all">
                     <div className="flex items-center justify-between mb-4">
                         <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Active Investment</p>
                         <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20 transition-all">
@@ -80,7 +80,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all">
                     <div className="flex items-center justify-between mb-4">
                         <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Investments</p>
                         <div className="p-2 rounded-lg bg-purple-500/10 group-hover:bg-purple-500/20 transition-all">
@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* ROI Chart */}
-                <div className="lg:col-span-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                <div className="lg:col-span-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm">
                     <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">Profit Performance</h2>
                     <div className="h-80">
                         <ROIChart data={roiData} />
@@ -104,7 +104,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Recent Transactions */}
-                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Recent Activity</h2>
                         <Link href="/dashboard/transactions" className="text-xs text-yellow-500 hover:text-yellow-400 transition-colors">
