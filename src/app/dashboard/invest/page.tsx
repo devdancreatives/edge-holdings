@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { Loader2 } from 'lucide-react'
-import { CREATE_INVESTMENT, GET_ME } from '@/graphql/queries'
+import { CREATE_INVESTMENT, GET_ME, GET_MY_INVESTMENTS } from '@/graphql/queries'
 
 export default function InvestPage() {
     const [amount, setAmount] = useState('')
@@ -15,6 +15,10 @@ export default function InvestPage() {
     const availableBalance = userData?.me?.availableBalance || 0
 
     const [createInvestment, { loading }] = useMutation(CREATE_INVESTMENT, {
+        refetchQueries: [
+            { query: GET_MY_INVESTMENTS },
+            { query: GET_ME }
+        ],
         onCompleted: () => {
             setSuccess('Investment created successfully!')
             setAmount('')
