@@ -123,9 +123,9 @@ export default function WalletPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-xl bg-linear-to-br from-yellow-500/20 to-yellow-600/20 border border-yellow-500/30">
+                    <div className="p-3 rounded-xl bg-linear-to-br from-yellow-500/20 to-yellow-600/20 border border-yellow-500/30 shrink-0">
                         <WalletIcon className="h-6 w-6 text-yellow-500" />
                     </div>
                     <div>
@@ -134,20 +134,20 @@ export default function WalletPage() {
                     </div>
                 </div>
                 {wallet && (
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <button
                             onClick={handleSync}
                             disabled={syncing}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 font-medium transition-colors border border-yellow-500/30 disabled:opacity-50"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 font-medium transition-colors border border-yellow-500/30 disabled:opacity-50 text-sm"
                         >
-                            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
-                            {syncing ? 'Checking...' : 'Check for Deposits'}
+                            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''} shrink-0`} />
+                            {syncing ? 'Checking...' : 'Check Deposits'}
                         </button>
                         <button
                             onClick={() => setShowWithdrawModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white font-medium transition-colors border border-zinc-700"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white font-medium transition-colors border border-zinc-700 text-sm"
                         >
-                            <ExternalLink className="h-4 w-4" />
+                            <ExternalLink className="h-4 w-4 shrink-0" />
                             Withdraw
                         </button>
                     </div>
