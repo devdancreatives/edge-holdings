@@ -52,7 +52,7 @@ export async function sendOtpEmail(to: string, otp: string) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "EdgePoint Holdings <noreply@kraftkonect.com>",
+      from: "Edgepoint Holdings <noreply@kraftkonect.com>",
       to: [to],
       subject: "Verify Your Email - EdgePoint Holdings",
       html,
