@@ -103,14 +103,14 @@ export default function WalletPage() {
                         <WalletIcon className="h-6 w-6 text-yellow-500" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">My Wallet</h1>
-                        <p className="text-sm text-zinc-400">Manage your USDT deposits & withdrawals</p>
+                        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">My Wallet</h1>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400">Manage your USDT deposits & withdrawals</p>
                     </div>
                 </div>
                 {wallet && (
                     <button
                         onClick={() => setShowWithdrawModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-medium transition-colors border border-zinc-700"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white font-medium transition-colors border border-zinc-700"
                     >
                         <ExternalLink className="h-4 w-4" />
                         Withdraw
@@ -132,13 +132,13 @@ export default function WalletPage() {
             )}
 
             {!wallet ? (
-                <div className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-12 text-center backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-12 text-center backdrop-blur-sm">
                     <div className="max-w-md mx-auto">
-                        <div className="p-4 rounded-full bg-zinc-800/50 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                        <div className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800/50 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                             <WalletIcon className="h-10 w-10 text-zinc-500" />
                         </div>
-                        <h2 className="text-xl font-semibold text-white mb-2">No Wallet Yet</h2>
-                        <p className="text-zinc-400 mb-6">
+                        <h2 className="text-xl font-semibold text-zinc-900 dark:text-white mb-2">No Wallet Yet</h2>
+                        <p className="text-zinc-600 dark:text-zinc-400 mb-6">
                             Create a wallet to start depositing USDT and making investments
                         </p>
                         <button
@@ -162,13 +162,13 @@ export default function WalletPage() {
                 </div>
             ) : (
                 <div className="space-y-6">
-                    <div className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
-                        <h2 className="text-lg font-semibold text-white mb-4">Wallet Address</h2>
+                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                        <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Wallet Address</h2>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm text-zinc-400 mb-2">BSC (BEP20) Address</label>
+                                <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-2">BSC (BEP20) Address</label>
                                 <div className="flex flex-row items-stretch sm:items-center gap-2">
-                                    <div className="flex-1 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 font-mono text-sm text-white overflow-hidden">
+                                    <div className="flex-1 p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-700 font-mono text-sm text-zinc-900 dark:text-white overflow-hidden">
                                         <span className="hidden sm:inline break-all">{wallet.address}</span>
                                         <span className="sm:hidden">
                                             {wallet.address.slice(0, 8)}...{wallet.address.slice(-8)}
@@ -176,44 +176,44 @@ export default function WalletPage() {
                                     </div>
                                     <button
                                         onClick={handleCopy}
-                                        className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 hover:border-yellow-500/50 hover:bg-zinc-800 transition-all"
+                                        className="p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-700 hover:border-yellow-500/50 hover:bg-zinc-100 dark:bg-zinc-800 transition-all"
                                         title="Copy address"
                                     >
                                         {copied ? (
                                             <Check className="h-5 w-5 text-green-500" />
                                         ) : (
-                                            <Copy className="h-5 w-5 text-zinc-400" />
+                                            <Copy className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
                                         )}
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-zinc-800/30 border border-zinc-700">
+                            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800/30 border border-zinc-700">
                                 <div>
                                     <p className="text-xs text-zinc-500 mb-1">Network</p>
-                                    <p className="text-sm font-semibold text-white">BSC (BEP20)</p>
+                                    <p className="text-sm font-semibold text-zinc-900 dark:text-white">BSC (BEP20)</p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-zinc-500 mb-1">Token Symbol</p>
-                                    <p className="text-sm font-semibold text-white">USDT</p>
+                                    <p className="text-sm font-semibold text-zinc-900 dark:text-white">USDT</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 text-sm text-zinc-400">
+                            <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                                 <span>Derivation Path Index:</span>
-                                <span className="text-white font-mono">{wallet.pathIndex}</span>
+                                <span className="text-zinc-900 dark:text-white font-mono">{wallet.pathIndex}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Withdrawal History */}
-                    <div className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 overflow-hidden">
-                        <div className="p-6 border-b border-zinc-800">
-                            <h2 className="text-lg font-semibold text-white">Withdrawal History</h2>
+                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 overflow-hidden">
+                        <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
+                            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Withdrawal History</h2>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left">
-                                <thead className="text-xs text-zinc-400 uppercase bg-zinc-900/50">
+                                <thead className="text-xs text-zinc-600 dark:text-zinc-400 uppercase bg-zinc-50 dark:bg-zinc-900/50">
                                     <tr>
                                         <th className="px-6 py-3">Date</th>
                                         <th className="px-6 py-3">Amount</th>
@@ -224,14 +224,14 @@ export default function WalletPage() {
                                 </thead>
                                 <tbody>
                                     {withdrawalData?.myWithdrawals?.map((w: any) => (
-                                        <tr key={w.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30">
-                                            <td className="px-6 py-4 text-zinc-300">
+                                        <tr key={w.id} className="border-b border-zinc-200 dark:border-zinc-800/50 hover:bg-zinc-100 dark:bg-zinc-800/30">
+                                            <td className="px-6 py-4 text-zinc-700 dark:text-zinc-300">
                                                 {new Date(w.createdAt).toLocaleDateString()}
                                             </td>
-                                            <td className="px-6 py-4 text-white font-medium">
+                                            <td className="px-6 py-4 text-zinc-900 dark:text-white font-medium">
                                                 {w.amount.toFixed(2)} USDT
                                             </td>
-                                            <td className="px-6 py-4 text-zinc-400">
+                                            <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
                                                 {w.fee ? w.fee.toFixed(2) : '0.00'} USDT
                                             </td>
                                             <td className="px-6 py-4">
@@ -242,7 +242,7 @@ export default function WalletPage() {
                                                     {w.status.toUpperCase()}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-zinc-400 font-mono text-xs">
+                                            <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400 font-mono text-xs">
                                                 {w.walletAddress.slice(0, 6)}...{w.walletAddress.slice(-6)}
                                             </td>
                                         </tr>
@@ -261,7 +261,7 @@ export default function WalletPage() {
 
                     <div className="rounded-xl border bg-linear-to-br from-blue-500/5 to-blue-600/5 border-blue-500/20 p-6 backdrop-blur-sm">
                         <h3 className="text-sm font-semibold text-blue-400 mb-2">⚠️ Important Information</h3>
-                        <ul className="space-y-2 text-sm text-zinc-300">
+                        <ul className="space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
                             <li className="flex items-start gap-2">
                                 <span className="text-blue-400 mt-1">•</span>
                                 <span><strong>Withdrawals:</strong> Minimum 10 USDT. A $3.00 fee applies to all withdrawals.</span>
@@ -273,8 +273,8 @@ export default function WalletPage() {
                         </ul>
                     </div>
 
-                    <div className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
-                        <h3 className="text-sm font-semibold text-white mb-4">View on Blockchain</h3>
+                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-4">View on Blockchain</h3>
                         <a
                             href={`https://bscscan.com/address/${wallet.address}`}
                             target="_blank"
@@ -291,22 +291,22 @@ export default function WalletPage() {
             {/* Withdrawal Modal */}
             {showWithdrawModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[2px]">
-                    <div className="bg-zinc-900 rounded-2xl border border-zinc-800 w-full max-w-md shadow-xl p-6">
-                        <h3 className="text-xl font-bold text-white mb-4">Withdraw Funds</h3>
+                    <div className="bg-zinc-50 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 w-full max-w-md shadow-xl p-6">
+                        <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-4">Withdraw Funds</h3>
                         <form onSubmit={handleWithdraw} className="space-y-4">
                             <div>
-                                <label className="block text-sm text-zinc-400 mb-2">Amount (USDT)</label>
+                                <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-2">Amount (USDT)</label>
                                 <input
                                     type="number"
                                     step="0.01"
                                     value={withdrawAmount}
                                     onChange={(e) => setWithdrawAmount(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white focus:outline-hidden focus:border-yellow-500 transition-colors"
+                                    className="w-full px-4 py-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-700 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500 transition-colors"
                                     placeholder="Min 10.00"
                                     required
                                 />
                                 {withdrawAmount && !isNaN(parseFloat(withdrawAmount)) && (
-                                    <div className="mt-2 text-xs flex justify-between text-zinc-400">
+                                    <div className="mt-2 text-xs flex justify-between text-zinc-600 dark:text-zinc-400">
                                         <span>Fee: ${FEE.toFixed(2)}</span>
                                         <span>Total Deduction: ${(parseFloat(withdrawAmount) + FEE).toFixed(2)}</span>
                                     </div>
@@ -314,12 +314,12 @@ export default function WalletPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm text-zinc-400 mb-2">Destination Address (BEP20)</label>
+                                <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-2">Destination Address (BEP20)</label>
                                 <input
                                     type="text"
                                     value={withdrawAddress}
                                     onChange={(e) => setWithdrawAddress(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white focus:outline-hidden focus:border-yellow-500 transition-colors font-mono"
+                                    className="w-full px-4 py-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-700 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500 transition-colors font-mono"
                                     placeholder="0x..."
                                     required
                                 />
@@ -335,7 +335,7 @@ export default function WalletPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowWithdrawModal(false)}
-                                    className="flex-1 px-4 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-medium transition-colors"
+                                    className="flex-1 px-4 py-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white font-medium transition-colors"
                                 >
                                     Cancel
                                 </button>

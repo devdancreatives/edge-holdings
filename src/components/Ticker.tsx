@@ -15,12 +15,12 @@ const MOCK_PRICES = [
 
 export function Ticker() {
     return (
-        <div className="w-full bg-zinc-950 border-b border-zinc-800 overflow-hidden py-2">
+        <div className="w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 overflow-hidden py-2">
             <div className="flex animate-scroll whitespace-nowrap">
                 {[...MOCK_PRICES, ...MOCK_PRICES, ...MOCK_PRICES].map((item, i) => (
                     <div key={i} className="mx-6 flex items-center gap-2 text-sm font-mono">
-                        <span className="text-zinc-400 font-bold">{item.pair}</span>
-                        <span className="text-white">${item.price.toFixed(2)}</span>
+                        <span className="text-zinc-600 dark:text-zinc-400 font-bold">{item.pair}</span>
+                        <span className="text-zinc-900 dark:text-white">${item.price.toFixed(2)}</span>
                         <span className={item.change >= 0 ? 'text-green-500' : 'text-red-500'}>
                             {item.change >= 0 ? '+' : ''}{item.change}%
                         </span>

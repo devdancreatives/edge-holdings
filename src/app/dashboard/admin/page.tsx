@@ -11,7 +11,7 @@ export default function AdminDashboard() {
     })
 
     if (loading && !data) {
-        return <div className="p-8 text-zinc-400">Loading admin stats...</div>
+        return <div className="p-8 text-zinc-600 dark:text-zinc-400">Loading admin stats...</div>
     }
 
     const stats = data?.adminStats
@@ -58,8 +58,8 @@ export default function AdminDashboard() {
                     <Shield className="h-6 w-6 text-purple-500" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-                    <p className="text-sm text-zinc-400">System overview and management</p>
+                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Admin Dashboard</h1>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">System overview and management</p>
                 </div>
             </div>
 
@@ -68,57 +68,57 @@ export default function AdminDashboard() {
                     <Link
                         key={i}
                         href={stat.href}
-                        className="p-6 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 transition-colors group"
+                        className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:bg-zinc-800 transition-colors group"
                     >
                         <div className="flex items-center justify-between mb-4">
                             <div className={`p-2 rounded-lg ${stat.bg} ${stat.color}`}>
                                 <stat.icon size={20} />
                             </div>
                         </div>
-                        <p className="text-zinc-400 text-sm mb-1">{stat.label}</p>
-                        <p className="text-2xl font-bold text-white">{stat.value}</p>
+                        <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-1">{stat.label}</p>
+                        <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stat.value}</p>
                     </Link>
                 ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-6 rounded-xl border border-zinc-800 bg-zinc-900/50">
-                    <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+                <div className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Quick Actions</h2>
                     <div className="space-y-2">
                         <Link
                             href="/dashboard/admin/chat"
-                            className="block p-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors border border-zinc-700"
+                            className="block p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 transition-colors border border-zinc-700"
                         >
                             <div className="flex items-center justify-between">
-                                <span className="font-medium text-white">Support Tickets</span>
-                                <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+                                <span className="font-medium text-zinc-900 dark:text-white">Support Tickets</span>
+                                <ArrowUpRight className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
                             </div>
-                            <p className="text-sm text-zinc-400 mt-1">Manage user support conversations</p>
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Manage user support conversations</p>
                         </Link>
                         <Link
                             href="/dashboard/admin/users"
-                            className="block p-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors border border-zinc-700"
+                            className="block p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 transition-colors border border-zinc-700"
                         >
                             <div className="flex items-center justify-between">
-                                <span className="font-medium text-white">Manage Users</span>
-                                <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+                                <span className="font-medium text-zinc-900 dark:text-white">Manage Users</span>
+                                <ArrowUpRight className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
                             </div>
-                            <p className="text-sm text-zinc-400 mt-1">View user details and balances</p>
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">View user details and balances</p>
                         </Link>
                     </div>
                 </div>
-                <div className="p-6 rounded-xl border border-zinc-800 bg-zinc-900/50">
-                    <h2 className="text-lg font-semibold text-white mb-4">Investment Management</h2>
+                <div className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Investment Management</h2>
                     <div className="space-y-2">
                         <Link
                             href="/dashboard/admin/investments"
-                            className="block p-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors border border-zinc-700"
+                            className="block p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 transition-colors border border-zinc-700"
                         >
                             <div className="flex items-center justify-between">
-                                <span className="font-medium text-white">Active Investments</span>
-                                <ArrowUpRight className="h-4 w-4 text-zinc-400" />
+                                <span className="font-medium text-zinc-900 dark:text-white">Active Investments</span>
+                                <ArrowUpRight className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
                             </div>
-                            <p className="text-sm text-zinc-400 mt-1">View all user investments</p>
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">View all user investments</p>
                         </Link>
                     </div>
                 </div>

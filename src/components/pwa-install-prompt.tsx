@@ -65,23 +65,23 @@ export function PwaInstallPrompt() {
 
     return (
         <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 animate-slide-up">
-            <div className="bg-zinc-900/90 backdrop-blur-xl border border-yellow-500/20 rounded-xl p-4 shadow-2xl flex flex-col gap-3">
+            <div className="bg-zinc-50 dark:bg-zinc-900/90 backdrop-blur-xl border border-yellow-500/20 rounded-xl p-4 shadow-2xl flex flex-col gap-3">
                 <div className="flex items-start justify-between">
                     <div>
-                        <h3 className="font-semibold text-white">Install App</h3>
-                        <p className="text-sm text-zinc-400 mt-1">
+                        <h3 className="font-semibold text-zinc-900 dark:text-white">Install App</h3>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
                             {isIOS
                                 ? "Install EdgePoint Holdings for a better experience."
                                 : "Install our app for faster access and better performance."}
                         </p>
                     </div>
-                    <button onClick={handleDismiss} className="text-zinc-500 hover:text-white transition-colors">
+                    <button onClick={handleDismiss} className="text-zinc-500 hover:text-zinc-900 dark:text-white transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
                 {isIOS ? (
-                    <div className="text-sm text-zinc-400 bg-zinc-800/50 p-3 rounded-lg">
+                    <div className="text-sm text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 p-3 rounded-lg">
                         Tap <Share className="inline w-4 h-4 mx-1" /> then "Add to Home Screen"
                     </div>
                 ) : (

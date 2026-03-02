@@ -60,6 +60,8 @@ function NotificationToggle() {
     )
 }
 
+import { ThemeToggle } from '@/components/theme-toggle'
+
 // Component defined outside to avoid recreation on each render
 const SidebarContent: React.FC<{
     navItems: typeof baseNavItems
@@ -69,9 +71,12 @@ const SidebarContent: React.FC<{
 }> = ({ navItems, pathname, setMobileMenuOpen, handleSignOut }) => (
     <div className="flex flex-col h-full w-full relative">
         {/* Header */}
-        <div className="pt-16 lg:pt-4 px-4 mb-6 flex items-center gap-2 shrink-0">
-            <div className="h-8 w-8 rounded-full bg-linear-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/50" />
-            <span className="text-lg font-bold bg-linear-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">EdgePoint Holdings</span>
+        <div className="pt-16 lg:pt-4 px-4 mb-6 flex items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-linear-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/50" />
+                <span className="text-lg font-bold bg-linear-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">EdgePoint Holdings</span>
+            </div>
+            <ThemeToggle />
         </div>
 
         {/* Navigation - Added large padding bottom to prevent overlap with absolute footer */}
@@ -88,7 +93,7 @@ const SidebarContent: React.FC<{
                             'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                             isActive
                                 ? 'bg-linear-to-r from-yellow-500/20 to-yellow-600/20 text-yellow-500 shadow-lg shadow-yellow-500/10'
-                                : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white hover:translate-x-1'
+                                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800/50 hover:text-zinc-900 dark:text-white hover:translate-x-1'
                         )}
                     >
                         <Icon size={20} />
@@ -104,7 +109,7 @@ const SidebarContent: React.FC<{
         </div>
 
         {/* Footer - Fixed positioning to ensure visibility above everything */}
-        <div className="fixed bottom-0 left-0 w-64 p-4 pb-[calc(2rem+env(safe-area-inset-bottom))] bg-linear-to-t from-zinc-950 via-zinc-950/95 to-zinc-950/0 backdrop-blur-sm z-50 border-r border-zinc-800">
+        <div className="fixed bottom-0 left-0 w-64 p-4 pb-[calc(2rem+env(safe-area-inset-bottom))] bg-linear-to-t from-zinc-950 via-zinc-950/95 to-zinc-950/0 backdrop-blur-sm z-50 border-r border-zinc-200 dark:border-zinc-800">
             <button
                 onClick={handleSignOut}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200"
@@ -147,7 +152,7 @@ export function Sidebar() {
             {/* Mobile Menu Button */}
             <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white hover:bg-zinc-800 transition-colors"
+                className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:bg-zinc-800 transition-colors"
                 aria-label="Toggle menu"
             >
                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -156,14 +161,14 @@ export function Sidebar() {
             {/* Mobile Sidebar Overlay */}
             {mobileMenuOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 bg-black/50 z-40"
+                    className="lg:hidden fixed inset-0 bg-black/20 dark:bg-black/50 z-40"
                     onClick={() => setMobileMenuOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
             <div className={cn(
-                "fixed lg:static inset-y-0 left-0 z-40 flex h-[100dvh] w-64 flex-col border-r border-zinc-800 bg-zinc-950 text-white transition-transform duration-300 overflow-hidden",
+                "fixed lg:static inset-y-0 left-0 z-40 flex h-[100dvh] w-64 flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white transition-transform duration-300 overflow-hidden",
                 mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
             )}>
                 <SidebarContent

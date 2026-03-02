@@ -161,11 +161,11 @@ export default function AiTradingPage() {
             <header className="flex flex-col gap-1 relative z-10">
                 <div className="flex items-center gap-3">
                     <div className="h-8 w-1 bg-yellow-500 rounded-full" />
-                    <h1 className="text-3xl font-bold text-white tracking-tight">
+                    <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
                         AI <span className="text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-yellow-600">Auto-Trading</span>
                     </h1>
                 </div>
-                <p className="text-zinc-400 text-sm ml-4 pl-0.5 max-w-lg">
+                <p className="text-zinc-600 dark:text-zinc-400 text-sm ml-4 pl-0.5 max-w-lg">
                     High-Frequency Quantum Trading Bot V4.2 running on <span className="text-yellow-500/80 font-mono">BSC-RPC-DATALSEED</span>
                 </p>
             </header>
@@ -196,7 +196,7 @@ export default function AiTradingPage() {
                         canCloseEarly={canCloseEarly}
                     />
                     {/* Stats / Info */}
-                    <div className="mt-4 p-4 rounded-xl bg-zinc-950/30 border border-zinc-800/50 backdrop-blur-sm text-xs text-zinc-500 space-y-2 relative z-10">
+                    <div className="mt-4 p-4 rounded-xl bg-white dark:bg-zinc-950/30 border border-zinc-200 dark:border-zinc-800/50 backdrop-blur-sm text-xs text-zinc-500 space-y-2 relative z-10">
                         <div className="flex justify-between">
                             <span>Win Rate (24h)</span>
                             <span className="text-green-400 font-mono">21.4%</span>

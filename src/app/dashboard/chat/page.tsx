@@ -110,20 +110,20 @@ export default function ChatPage() {
     }
 
     if (loading && !data) {
-        return <div className="p-8 text-center text-zinc-400">Loading chat...</div>
+        return <div className="p-8 text-center text-zinc-600 dark:text-zinc-400">Loading chat...</div>
     }
 
     return (
-        <div className="flex h-full flex-col rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+        <div className="flex h-full flex-col rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden">
             {/* Header */}
-            <div className="border-b border-zinc-800 bg-zinc-900/50 p-3 sm:p-4 backdrop-blur-sm">
+            <div className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-3 sm:p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500/10 text-yellow-500">
                         <MessageSquare size={20} />
                     </div>
                     <div>
-                        <h2 className="font-semibold text-white">Support Chat</h2>
-                        <p className="text-xs text-zinc-400">
+                        <h2 className="font-semibold text-zinc-900 dark:text-white">Support Chat</h2>
+                        <p className="text-xs text-zinc-600 dark:text-zinc-400">
                             {activeChatId ? 'Ticket #' + activeChatId.slice(0, 8) : 'Start a new conversation'}
                         </p>
                     </div>
@@ -153,7 +153,7 @@ export default function ChatPage() {
                                     <div
                                         className={`rounded-2xl px-3 py-2 sm:px-4 ${isUser
                                             ? 'bg-yellow-500 text-black'
-                                            : 'bg-zinc-800 text-zinc-200'
+                                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200'
                                             }`}
                                     >
                                         <p className="text-sm wrap-break-word">{msg.content}</p>
@@ -170,13 +170,13 @@ export default function ChatPage() {
             </div>
 
             {/* Input Area */}
-            <div className="border-t border-zinc-800 bg-zinc-900 p-3 sm:p-4 pb-safe">
+            <div className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-3 sm:p-4 pb-safe">
                 {activeChat?.status === 'closed' ? (
                     <div className="flex flex-col items-center gap-3 py-2">
                         <p className="text-zinc-500 text-sm">This chat session has been closed.</p>
                         <button
                             onClick={() => setActiveChatId(null)}
-                            className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg text-sm font-medium transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-zinc-900 dark:text-white rounded-lg text-sm font-medium transition-colors"
                         >
                             <MessageSquare size={16} />
                             Start New Chat
@@ -190,7 +190,7 @@ export default function ChatPage() {
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyPress}
                             placeholder="Type a message..."
-                            className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-3 pr-12 text-sm text-white placeholder-zinc-500 focus:border-yellow-500/50 focus:outline-hidden focus:ring-1 focus:ring-yellow-500/50 appearance-none"
+                            className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 pr-12 text-sm text-zinc-900 dark:text-white placeholder-zinc-500 focus:border-yellow-500/50 focus:outline-hidden focus:ring-1 focus:ring-yellow-500/50 appearance-none"
                         />
                         <button
                             onClick={handleSend}

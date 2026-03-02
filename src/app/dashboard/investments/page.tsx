@@ -47,15 +47,15 @@ export default function InvestmentsPage() {
                     <TrendingUp className="h-6 w-6 text-yellow-500" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Active Investments</h1>
-                    <p className="text-sm text-zinc-400">Track your investment performance</p>
+                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Active Investments</h1>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">Track your investment performance</p>
                 </div>
             </div>
 
             {investments.length === 0 ? (
-                <div className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-12 text-center backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-12 text-center backdrop-blur-sm">
                     <TrendingUp className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
-                    <p className="text-zinc-400">No investments yet</p>
+                    <p className="text-zinc-600 dark:text-zinc-400">No investments yet</p>
                     <p className="text-sm text-zinc-500 mt-2">Start investing to see your portfolio here</p>
                 </div>
             ) : (
@@ -66,7 +66,7 @@ export default function InvestmentsPage() {
                         return (
                             <div
                                 key={investment.id}
-                                className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-yellow-500/30 transition-all group"
+                                className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-yellow-500/30 transition-all group"
                             >
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
@@ -74,8 +74,8 @@ export default function InvestmentsPage() {
                                             <DollarSign className="h-5 w-5 text-yellow-500" />
                                         </div>
                                         <div>
-                                            <p className="text-sm text-zinc-400">Investment Amount</p>
-                                            <p className="text-2xl font-bold text-white">
+                                            <p className="text-sm text-zinc-600 dark:text-zinc-400">Investment Amount</p>
+                                            <p className="text-2xl font-bold text-zinc-900 dark:text-white">
                                                 ${investment.amount.toLocaleString()}
                                             </p>
                                         </div>
@@ -87,21 +87,21 @@ export default function InvestmentsPage() {
 
                                 <div className="space-y-3 mb-4">
                                     <div className="flex items-center gap-2 text-sm">
-                                        <Clock className="h-4 w-4 text-zinc-400" />
-                                        <span className="text-zinc-400">Duration:</span>
-                                        <span className="text-white font-medium">{investment.durationMonths} months</span>
+                                        <Clock className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                                        <span className="text-zinc-600 dark:text-zinc-400">Duration:</span>
+                                        <span className="text-zinc-900 dark:text-white font-medium">{investment.durationMonths} months</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm">
-                                        <Calendar className="h-4 w-4 text-zinc-400" />
-                                        <span className="text-zinc-400">Started:</span>
-                                        <span className="text-white font-medium">
+                                        <Calendar className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                                        <span className="text-zinc-600 dark:text-zinc-400">Started:</span>
+                                        <span className="text-zinc-900 dark:text-white font-medium">
                                             {new Date(investment.startDate).toLocaleDateString()}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm">
-                                        <Calendar className="h-4 w-4 text-zinc-400" />
-                                        <span className="text-zinc-400">Ends:</span>
-                                        <span className="text-white font-medium">
+                                        <Calendar className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                                        <span className="text-zinc-600 dark:text-zinc-400">Ends:</span>
+                                        <span className="text-zinc-900 dark:text-white font-medium">
                                             {new Date(investment.endDate).toLocaleDateString()}
                                         </span>
                                     </div>
@@ -110,10 +110,10 @@ export default function InvestmentsPage() {
                                 {investment.status === 'active' && (
                                     <div>
                                         <div className="flex items-center justify-between text-sm mb-2">
-                                            <span className="text-zinc-400">Progress</span>
+                                            <span className="text-zinc-600 dark:text-zinc-400">Progress</span>
                                             <span className="text-yellow-500 font-medium">{progress}%</span>
                                         </div>
-                                        <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                        <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-linear-to-r from-yellow-500 to-yellow-600 transition-all duration-500 rounded-full"
                                                 style={{ width: `${progress}%` }}

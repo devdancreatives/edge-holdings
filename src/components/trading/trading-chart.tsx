@@ -86,7 +86,7 @@ export function TradingChart({ isTrading, direction, result, onPriceUpdate, sess
     const max = Math.max(...data.map(d => d.price))
 
     return (
-        <div className="p-4 h-[400px] w-full bg-zinc-950/50 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-xl shadow-black/20 relative overflow-hidden group">
+        <div className="p-4 h-[400px] w-full bg-white dark:bg-zinc-950/50 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800/50 rounded-2xl shadow-xl shadow-black/20 relative overflow-hidden group">
             {/* Grid Pattern Background */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)] pointer-events-none" />
             <ResponsiveContainer width="100%" height="100%">
@@ -116,7 +116,7 @@ export function TradingChart({ isTrading, direction, result, onPriceUpdate, sess
                     />
                 </LineChart>
             </ResponsiveContainer>
-            <div className="absolute top-4 right-4 text-white text-2xl font-mono">
+            <div className="absolute top-4 right-4 text-zinc-900 dark:text-white text-2xl font-mono">
                 ${currentPriceRef.current.toFixed(4)}
             </div>
             {/* Overlay for session state? Or handled by parent? */}

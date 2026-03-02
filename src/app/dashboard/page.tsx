@@ -35,28 +35,28 @@ export default function DashboardPage() {
         <div className="space-y-6">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Welcome, {user?.fullName || 'User'}</h1>
-                <p className="text-zinc-400">Here&apos;s your investment overview</p>
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Welcome, {user?.fullName || 'User'}</h1>
+                <p className="text-zinc-600 dark:text-zinc-400">Here&apos;s your investment overview</p>
             </div>
 
             {/* Stats Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <div className="group rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-yellow-500/30 transition-all">
+                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-yellow-500/30 transition-all">
                     <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm font-medium text-zinc-400">Available Balance</p>
+                        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Available Balance</p>
                         <div className="p-2 rounded-lg bg-yellow-500/10 group-hover:bg-yellow-500/20 transition-all">
                             <DollarSign className="h-5 w-5 text-yellow-500" />
                         </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold text-white">${balance.toLocaleString()}</span>
+                        <span className="text-3xl font-bold text-zinc-900 dark:text-white">${balance.toLocaleString()}</span>
                         <span className="text-sm text-zinc-500">USDT</span>
                     </div>
                 </div>
 
-                <div className="group rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-green-500/30 transition-all">
+                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-green-500/30 transition-all">
                     <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm font-medium text-zinc-400">Total Profit</p>
+                        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Profit</p>
                         <div className="p-2 rounded-lg bg-green-500/10 group-hover:bg-green-500/20 transition-all">
                             <TrendingUp className="h-5 w-5 text-green-500" />
                         </div>
@@ -67,9 +67,9 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <div className="group rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-blue-500/30 transition-all">
+                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-blue-500/30 transition-all">
                     <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm font-medium text-zinc-400">Active Investment</p>
+                        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Active Investment</p>
                         <div className="p-2 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20 transition-all">
                             <Activity className="h-5 w-5 text-blue-500" />
                         </div>
@@ -80,9 +80,9 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <div className="group rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all">
+                <div className="group rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all">
                     <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm font-medium text-zinc-400">Investments</p>
+                        <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Investments</p>
                         <div className="p-2 rounded-lg bg-purple-500/10 group-hover:bg-purple-500/20 transition-all">
                             <Wallet className="h-5 w-5 text-purple-500" />
                         </div>
@@ -96,17 +96,17 @@ export default function DashboardPage() {
 
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* ROI Chart */}
-                <div className="lg:col-span-2 rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
-                    <h2 className="mb-4 text-lg font-semibold text-white">Profit Performance</h2>
+                <div className="lg:col-span-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                    <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">Profit Performance</h2>
                     <div className="h-80">
                         <ROIChart data={roiData} />
                     </div>
                 </div>
 
                 {/* Recent Transactions */}
-                <div className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
+                        <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Recent Activity</h2>
                         <Link href="/dashboard/transactions" className="text-xs text-yellow-500 hover:text-yellow-400 transition-colors">
                             View All
                         </Link>
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                             <p className="text-sm text-zinc-500 text-center py-8">No recent transactions</p>
                         ) : (
                             transactions.map((tx: any) => (
-                                <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/30 hover:bg-zinc-800/50 transition-all">
+                                <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/30 hover:bg-zinc-100 dark:bg-zinc-800/50 transition-all">
                                     <div className="flex items-center gap-3">
                                         <div className={`p-2 rounded-lg ${tx.type === 'deposit' ? 'bg-green-500/10' :
                                             tx.type === 'withdrawal' ? 'bg-red-500/10' :
@@ -131,7 +131,7 @@ export default function DashboardPage() {
                                             )}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-white capitalize">
+                                            <p className="text-sm font-medium text-zinc-900 dark:text-white capitalize">
                                                 {tx.type.replace('_', ' ')}
                                             </p>
                                             <p className="text-xs text-zinc-500">

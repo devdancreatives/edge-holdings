@@ -53,10 +53,10 @@ export function TradeControls({
     const multiplier = stake > 0 ? ((stake + currentProfit) / stake).toFixed(2) : '1.00'
 
     return (
-        <div className="p-4 bg-zinc-950/50 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-xl shadow-black/20 text-white flex flex-col gap-3 h-full relative overflow-hidden transition-all duration-500">
+        <div className="p-4 bg-white dark:bg-zinc-950/50 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800/50 rounded-2xl shadow-xl shadow-black/20 text-zinc-900 dark:text-white flex flex-col gap-3 h-full relative overflow-hidden transition-all duration-500">
             {/* Header: Balance */}
             <div className="flex justify-between items-center relative z-10">
-                <span className="text-zinc-400 text-xs font-medium uppercase tracking-wider">Balance</span>
+                <span className="text-zinc-600 dark:text-zinc-400 text-xs font-medium uppercase tracking-wider">Balance</span>
                 <span className="font-mono text-lg text-yellow-500 font-bold">${balance.toFixed(2)}</span>
             </div>
 
@@ -70,7 +70,7 @@ export function TradeControls({
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         disabled={isTrading || isLoading}
-                        className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-2.5 pl-6 text-base font-mono text-white focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500 outline-none w-full transition-all disabled:opacity-50"
+                        className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2.5 pl-6 text-base font-mono text-zinc-900 dark:text-white focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500 outline-none w-full transition-all disabled:opacity-50"
                     />
                 </div>
                 {error && (
@@ -79,12 +79,12 @@ export function TradeControls({
             </div>
 
             {/* Trading Status (Multiplier) - Fades in when trading */}
-            <div className={`flex flex-col gap-1 items-center justify-center py-4 bg-zinc-900/30 rounded-lg border border-zinc-800/50 relative z-10 transition-all duration-500 transform ${isTrading ? 'opacity-100 translate-y-0 h-32' : 'opacity-0 -translate-y-4 absolute top-14 left-4 right-4 h-0 pointer-events-none'}`}>
+            <div className={`flex flex-col gap-1 items-center justify-center py-4 bg-zinc-50 dark:bg-zinc-900/30 rounded-lg border border-zinc-200 dark:border-zinc-800/50 relative z-10 transition-all duration-500 transform ${isTrading ? 'opacity-100 translate-y-0 h-32' : 'opacity-0 -translate-y-4 absolute top-14 left-4 right-4 h-0 pointer-events-none'}`}>
                 <span className="text-[10px] text-zinc-500 uppercase tracking-widest">Return</span>
                 <div className={`text-4xl font-black font-mono tracking-tighter transition-colors duration-300 ${parseFloat(multiplier) >= 1 ? 'text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.3)]' : 'text-red-400'}`}>
                     {multiplier}x
                 </div>
-                <span className={`text-xs font-mono ${currentProfit >= 0 ? 'text-zinc-400' : 'text-red-400/70'}`}>
+                <span className={`text-xs font-mono ${currentProfit >= 0 ? 'text-zinc-600 dark:text-zinc-400' : 'text-red-400/70'}`}>
                     {currentProfit >= 0 ? '+' : ''}{currentProfit.toFixed(2)} USDT
                 </span>
             </div>
@@ -127,7 +127,7 @@ export function TradeControls({
 
                 {/* Countdown / Close Button - Fade In */}
                 <div className={`flex flex-col gap-3 transition-all duration-500 absolute inset-0 ${isTrading ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
-                    <div className="h-12 flex items-center justify-center gap-2 text-zinc-400 bg-zinc-900/50 rounded-lg border border-zinc-800 border-dashed animate-pulse">
+                    <div className="h-12 flex items-center justify-center gap-2 text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800 border-dashed animate-pulse">
                         <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
@@ -138,7 +138,7 @@ export function TradeControls({
                     <button
                         onClick={onCloseTrade}
                         disabled={!canCloseEarly}
-                        className={`w-full h-12 rounded-lg flex items-center justify-center gap-2 font-bold transition-all ${canCloseEarly ? 'bg-yellow-500 hover:bg-yellow-400 text-black shadow-lg shadow-yellow-500/20 scale-100' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed scale-95 opacity-50'}`}
+                        className={`w-full h-12 rounded-lg flex items-center justify-center gap-2 font-bold transition-all ${canCloseEarly ? 'bg-yellow-500 hover:bg-yellow-400 text-black shadow-lg shadow-yellow-500/20 scale-100' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 cursor-not-allowed scale-95 opacity-50'}`}
                     >
                         {canCloseEarly ? (
                             <>

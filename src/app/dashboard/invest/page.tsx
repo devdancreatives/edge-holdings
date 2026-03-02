@@ -55,12 +55,12 @@ export default function InvestPage() {
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
-            <h1 className="text-2xl font-bold text-white">New Investment</h1>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">New Investment</h1>
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-xl">
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6 backdrop-blur-xl">
                 <form onSubmit={handleInvest} className="space-y-6">
                     <div>
-                        <label className="text-sm font-medium text-zinc-400 flex justify-between">
+                        <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 flex justify-between">
                             <span>Investment Amount (USDT)</span>
                             <span className="text-xs text-yellow-500">Available: ${availableBalance.toFixed(2)}</span>
                         </label>
@@ -69,7 +69,7 @@ export default function InvestPage() {
                             step="0.01"
                             required
                             min="10"
-                            className="mt-2 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-white placeholder-zinc-500 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500"
+                            className="mt-2 block w-full rounded-lg border border-zinc-700 bg-zinc-100 dark:bg-zinc-800/50 px-3 py-2 text-zinc-900 dark:text-white placeholder-zinc-500 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500"
                             placeholder="1000.00"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
@@ -77,7 +77,7 @@ export default function InvestPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-400">
+                        <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400">
                             Duration (Months)
                         </label>
                         <div className="mt-2 grid grid-cols-3 gap-3 sm:grid-cols-6">
@@ -88,7 +88,7 @@ export default function InvestPage() {
                                     onClick={() => setDuration(m.toString())}
                                     className={`flex flex-col items-center justify-center rounded-lg border px-2 py-3 text-sm font-medium transition-colors ${duration === m.toString()
                                         ? 'border-yellow-500 bg-yellow-500/10 text-yellow-500'
-                                        : 'border-zinc-700 bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                                        : 'border-zinc-700 bg-zinc-100 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 hover:text-zinc-900 dark:text-white'
                                         }`}
                                 >
                                     <span className="text-lg">{m}</span>
@@ -120,18 +120,18 @@ export default function InvestPage() {
                 </form>
             </div>
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-sm text-zinc-400">
-                <h3 className="font-semibold text-white mb-3">Investment Summary</h3>
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30 p-4 text-sm text-zinc-600 dark:text-zinc-400">
+                <h3 className="font-semibold text-zinc-900 dark:text-white mb-3">Investment Summary</h3>
                 <div className="space-y-2">
                     <div className="flex justify-between">
                         <span>Capital Amount:</span>
-                        <span className="text-white">{parsedAmount > 0 ? `$${parsedAmount.toFixed(2)}` : '-'}</span>
+                        <span className="text-zinc-900 dark:text-white">{parsedAmount > 0 ? `$${parsedAmount.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between text-zinc-500">
                         <span>Service Fee (0.1%):</span>
                         <span>{parsedAmount > 0 ? `$${fee.toFixed(2)}` : '-'}</span>
                     </div>
-                    <div className="flex justify-between font-medium text-white border-t border-zinc-800 pt-2">
+                    <div className="flex justify-between font-medium text-zinc-900 dark:text-white border-t border-zinc-200 dark:border-zinc-800 pt-2">
                         <span>Total Deduction:</span>
                         <span className="text-yellow-500">{parsedAmount > 0 ? `$${totalDeduction.toFixed(2)}` : '-'}</span>
                     </div>
@@ -146,7 +146,7 @@ export default function InvestPage() {
                         <span>Maturity Date:</span>
                         <span>{maturityDate.toLocaleDateString()}</span>
                     </div>
-                    <div className="flex justify-between font-bold text-white border-t border-zinc-800 pt-2 mt-2">
+                    <div className="flex justify-between font-bold text-zinc-900 dark:text-white border-t border-zinc-200 dark:border-zinc-800 pt-2 mt-2">
                         <span>Est. Total Return:</span>
                         <span>{parsedAmount > 0 ? `$${totalReturn.toFixed(2)}` : '-'}</span>
                     </div>
