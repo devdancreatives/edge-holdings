@@ -92,14 +92,14 @@ function LoginContent() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-zinc-950">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-zinc-950">
       <PublicNavbar />
       <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-8 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 backdrop-blur-xl">
+        <div className="w-full max-w-md space-y-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-8 backdrop-blur-xl">
           <div className="text-center">
             <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-yellow-500" />
-            <h2 className="text-3xl font-bold tracking-tight text-white">EdgePoint Holdings</h2>
-            <p className="mt-2 text-sm text-zinc-400">
+            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">EdgePoint Holdings</h2>
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
               {isSignUp ? (showOtpInput ? 'Verify your email' : 'Create your account') : 'Sign in to your portfolio'}
             </p>
           </div>
@@ -115,7 +115,7 @@ function LoginContent() {
                       name="fullName"
                       type="text"
                       required
-                      className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white placeholder-zinc-400 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 sm:text-sm"
+                      className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-white placeholder-zinc-400 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 sm:text-sm"
                       placeholder="Full Name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -127,7 +127,7 @@ function LoginContent() {
                       id="referralCode"
                       name="referralCode"
                       type="text"
-                      className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white placeholder-zinc-400 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 sm:text-sm"
+                      className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-white placeholder-zinc-400 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 sm:text-sm"
                       placeholder="Referral Code (Optional)"
                       value={referralCode}
                       onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
@@ -146,7 +146,7 @@ function LoginContent() {
                       type="email"
                       autoComplete="email"
                       required
-                      className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white placeholder-zinc-400 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 sm:text-sm"
+                      className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-white placeholder-zinc-400 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 sm:text-sm"
                       placeholder="Email address"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -160,7 +160,7 @@ function LoginContent() {
                       type="password"
                       autoComplete={isSignUp ? "new-password" : "current-password"}
                       required
-                      className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-white placeholder-zinc-400 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 sm:text-sm"
+                      className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-zinc-900 dark:text-white placeholder-zinc-400 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 sm:text-sm"
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -177,7 +177,7 @@ function LoginContent() {
                     name="otp"
                     type="text"
                     required
-                    className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-center text-2xl font-bold tracking-widest text-yellow-500 placeholder-zinc-600 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500"
+                    className="relative block w-full rounded-lg border border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-center text-2xl font-bold tracking-widest text-yellow-500 placeholder-zinc-600 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500"
                     placeholder="000000"
                     maxLength={6}
                     value={otp}
@@ -245,7 +245,7 @@ function LoginContent() {
             {showOtpInput && (
               <button
                 onClick={() => setShowOtpInput(false)}
-                className="text-sm font-medium text-zinc-500 hover:text-zinc-400"
+                className="text-sm font-medium text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
               >
                 Back to details
               </button>
@@ -260,7 +260,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950">
         <svg className="animate-spin h-8 w-8 text-yellow-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

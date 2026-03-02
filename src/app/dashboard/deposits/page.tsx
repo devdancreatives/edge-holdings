@@ -49,19 +49,19 @@ export default function DepositsPage() {
                     <TrendingDown className="h-6 w-6 text-green-500" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Deposit History</h1>
-                    <p className="text-sm text-zinc-400">Track your USDT deposits and their status</p>
+                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Deposit History</h1>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">Track your USDT deposits and their status</p>
                 </div>
             </div>
 
             {deposits.length === 0 ? (
-                <div className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-12 text-center backdrop-blur-sm">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-12 text-center backdrop-blur-sm">
                     <div className="max-w-md mx-auto">
-                        <div className="p-4 rounded-full bg-zinc-800/50 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                        <div className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800/50 w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                             <TrendingDown className="h-10 w-10 text-zinc-500" />
                         </div>
-                        <h2 className="text-xl font-semibold text-white mb-2">No Deposits Yet</h2>
-                        <p className="text-zinc-400">
+                        <h2 className="text-xl font-semibold text-zinc-900 dark:text-white mb-2">No Deposits Yet</h2>
+                        <p className="text-zinc-600 dark:text-zinc-400">
                             Your deposit history will appear here once you make your first deposit
                         </p>
                     </div>
@@ -71,16 +71,16 @@ export default function DepositsPage() {
                     {deposits.map((deposit: any) => (
                         <div
                             key={deposit.id}
-                            className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-zinc-700 transition-all"
+                            className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm hover:border-zinc-700 transition-all"
                         >
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-3 rounded-lg bg-zinc-800/50">
+                                    <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/50">
                                         {getStatusIcon(deposit.status)}
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="text-lg font-semibold text-white">
+                                            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
                                                 ${deposit.amount.toLocaleString()} USDT
                                             </h3>
                                             <span
@@ -91,7 +91,7 @@ export default function DepositsPage() {
                                                 {deposit.status.charAt(0).toUpperCase() + deposit.status.slice(1)}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-zinc-400 mb-2">
+                                        <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
                                             {new Date(deposit.createdAt).toLocaleString()}
                                         </p>
                                         <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ export default function DepositsPage() {
                                 {deposit.confirmedAt && (
                                     <div className="text-right">
                                         <p className="text-xs text-zinc-500">Confirmed</p>
-                                        <p className="text-sm text-zinc-400">
+                                        <p className="text-sm text-zinc-600 dark:text-zinc-400">
                                             {new Date(deposit.confirmedAt).toLocaleString()}
                                         </p>
                                     </div>

@@ -69,40 +69,40 @@ export default function ProfilePage() {
                     <UserIcon className="h-6 w-6 text-yellow-500" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Profile</h1>
-                    <p className="text-sm text-zinc-400">Manage your personal information</p>
+                    <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Profile</h1>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">Manage your personal information</p>
                 </div>
             </div>
 
             <div className="max-w-2xl">
-                <form onSubmit={handleSave} className="rounded-xl border border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm space-y-6">
+                <form onSubmit={handleSave} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-linear-to-br from-zinc-900/50 to-zinc-900/30 p-6 backdrop-blur-sm space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-2">
+                        <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
                             Email Address
                         </label>
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700">
-                            <Mail className="h-5 w-5 text-zinc-400" />
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-700">
+                            <Mail className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
                             <input
                                 type="email"
                                 value={user?.email || ''}
                                 disabled
-                                className="flex-1 bg-transparent text-white outline-none"
+                                className="flex-1 bg-transparent text-zinc-900 dark:text-white outline-none"
                             />
                         </div>
                         <p className="mt-2 text-xs text-zinc-500">Email cannot be changed</p>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-2">
+                        <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
                             Full Name
                         </label>
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700 focus-within:border-yellow-500 transition-all">
-                            <UserIcon className="h-5 w-5 text-zinc-400" />
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-700 focus-within:border-yellow-500 transition-all">
+                            <UserIcon className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
                             <input
                                 type="text"
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
-                                className="flex-1 bg-transparent text-white outline-none"
+                                className="flex-1 bg-transparent text-zinc-900 dark:text-white outline-none"
                                 placeholder="Enter your full name"
                             />
                         </div>
@@ -138,7 +138,7 @@ export default function ProfilePage() {
                                 type="button"
                                 onClick={() => testPush()}
                                 disabled={sendingPush}
-                                className="inline-flex items-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700 disabled:opacity-50"
+                                className="inline-flex items-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-zinc-900 dark:text-white transition-colors hover:bg-yellow-700 disabled:opacity-50"
                             >
                                 {sendingPush ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
                                 Test Notification
@@ -147,7 +147,7 @@ export default function ProfilePage() {
                                 type="button"
                                 onClick={() => testPush({ variables: { delay: 5 } })}
                                 disabled={sendingPush}
-                                className="inline-flex items-center gap-2 rounded-lg bg-zinc-800 border border-zinc-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50"
+                                className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-900 dark:text-white transition-colors hover:bg-zinc-200 dark:bg-zinc-700 disabled:opacity-50"
                             >
                                 {sendingPush ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellOff className="h-4 w-4" />}
                                 Test Background (5s)

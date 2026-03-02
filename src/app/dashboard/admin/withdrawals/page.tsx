@@ -31,18 +31,18 @@ export default function AdminWithdrawalsPage() {
         }
     }
 
-    if (loading && !data) return <div className="p-8 text-zinc-400">Loading withdrawals...</div>
+    if (loading && !data) return <div className="p-8 text-zinc-600 dark:text-zinc-400">Loading withdrawals...</div>
 
     const withdrawals = data?.adminWithdrawals || []
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-white">Withdrawal Requests</h1>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Withdrawal Requests</h1>
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="text-xs text-zinc-400 uppercase bg-zinc-900">
+                        <thead className="text-xs text-zinc-600 dark:text-zinc-400 uppercase bg-zinc-50 dark:bg-zinc-900">
                             <tr>
                                 <th className="px-6 py-4">Date</th>
                                 <th className="px-6 py-4">User</th>
@@ -54,19 +54,19 @@ export default function AdminWithdrawalsPage() {
                         </thead>
                         <tbody>
                             {withdrawals.map((w: any) => (
-                                <tr key={w.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/20">
-                                    <td className="px-6 py-4 text-zinc-400">
+                                <tr key={w.id} className="border-b border-zinc-200 dark:border-zinc-800/50 hover:bg-zinc-100 dark:bg-zinc-800/20">
+                                    <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
                                         {new Date(w.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-white font-medium">{w.user?.fullName}</div>
+                                        <div className="text-zinc-900 dark:text-white font-medium">{w.user?.fullName}</div>
                                         <div className="text-xs text-zinc-500">{w.user?.email}</div>
                                     </td>
-                                    <td className="px-6 py-4 text-white font-medium">
+                                    <td className="px-6 py-4 text-zinc-900 dark:text-white font-medium">
                                         {w.amount.toFixed(2)} USDT
                                         <span className="block text-xs text-red-400">Fee: {w.fee}</span>
                                     </td>
-                                    <td className="px-6 py-4 font-mono text-xs text-zinc-400">
+                                    <td className="px-6 py-4 font-mono text-xs text-zinc-600 dark:text-zinc-400">
                                         {w.walletAddress}
                                         <a href={`https://bscscan.com/address/${w.walletAddress}`} target="_blank" className="ml-2 text-blue-500 hover:text-blue-400">
                                             <ExternalLink size={12} className="inline" />

@@ -14,11 +14,11 @@ export default function LandingPage() {
                         <span className="flex h-2 w-2 rounded-full bg-yellow-500 mr-2 animate-pulse"></span>
                         Now Accepting New Investors
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-7xl">
+                    <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white sm:text-5xl md:text-7xl">
                         Human Expertise. <br />
                         <span className="text-yellow-500">AI Precision.</span>
                     </h1>
-                    <p className="mt-6 max-w-2xl mx-auto text-lg text-zinc-400">
+                    <p className="mt-6 max-w-2xl mx-auto text-lg text-zinc-600 dark:text-zinc-400">
                         EdgePoint Holdings combines professional human traders with advanced AI analytics to deliver superior ROI on your crypto capital. No bots, just results.
                     </p>
                     <div className="mt-10 flex justify-center gap-4">
@@ -30,7 +30,7 @@ export default function LandingPage() {
                         </Link>
                         <Link
                             href="/about"
-                            className="rounded-full border border-zinc-700 bg-zinc-900/50 px-8 py-4 text-base font-semibold text-white transition-all hover:bg-zinc-800"
+                            className="rounded-full border border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 px-8 py-4 text-base font-semibold text-zinc-900 dark:text-white transition-all hover:bg-zinc-100 dark:bg-zinc-800"
                         >
                             Learn More
                         </Link>
@@ -48,11 +48,11 @@ export default function LandingPage() {
             </section>
 
             {/* Features Grid */}
-            <section className="py-24 bg-zinc-900/30 border-y border-zinc-800">
+            <section className="py-24 bg-zinc-50 dark:bg-zinc-900/30 border-y border-zinc-200 dark:border-zinc-800">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-white mb-4">Why Choose EdgePoint Holdings?</h2>
-                        <p className="text-zinc-400 max-w-2xl mx-auto">We bridge the gap between complex crypto markets and passive income, ensuring your capital is managed by the best.</p>
+                        <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-4">Why Choose EdgePoint Holdings?</h2>
+                        <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">We bridge the gap between complex crypto markets and passive income, ensuring your capital is managed by the best.</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {[
@@ -61,10 +61,10 @@ export default function LandingPage() {
                             { icon: ShieldCheck, title: 'Secure Custody', desc: 'Funds secured in cold storage with strict access controls.' },
                             { icon: Clock, title: 'Flexible Terms', desc: 'Choose lock-in periods from 1 to 6 months to suit your goals.' }
                         ].map((feature, i) => (
-                            <div key={i} className="p-6 rounded-2xl bg-zinc-950 border border-zinc-800 hover:border-yellow-500/50 transition-colors">
+                            <div key={i} className="p-6 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-yellow-500/50 transition-colors">
                                 <feature.icon className="h-10 w-10 text-yellow-500 mb-4" />
-                                <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-                                <p className="text-zinc-400">{feature.desc}</p>
+                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">{feature.title}</h3>
+                                <p className="text-zinc-600 dark:text-zinc-400">{feature.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -75,8 +75,8 @@ export default function LandingPage() {
             <section className="py-24 relative overflow-hidden">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-white mb-4">How It Works</h2>
-                        <p className="text-zinc-400">Start growing your wealth in three simple steps.</p>
+                        <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-4">How It Works</h2>
+                        <p className="text-zinc-600 dark:text-zinc-400">Start growing your wealth in three simple steps.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -85,10 +85,10 @@ export default function LandingPage() {
                             { step: '02', title: 'Make Deposit', desc: 'Transfer USDT (BSC BEP20) to your dedicated deposit address.' },
                             { step: '03', title: 'Earn Rewards', desc: 'Watch your portfolio grow with weekly ROI distributions.' }
                         ].map((item, i) => (
-                            <div key={i} className="relative p-8 rounded-2xl bg-zinc-900/50 border border-zinc-800">
+                            <div key={i} className="relative p-8 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
                                 <div className="text-6xl font-bold text-yellow-500/10 absolute top-4 right-4">{item.step}</div>
-                                <h3 className="text-xl font-bold text-white mb-4 relative z-10">{item.title}</h3>
-                                <p className="text-zinc-400 relative z-10">{item.desc}</p>
+                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-4 relative z-10">{item.title}</h3>
+                                <p className="text-zinc-600 dark:text-zinc-400 relative z-10">{item.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -105,7 +105,7 @@ export default function LandingPage() {
                             <div className="text-zinc-800 font-medium">Active Investors</div>
                         </div>
                         <div className="p-8 md:border-l md:border-r border-zinc-900/10">
-                            <div className="text-5xl font-bold text-white mb-2">$8.5M</div>
+                            <div className="text-5xl font-bold text-zinc-900 dark:text-white mb-2">$8.5M</div>
                             <div className="text-zinc-800 font-medium">Assets Under Management</div>
                         </div>
                         <div className="p-8">
@@ -120,7 +120,7 @@ export default function LandingPage() {
             <section className="py-24">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-white mb-4">What Our Users Say</h2>
+                        <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-4">What Our Users Say</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {[
@@ -128,11 +128,11 @@ export default function LandingPage() {
                             { name: 'David M.', role: 'Crypto Trader', text: "Finally, a platform that combines the best of both worlds. The returns are stable and the platform is easy to use." },
                             { name: 'Elena R.', role: 'Business Owner', text: "The perfect way to diversify my portfolio without staring at charts all day. Highly recommended." }
                         ].map((t, i) => (
-                            <div key={i} className="bg-zinc-900/30 p-8 rounded-2xl border border-zinc-800">
+                            <div key={i} className="bg-zinc-50 dark:bg-zinc-900/30 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                                 <Quote className="h-8 w-8 text-yellow-500 mb-4" />
-                                <p className="text-zinc-300 mb-6">"{t.text}"</p>
+                                <p className="text-zinc-700 dark:text-zinc-300 mb-6">"{t.text}"</p>
                                 <div>
-                                    <div className="font-bold text-white">{t.name}</div>
+                                    <div className="font-bold text-zinc-900 dark:text-white">{t.name}</div>
                                     <div className="text-sm text-zinc-500">{t.role}</div>
                                 </div>
                             </div>
