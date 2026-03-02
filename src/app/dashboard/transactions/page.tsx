@@ -76,7 +76,7 @@ export default function TransactionsPage() {
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 group-hover:bg-zinc-100 dark:bg-zinc-800 transition-all">
+                                        <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-800 transition-all">
                                             {getTransactionIcon(tx.type)}
                                         </div>
                                         <div>
