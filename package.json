@@ -15,6 +15,7 @@
     "@as-integrations/next": "^4.1.0",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@supabase/supabase-js": "^2.89.0",
+    "@vercel/analytics": "^1.6.1",
     "bip32": "^5.0.0",
     "bip39": "^3.1.0",
     "bs58": "^6.0.0",
