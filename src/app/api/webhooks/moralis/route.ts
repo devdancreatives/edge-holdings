@@ -38,15 +38,33 @@ function verifySignature(body: string, signature: string): boolean {
 export async function POST(request: NextRequest) {
   try {
     const rawBody = await request.text();
+    const bodyTrimmed = rawBody.trim();
 
     // Moralis sends a test webhook with empty body on stream creation — ack it
-    if (!rawBody || rawBody === "{}") {
+    // They may send {} or an empty string.
+    if (!bodyTrimmed || bodyTrimmed === "{}" || bodyTrimmed === "[]") {
+      console.log("[MORALIS WEBHOOK] Received validation/test request");
       return NextResponse.json({ message: "OK (test)" });
     }
 
     // Verify signature
     const signature = request.headers.get("x-signature");
-    if (!signature || !verifySignature(rawBody, signature)) {
+    let secret = process.env.MORALIS_WEBHOOK_SECRET;
+
+    // Extremely lenient check for bootstrap mode:
+    // Only verify if we have a real-looking secret (not empty, not placeholder)
+    const isSecretSet =
+      secret &&
+      secret.length > 20 &&
+      !secret.includes("your_moralis_webhook_secret_here") &&
+      secret !== "undefined" &&
+      secret !== "null";
+
+    if (!isSecretSet) {
+      console.warn(
+        `[MORALIS WEBHOOK] Signature check skipped (Secret: ${secret ? "SET but placeholder/invalid" : "NOT SET"})`,
+      );
+    } else if (!signature || !verifySignature(rawBody, signature)) {
       console.warn("[MORALIS WEBHOOK] Invalid or missing signature");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }

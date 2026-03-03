@@ -1,23 +1,5 @@
-/**
- * One-time setup script to create a Moralis Stream for monitoring
- * USDT deposits on BSC to your monitored wallet addresses.
- *
- * Usage:
- *   1. Set MORALIS_API_KEY in your .env.local
- *   2. Run: npx ts-node --esm scripts/setup-moralis-stream.ts
- *   3. Copy the webhook secret from the output to your .env.local as MORALIS_WEBHOOK_SECRET
- *
- * Or set up manually via the Moralis Dashboard:
- *   1. Go to https://admin.moralis.io/streams
- *   2. Create a new Stream:
- *      - Network: BNB Chain (BSC)
- *      - Contract Address: 0x55d398326f99059fF775485246999027B3197955 (USDT)
- *      - Event: Transfer(address,address,uint256)
- *      - Webhook URL: https://edge-holdings.vercel.app/api/webhooks/moralis
- *      - Under Advanced: Add address filter for topic2 (to) matching your wallet addresses
- *   3. Copy the webhook secret from the Stream settings
- */
-
+import Moralis from "moralis";
+import { EvmChain } from "@moralisweb3/common-evm-utils";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 
@@ -43,7 +25,7 @@ const WEBHOOK_URL =
 
 const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
 
-// Your monitored wallet addresses — update this list as needed
+// Your monitored wallet addresses
 const WALLET_ADDRESSES = [
   "0x635aB8aD55b6920E2E6Eb4d56F238b990CFa3D42",
   "0x35638B6940b0AAdf2E01046C69eCC6A986925ab2",
@@ -64,118 +46,104 @@ const ERC20_TRANSFER_ABI = [
   },
 ];
 
-async function createStream() {
+async function setupStream() {
   if (!MORALIS_API_KEY) {
     console.error("❌ MORALIS_API_KEY not set. Set it in .env.local first.");
     process.exit(1);
   }
 
-  console.log("📡 Creating Moralis Stream for USDT deposits on BSC...\n");
-  console.log(`  Contract: ${USDT_CONTRACT}`);
-  console.log(`  Webhook:  ${WEBHOOK_URL}`);
-  console.log(`  Wallets:  ${WALLET_ADDRESSES.length} addresses\n`);
-
   try {
-    // Create the stream
-    const response = await fetch(
-      "https://api.moralis-streams.com/streams/evm",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": MORALIS_API_KEY,
-        },
-        body: JSON.stringify({
-          webhookUrl: WEBHOOK_URL,
-          description: "EdgePoint Holdings - BSC USDT Deposit Monitor",
-          tag: "usdt-deposits",
-          chainIds: ["0x38"], // BSC Mainnet
-          includeContractLogs: true,
-          includeNativeTxs: false,
-          includeInternalTxs: false,
-          abi: ERC20_TRANSFER_ABI,
-          topic0: ["Transfer(address,address,uint256)"],
-          advancedOptions: [
-            {
-              topic0: "Transfer(address,address,uint256)",
-              filter: {
-                or: WALLET_ADDRESSES.map((addr) => ({
-                  eq: ["to", addr.toLowerCase()],
-                })),
-              },
+    await Moralis.start({
+      apiKey: MORALIS_API_KEY,
+    });
+
+    console.log("📡 Setting up Moralis Stream via SDK...\n");
+    console.log(`  Contract: ${USDT_CONTRACT}`);
+    console.log(`  Webhook:  ${WEBHOOK_URL}`);
+
+    // Check if stream already exists
+    const streams = await Moralis.Streams.getAll({
+      limit: 100,
+    });
+
+    let stream = streams.raw.result.find((s: any) => s.tag === "usdt-deposits");
+
+    if (stream) {
+      console.log(`♻️ Found existing stream (ID: ${stream.id}), updating...`);
+      await Moralis.Streams.update({
+        id: stream.id,
+        webhookUrl: WEBHOOK_URL,
+        description: "EdgePoint Holdings - BSC USDT Deposit Monitor",
+        tag: "usdt-deposits",
+        chainIds: [EvmChain.BSC],
+        includeContractLogs: true,
+        abi: ERC20_TRANSFER_ABI,
+        topic0: ["Transfer(address,address,uint256)"],
+        advancedOptions: [
+          {
+            topic0: "Transfer(address,address,uint256)",
+            filter: {
+              or: WALLET_ADDRESSES.map((addr) => ({
+                eq: ["to", addr.toLowerCase()],
+              })),
             },
-          ],
-        }),
-      },
-    );
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Moralis API error (${response.status}): ${errorBody}`);
+          },
+        ],
+      });
+    } else {
+      console.log("🆕 Creating new stream...");
+      const result = await Moralis.Streams.add({
+        webhookUrl: WEBHOOK_URL,
+        description: "EdgePoint Holdings - BSC USDT Deposit Monitor",
+        tag: "usdt-deposits",
+        chains: [EvmChain.BSC],
+        includeContractLogs: true,
+        abi: ERC20_TRANSFER_ABI,
+        topic0: ["Transfer(address,address,uint256)"],
+        advancedOptions: [
+          {
+            topic0: "Transfer(address,address,uint256)",
+            filter: {
+              or: WALLET_ADDRESSES.map((addr) => ({
+                eq: ["to", addr.toLowerCase()],
+              })),
+            },
+          },
+        ],
+      });
+      stream = result.raw;
     }
 
-    const stream = await response.json();
-    console.log("✅ Stream created successfully!");
-    console.log(`  Stream ID: ${stream.id}`);
+    console.log(`✅ Stream ready! (ID: ${stream.id})`);
 
-    // Add the USDT contract address to the stream
-    const addAddressResponse = await fetch(
-      `https://api.moralis-streams.com/streams/evm/${stream.id}/address`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": MORALIS_API_KEY,
-        },
-        body: JSON.stringify({
-          address: USDT_CONTRACT,
-        }),
-      },
-    );
-
-    if (!addAddressResponse.ok) {
-      const errorBody = await addAddressResponse.text();
-      throw new Error(
-        `Failed to add contract address (${addAddressResponse.status}): ${errorBody}`,
-      );
-    }
-
+    // Add USDT contract address to the stream
+    await Moralis.Streams.addAddress({
+      id: stream.id,
+      address: USDT_CONTRACT,
+    });
     console.log("✅ USDT contract address added to stream.");
 
     // Get the webhook secret
-    const settingsResponse = await fetch(
-      "https://api.moralis-streams.com/settings",
-      {
-        headers: {
-          "x-api-key": MORALIS_API_KEY,
-        },
-      },
-    );
+    const settings = await Moralis.Streams.getSettings();
 
-    if (settingsResponse.ok) {
-      const settings = await settingsResponse.json();
-      console.log("\n" + "=".repeat(60));
-      console.log(
-        "🔑 WEBHOOK SECRET (add to .env.local as MORALIS_WEBHOOK_SECRET):",
-      );
-      console.log(`   ${settings.secretKey}`);
-      console.log("=".repeat(60));
-    } else {
-      console.log(
-        "\n⚠️  Could not auto-fetch webhook secret. Find it at: https://admin.moralis.io/settings",
-      );
-    }
+    console.log("\n" + "=".repeat(60));
+    console.log("🔑 WEBHOOK SECRET (add to .env.local and Vercel):");
+    console.log(`   ${settings.raw.secretKey}`);
+    console.log("=".repeat(60));
 
     console.log("\n📋 Next steps:");
     console.log(
       "  1. Add MORALIS_WEBHOOK_SECRET to your Vercel environment variables",
     );
-    console.log("  2. Deploy the webhook endpoint");
+    console.log("  2. Deploy the webhook endpoint to re-enable security");
     console.log("  3. Send a test USDT deposit to verify");
-  } catch (error) {
-    console.error("❌ Error creating Moralis stream:", error);
+  } catch (error: any) {
+    console.error(
+      "❌ Error setting up Moralis stream:",
+      error.message || error,
+    );
     process.exit(1);
   }
 }
 
-createStream();
+setupStream();
