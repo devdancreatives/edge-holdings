@@ -2,8 +2,11 @@ import { ethers } from "ethers";
 import { createClient } from "@supabase/supabase-js";
 
 const BSCSCAN_API_URL = "https://api.etherscan.io/v2/api";
-const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // BSC-USD
+const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // BSC-USD (BEP20)
 const MIN_CONFIRMATIONS = 15;
+const TRANSFER_TOPIC =
+  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"; // Transfer(address,address,uint256)
+const BSC_RPC_URL = "https://bsc-dataseed.binance.org/";
 
 // Interface for BscScan transaction
 export interface BscScanTransaction {
@@ -28,15 +31,20 @@ interface ProcessedTransaction {
 }
 
 /**
- * Fetch recent BEP20 transactions for a wallet address from BscScan
+ * Helper: Extract a proper checksummed address from a 32-byte log topic.
+ * Topics are zero-padded to 32 bytes; the actual address is the last 20 bytes.
  */
+function addressFromTopic(topic: string): string {
+  return ethers.getAddress("0x" + topic.slice(26));
+}
+
 /**
  * Fetch recent BEP20 transactions for a wallet address from RPC (ethers)
  * This replaces the paid BscScan API.
  */
 export async function getWalletTransactions(
   address: string,
-  _limit: number = 20, // limit is less relevant for block range, but we keep signature
+  _limit: number = 20,
 ): Promise<BscScanTransaction[]> {
   try {
     const provider = new ethers.JsonRpcProvider(
@@ -45,8 +53,7 @@ export async function getWalletTransactions(
 
     // Filter for Transfer event to 'address' on USDT contract
     const topicTo = ethers.zeroPadValue(address, 32);
-    const transferTopic =
-      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"; // Transfer(address,address,uint256)
+    const transferTopic = TRANSFER_TOPIC;
 
     // Get current block
     const currentBlock = await provider.getBlockNumber();
@@ -68,11 +75,11 @@ export async function getWalletTransactions(
         // Decode amount (value)
         const amount = BigInt(log.data).toString();
 
-        // Extract 'from' address from topic[1] (if present)
-        let fromAddress = "0x";
-        if (log.topics && log.topics[1]) {
-          fromAddress = ethers.stripZerosLeft(log.topics[1]);
-        }
+        // Extract 'from' address from topic[1]
+        const fromAddress =
+          log.topics && log.topics[1]
+            ? addressFromTopic(log.topics[1])
+            : "0x0000000000000000000000000000000000000000";
 
         return {
           hash: log.transactionHash,
@@ -91,7 +98,6 @@ export async function getWalletTransactions(
     );
 
     // Sort valid transactions descending by timestamp
-    // Filter out nulls if any block fetch failed (unlikely)
     return transactions.sort(
       (a, b) => parseInt(b.timeStamp) - parseInt(a.timeStamp),
     );
@@ -102,42 +108,47 @@ export async function getWalletTransactions(
 }
 
 /**
- * Fetch all USDT transfer logs for a block range.
- * High-performance scanning for multiple users.
+ * Fetch USDT transfer logs for a block range, filtered to specific wallet addresses.
+ * Only returns transfers TO one of the provided addresses.
  * Automatically fragments requests if block range is too large or if RPC limits are hit.
  */
 export async function getGlobalTransactions(
   fromBlock: number,
   toBlock: number,
+  walletAddresses?: string[],
 ): Promise<BscScanTransaction[]> {
-  const MAX_BLOCKS_PER_CHUNK = 1000;
+  const MAX_BLOCKS_PER_CHUNK = 5000;
 
   try {
-    const provider = new ethers.JsonRpcProvider(
-      "https://bsc-dataseed.binance.org/",
-    );
-
-    const transferTopic =
-      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+    const provider = new ethers.JsonRpcProvider(BSC_RPC_URL);
 
     // If block range is too large, split and recurse
     if (toBlock - fromBlock > MAX_BLOCKS_PER_CHUNK) {
       console.log(`Range ${fromBlock}-${toBlock} too large, splitting...`);
       const mid = Math.floor((fromBlock + toBlock) / 2);
       const [part1, part2] = await Promise.all([
-        getGlobalTransactions(fromBlock, mid),
-        getGlobalTransactions(mid + 1, toBlock),
+        getGlobalTransactions(fromBlock, mid, walletAddresses),
+        getGlobalTransactions(mid + 1, toBlock, walletAddresses),
       ]);
       return [...part1, ...part2];
     }
 
     console.log(`Scanning BSC logs from ${fromBlock} to ${toBlock}...`);
 
+    // Build topics filter:
+    // topic[0] = Transfer event signature
+    // topic[1] = from (null = any sender)
+    // topic[2] = to (filter to our wallets if provided)
+    const toFilter =
+      walletAddresses && walletAddresses.length > 0
+        ? walletAddresses.map((addr) => ethers.zeroPadValue(addr, 32))
+        : null;
+
     let logs;
     try {
       logs = await provider.getLogs({
         address: USDT_CONTRACT,
-        topics: [transferTopic],
+        topics: [TRANSFER_TOPIC, null, toFilter],
         fromBlock,
         toBlock,
       });
@@ -153,8 +164,8 @@ export async function getGlobalTransactions(
         );
         const mid = Math.floor((fromBlock + toBlock) / 2);
         const [part1, part2] = await Promise.all([
-          getGlobalTransactions(fromBlock, mid),
-          getGlobalTransactions(mid + 1, toBlock),
+          getGlobalTransactions(fromBlock, mid, walletAddresses),
+          getGlobalTransactions(mid + 1, toBlock, walletAddresses),
         ]);
         return [...part1, ...part2];
       }
@@ -164,36 +175,50 @@ export async function getGlobalTransactions(
     if (logs.length === 0) return [];
 
     console.log(
-      `Found ${logs.length} USDT transfers in range ${fromBlock}-${toBlock}.`,
+      `Found ${logs.length} USDT transfers to monitored wallets in ${fromBlock}-${toBlock}.`,
     );
+
+    // Get current block for confirmation calculation
+    const currentBlock = await provider.getBlockNumber();
+
+    // Fetch block timestamps for all unique blocks in parallel
+    const uniqueBlockNumbers = [...new Set(logs.map((l) => l.blockNumber))];
+    const blockMap = new Map<number, number>();
+    const blockResults = await Promise.all(
+      uniqueBlockNumbers.map((bn) => provider.getBlock(bn)),
+    );
+    for (const block of blockResults) {
+      if (block) blockMap.set(block.number, block.timestamp);
+    }
 
     // Map logs to BscScanTransaction format
     const transactions: BscScanTransaction[] = logs.map((log) => {
-      // Decode amount (value) from data
       const amount = BigInt(log.data).toString();
 
-      // Extract 'from' address from topic[1]
-      let fromAddress = "0x";
-      if (log.topics && log.topics[1]) {
-        fromAddress = ethers.stripZerosLeft(log.topics[1]);
-      }
+      const fromAddress =
+        log.topics && log.topics[1]
+          ? addressFromTopic(log.topics[1])
+          : "0x0000000000000000000000000000000000000000";
 
-      // Extract 'to' address from topic[2]
-      let toAddress = "0x";
-      if (log.topics && log.topics[2]) {
-        toAddress = ethers.stripZerosLeft(log.topics[2]);
-      }
+      const toAddress =
+        log.topics && log.topics[2]
+          ? addressFromTopic(log.topics[2])
+          : "0x0000000000000000000000000000000000000000";
+
+      const blockTimestamp =
+        blockMap.get(log.blockNumber) || Math.floor(Date.now() / 1000);
+      const confirmations = currentBlock - log.blockNumber;
 
       return {
         hash: log.transactionHash,
         from: fromAddress,
         to: toAddress,
         value: amount,
-        timeStamp: Math.floor(Date.now() / 1000).toString(), // Will be approximate for batch
+        timeStamp: blockTimestamp.toString(),
         tokenSymbol: "USDT",
         tokenDecimal: "18",
         contractAddress: USDT_CONTRACT,
-        confirmations: "0", // Handled by caller or post-processing
+        confirmations: confirmations.toString(),
       };
     });
 
@@ -212,9 +237,7 @@ export async function getGlobalTransactions(
  */
 export async function getCurrentBlockNumber(): Promise<number> {
   try {
-    const provider = new ethers.JsonRpcProvider(
-      "https://bsc-dataseed.binance.org/",
-    );
+    const provider = new ethers.JsonRpcProvider(BSC_RPC_URL);
     return await provider.getBlockNumber();
   } catch (error) {
     console.error("Error getting current block:", error);
@@ -224,20 +247,12 @@ export async function getCurrentBlockNumber(): Promise<number> {
 
 /**
  * Get transaction confirmations (BSC specific)
- * BscScan includes confirmations in the transaction list endpoint,
- * but for specific tx logic we might just query the tx status or trusted RPC.
- * This function mimics the previous interface.
  */
 export async function getTransactionConfirmations(
   txHash: string,
 ): Promise<number> {
   try {
-    // We can use ethers to get standard provider confirmations
-    // or query BscScan again. Cost-effective way is RPC.
-    // Using public RPC for BSC
-    const provider = new ethers.JsonRpcProvider(
-      "https://bsc-dataseed.binance.org/",
-    );
+    const provider = new ethers.JsonRpcProvider(BSC_RPC_URL);
     const tx = await provider.getTransaction(txHash);
     const currentBlock = await provider.getBlockNumber();
 
