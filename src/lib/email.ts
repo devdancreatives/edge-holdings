@@ -125,7 +125,7 @@ export async function sendDepositNotification(
               <div class="details">
                 <div class="detail-row">
                   <span class="detail-label">Network</span>
-                  <span class="detail-value">TRON (TRC20)</span>
+                  <span class="detail-value">BSC (BEP20)</span>
                 </div>
                 <div class="detail-row">
                   <span class="detail-label">Status</span>
@@ -138,7 +138,7 @@ export async function sendDepositNotification(
               </div>
 
               <div style="text-align: center;">
-                <a href="https://tronscan.org/#/transaction/${txHash}" class="button" target="_blank">View on TronScan</a>
+                <a href="https://bscscan.com/tx/${txHash}" class="button" target="_blank">View on BscScan</a>
               </div>
 
               <p class="text" style="font-size: 14px; margin-top: 30px;">Your funds are now available for investment. Start growing your portfolio today!</p>

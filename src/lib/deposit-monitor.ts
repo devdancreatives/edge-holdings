@@ -39,7 +39,26 @@ export async function monitorDeposits(): Promise<DepositResult> {
       .eq("key", "last_bsc_block")
       .single();
 
-    const lastBlock = config ? parseInt(config.value as string) : 0;
+    // Handle JSONB value - could be number (46000000) or string ("84280000")
+    let lastBlock = 0;
+    if (config?.value !== null && config?.value !== undefined) {
+      const raw = config.value;
+      if (typeof raw === "number") {
+        lastBlock = raw;
+      } else if (typeof raw === "string") {
+        lastBlock = parseInt(raw, 10);
+      } else {
+        // JSONB object/other — try JSON.parse for stringified numbers
+        lastBlock = parseInt(String(raw), 10);
+      }
+      if (isNaN(lastBlock)) {
+        console.error(
+          `[DEPOSIT MONITOR] Invalid last_bsc_block value: ${JSON.stringify(raw)}. Resetting.`,
+        );
+        lastBlock = 0;
+      }
+    }
+
     const currentBlock = await getCurrentBlockNumber();
 
     // 1b. Automatic Jump Logic
@@ -57,10 +76,9 @@ export async function monitorDeposits(): Promise<DepositResult> {
       return result;
     }
 
-    // Limit scan range to avoid RPC timeouts (max 200 blocks)
-    // USDT contract is very busy and large ranges cause "limit exceeded" or timeouts
+    // Scan up to 5000 blocks per cron invocation (safe with topic filters)
     const fromBlock = scanFrom;
-    const toBlock = Math.min(currentBlock, fromBlock + 200);
+    const toBlock = Math.min(currentBlock, fromBlock + 5000);
 
     // 2. Get all monitored wallets for O(1) lookup
     const { data: wallets } = await supabase
@@ -78,8 +96,13 @@ export async function monitorDeposits(): Promise<DepositResult> {
       ]),
     );
 
-    // 3. Scan for global transactions
-    const transactions = await getGlobalTransactions(fromBlock, toBlock);
+    // 3. Scan for transactions filtered to our wallet addresses
+    const walletAddresses = wallets.map((w: { address: string }) => w.address);
+    const transactions = await getGlobalTransactions(
+      fromBlock,
+      toBlock,
+      walletAddresses,
+    );
     const minConfirmations = getMinConfirmations();
 
     for (const tx of transactions) {
@@ -88,11 +111,8 @@ export async function monitorDeposits(): Promise<DepositResult> {
 
       try {
         const parsedTx = parseTransaction(tx);
-        // During global scan, confirmations for the specific block are calculated
-        // but we might need to fetch the specific block number if BscScanTransaction doesn't have it.
-        // For simplicity in this scan, we treat new ones as pending or confirmed based on range.
-        // Re-fetching exact confirmations is safer.
-        const confirmations = await getTransactionConfirmations(tx.hash);
+        // Use confirmations already computed during the scan
+        const confirmations = parseInt(tx.confirmations) || 0;
         const status =
           confirmations >= minConfirmations ? "confirmed" : "pending";
 
