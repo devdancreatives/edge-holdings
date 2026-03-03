@@ -29,6 +29,10 @@ CREATE OR REPLACE FUNCTION public.process_bsc_deposit(
 DECLARE
     v_existing_status TEXT;
 BEGIN
+    -- 0. Use transaction-level advisory lock on tx_hash decimal representation to prevent race conditions
+    -- tx_hash is hex, we take first 8 chars and convert to int for the lock key
+    PERFORM pg_advisory_xact_lock(hashtext(p_tx_hash));
+
     -- Get current status if it exists
     SELECT status INTO v_existing_status FROM public.deposits WHERE tx_hash = p_tx_hash;
 
