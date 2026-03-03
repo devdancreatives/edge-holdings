@@ -75,7 +75,7 @@ async function setupStream() {
         webhookUrl: WEBHOOK_URL,
         description: "EdgePoint Holdings - BSC USDT Deposit Monitor",
         tag: "usdt-deposits",
-        chainIds: [EvmChain.BSC],
+        chains: [EvmChain.BSC],
         includeContractLogs: true,
         abi: ERC20_TRANSFER_ABI,
         topic0: ["Transfer(address,address,uint256)"],
@@ -124,11 +124,11 @@ async function setupStream() {
     console.log("✅ USDT contract address added to stream.");
 
     // Get the webhook secret
-    const settings = await Moralis.Streams.getSettings();
+    const settings = await Moralis.Streams.readSettings();
 
     console.log("\n" + "=".repeat(60));
     console.log("🔑 WEBHOOK SECRET (add to .env.local and Vercel):");
-    console.log(`   ${settings.raw.secretKey}`);
+    console.log(`   ${(settings.raw as any).secretKey}`);
     console.log("=".repeat(60));
 
     console.log("\n📋 Next steps:");
