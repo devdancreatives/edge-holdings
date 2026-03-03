@@ -229,11 +229,27 @@ export async function checkPendingDeposits(): Promise<number> {
     let newlyConfirmed = 0;
     const minConfirmations = getMinConfirmations();
 
-    for (const deposit of pendingDeposits) {
-      try {
-        const confirmations = await getTransactionConfirmations(
-          deposit.tx_hash,
+    // Fetch all confirmations in parallel to avoid sequential RPC waits
+    const confirmationResults = await Promise.allSettled(
+      pendingDeposits.map((deposit) =>
+        getTransactionConfirmations(deposit.tx_hash),
+      ),
+    );
+
+    for (let i = 0; i < pendingDeposits.length; i++) {
+      const deposit = pendingDeposits[i];
+      const result = confirmationResults[i];
+
+      if (result.status === "rejected") {
+        console.error(
+          `Error fetching confirmations for tx ${deposit.tx_hash}:`,
+          result.reason,
         );
+        continue;
+      }
+
+      try {
+        const confirmations = result.value;
         const status =
           confirmations >= minConfirmations ? "confirmed" : "pending";
 
