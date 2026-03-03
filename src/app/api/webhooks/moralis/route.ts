@@ -65,7 +65,11 @@ export async function POST(request: NextRequest) {
         `[MORALIS WEBHOOK] Signature check skipped (Secret: ${secret ? "SET but placeholder/invalid" : "NOT SET"})`,
       );
     } else if (!signature || !verifySignature(rawBody, signature)) {
-      console.warn("[MORALIS WEBHOOK] Invalid or missing signature");
+      console.warn(
+        `[MORALIS WEBHOOK] Invalid or missing signature. ` +
+          `Provided Signature: ${signature ? signature.substring(0, 8) + "..." : "NONE"}. ` +
+          `Secret: ${secret ? "SET (length " + secret.length + ")" : "NOT SET"}.`,
+      );
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
