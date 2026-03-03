@@ -8,21 +8,19 @@ import { START_AI_TRADE, RESOLVE_AI_TRADE, GET_ME } from '@/graphql/queries'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
-// WIN RATE CONFIGURATION
-const WIN_RATE_PERCENT = 0.20 // 20% win rate as requested
-
 export default function AiTradingPage() {
     // Session State
     const [timeLeft, setTimeLeft] = useState(60) // 0-60s loop
 
     // Trade State
     const [isTrading, setIsTrading] = useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false) // Track loading
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const [tradeDirection, setTradeDirection] = useState<'UP' | 'DOWN' | null>(null)
     const [tradeResult, setTradeResult] = useState<'WIN' | 'LOSS' | null>(null)
     const [stake, setStake] = useState(0)
     const [entryPrice, setEntryPrice] = useState(0)
     const [currentPrice, setCurrentPrice] = useState(0)
+    const [tradeId, setTradeId] = useState<string | null>(null)
 
     // Mutations & Queries
     const { data: userData, refetch: refetchUser } = useQuery<any>(GET_ME)
@@ -44,23 +42,27 @@ export default function AiTradingPage() {
     const handleStartTrade = async (amount: number, direction: 'UP' | 'DOWN') => {
         try {
             setIsSubmitting(true)
-            // Optimistic UI update? No, wait for server confirm for balance deduction
-            await startTrade({
+            const { data } = await startTrade({
                 variables: { amount, type: direction }
             })
 
-            // Deduct locally for instant feedback if needed, but refetchUser is safer
             await refetchUser()
 
+            const returnedTradeId = (data as any)?.startAiTrade
+            if (!returnedTradeId) {
+                throw new Error('Failed to create trade')
+            }
+
+            setTradeId(returnedTradeId)
             setStake(amount)
             setTradeDirection(direction)
             setEntryPrice(currentPrice)
             setIsTrading(true)
 
-            // Determine result immediately based on 20% probability
-            // This setup guarantees the outcome for the "AI" visualizer
-            const isWin = Math.random() < WIN_RATE_PERCENT
-            setTradeResult(isWin ? 'WIN' : 'LOSS')
+            // Client does NOT know the outcome — show random visual bias for excitement
+            // This is purely cosmetic; the real result comes from the server on resolve
+            const visualBias = Math.random() < 0.5 ? 'WIN' : 'LOSS'
+            setTradeResult(visualBias)
 
             toast.success(`Trade Started: ${direction} $${amount}`)
 
@@ -73,62 +75,42 @@ export default function AiTradingPage() {
 
     // End/Resolve Trade Handler
     const handleCloseTrade = async (reason: 'expired' | 'early_close') => {
-        if (!isTrading) return
-
-        let finalIsWin = false
-        let profit = 0
-
-        // Calculate PnL locally based on result state or current price (for early close)
-        if (reason === 'expired') {
-            finalIsWin = tradeResult === 'WIN' // Trust the predetermined result
-            // Or should we trust the price? 
-            // Ideally price follows result.
-            // If WIN, payout = stake + profit. Let's assume 90% payout.
-            profit = finalIsWin ? stake * 0.9 : -stake
-        } else if (reason === 'early_close') {
-            // Check if actually profitable
-            const pnl = calcProfit()
-            if (pnl > stake * 0.5) { // 1.5x total means +0.5x profit
-                finalIsWin = true
-                profit = pnl
-            } else {
-                toast.error("Profit not high enough to close early")
-                return
-            }
-        }
+        if (!isTrading || !tradeId) return
 
         try {
-            await resolveTrade({
-                variables: {
-                    amount: stake,
-                    profit: finalIsWin ? (reason === 'early_close' ? profit : stake * 0.9) : 0,
-                    isWin: finalIsWin
-                }
+            const { data } = await resolveTrade({
+                variables: { tradeId }
             })
 
-            if (finalIsWin) {
-                toast.success(`Trade Won! +$${(reason === 'early_close' ? profit : stake * 0.9).toFixed(2)}`)
+            // Parse server response
+            const result = JSON.parse((data as any)?.resolveAiTrade || '{}')
+            const isWin = result.outcome === 'WIN'
+            const profit = result.profit || 0
+
+            if (result.expired) {
+                toast.error('Trade expired — session timed out')
+            } else if (isWin) {
+                toast.success(`Trade Won! +$${profit.toFixed(2)}`)
             } else {
-                toast.error("Trade Lost")
+                toast.error('Trade Lost')
             }
 
             await refetchUser()
 
         } catch (error: any) {
             console.error(error)
-            // Even if api fails, reset local state
+            toast.error(error.message || 'Failed to resolve trade')
         } finally {
             setIsTrading(false)
             setTradeDirection(null)
             setTradeResult(null)
             setStake(0)
+            setTradeId(null)
         }
     }
 
     // Auto-Close when session loops (if still trading)
     useEffect(() => {
-        // If timeLeft hits 60 (reset) or 0 and we are trading, close it.
-        // Let's say we close at t=1 (end of session)
         if (timeLeft === 1 && isTrading) {
             handleCloseTrade('expired')
         }
@@ -137,10 +119,7 @@ export default function AiTradingPage() {
     const calcProfit = () => {
         if (!entryPrice || !currentPrice || !stake) return 0
         const isUp = tradeDirection === 'UP'
-        // Mock PnL: proportional to price diff? 
-        // Or just fixed based on "Win/Loss" state to ensure it matches UI?
-        // Let's use price diff for realism in UI, but result state for outcome.
-        const diffPercent = (currentPrice - entryPrice) / entryPrice * 1000 // Multiplier for effect
+        const diffPercent = (currentPrice - entryPrice) / entryPrice * 1000
         const pnl = isUp ? diffPercent : -diffPercent
 
         // Cap max loss at -stake
@@ -187,7 +166,7 @@ export default function AiTradingPage() {
                     <TradeControls
                         balance={userData.me?.balance || 0}
                         isTrading={isTrading}
-                        isLoading={isSubmitting} // Added isLoading prop
+                        isLoading={isSubmitting}
                         currentProfit={currentProfit}
                         stake={stake}
                         sessionTimeLeft={timeLeft}

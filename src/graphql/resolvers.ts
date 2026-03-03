@@ -1405,18 +1405,35 @@ export const resolvers = {
     },
 
     // AI Trading Resolvers
-    // AI Trading Resolvers
     startAiTrade: async (_: any, { amount, type }: any, context: any) => {
       const client = getClient(context);
       const user = await getUser(client);
       if (!user) throw new Error("Unauthorized");
+
+      // Validate stake amount
+      if (amount <= 0) throw new Error("Stake must be positive");
+      if (amount > 10000) throw new Error("Maximum stake is $10,000");
 
       const balance = await getAvailableBalance(client, user.id);
       if (balance < amount) throw new Error("Insufficient balance");
 
       const serviceClient = getServiceClient();
 
-      // 1. Fetch current manual balance
+      // Check for existing pending trade (DB enforces uniqueness, but give nice error)
+      const { data: existingTrade } = await serviceClient
+        .from("ai_trades")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .single();
+
+      if (existingTrade) {
+        throw new Error(
+          "You already have an active trade. Wait for it to resolve.",
+        );
+      }
+
+      // Fetch current manual balance
       const { data: userData } = await serviceClient
         .from("users")
         .select("balance")
@@ -1425,27 +1442,11 @@ export const resolvers = {
 
       const currentManualBalance = userData?.balance || 0;
 
-      // 2. Determine Outcome (Server-Side Logic)
-      //    Safety Rule: House Pool must be > Potential Payout
-      //    Potential Payout = Stake * 1.9 (approx)
-
-      // Calculate House Pool
+      // Determine Outcome (Server-Side Logic)
+      // Calculate House Pool from all AI transactions
       const { data: transactions } = await serviceClient
         .from("transactions")
         .select("amount, type");
-
-      const totalLosses = transactions?.filter(
-        (t: any) => t.type === "trade_entry" || t.type === "trade_loss",
-      ); // Entry is negative amount (revenue for house?), wait.
-      // Logic:
-      // Entry: User pays -50. (House +50)
-      // Win: User gets +90. (House -90)
-      // Loss: User gets 0. (House keeps 50)
-      // So Net House = Sum of (-1 * UserTransactionAmount) for AI trades
-      // actually easier: sum of all ai transactions.
-      // If sum is POSITIVE for user, House is NEGATIVE.
-      // If sum is NEGATIVE for user, House is POSITIVE.
-      // We want House to be POSITIVE.
 
       const aiTransactions =
         transactions?.filter(
@@ -1455,41 +1456,36 @@ export const resolvers = {
             t.type === "trade_loss",
         ) || [];
 
-      // Sum of user balances changes.
-      // Entry: -50. Win: +90. Net User: +40. House: -40.
-      // Entry: -50. Loss: 0. Net User: -50. House: +50.
-      // So House Profit = -1 * (Sum of all AI transactions)
+      // House Profit = -1 * (sum of user-side AI transactions)
+      // Entry: -50 (user loses, house gains). Win: +90 (user gains, house loses).
       const userNetChange = aiTransactions.reduce(
         (acc: number, t: any) => acc + t.amount,
         0,
       );
       const housePool = -userNetChange;
 
-      // Potential Payout if User Wins
-      // Assume 90% profit (1.9x multiplier) for safety calculation
       const potentialPayout = amount * 0.9;
 
-      // Random Chance (20% Win Rate)
+      // 20% base win rate
       let isWin = Math.random() < 0.2;
 
-      // SAFETY OVERRIDE (Strict Mode)
-      // 1. "Recovery Mode": If House Pool is negative, FORCE LOSS (0% chance).
+      // SAFETY OVERRIDES
       if (housePool < 0) {
         console.log(
-          `[AI TRADING] STRICT SAFETY MODE. Pool Negative (${housePool}). Forcing LOSS to recover.`,
+          `[AI TRADING] RECOVERY MODE. Pool: ${housePool}. Forcing LOSS.`,
         );
         isWin = false;
-      }
-      // 2. "Predictive Safety": If paying out would dip pool below zero, FORCE LOSS.
-      else if (isWin && housePool - potentialPayout < 0) {
+      } else if (isWin && housePool - potentialPayout < 0) {
         console.log(
-          `[AI TRADING] Safety Override Triggered. Pool: ${housePool}, Payout: ${potentialPayout}. Forcing LOSS.`,
+          `[AI TRADING] Safety Override. Pool: ${housePool}, Payout: ${potentialPayout}. Forcing LOSS.`,
         );
         isWin = false;
       }
 
       const outcome = isWin ? "WIN" : "LOSS";
+      const profit = isWin ? amount * 0.9 : 0;
 
+      // Deduct balance
       const { error: updateError } = await serviceClient
         .from("users")
         .update({ balance: currentManualBalance - amount })
@@ -1497,7 +1493,7 @@ export const resolvers = {
 
       if (updateError) throw new Error("Failed to deduct balance");
 
-      // Record Transaction (Debit)
+      // Record entry transaction
       const { error: txError } = await serviceClient
         .from("transactions")
         .insert({
@@ -1509,77 +1505,121 @@ export const resolvers = {
 
       if (txError) {
         console.error("[AI TRADING] Failed to record transaction:", txError);
-        // throw new Error("Transaction failed"); // Optional: fail the trade if tracking fails?
       }
 
-      // Return outcome to client so it knows what to display
-      return outcome;
+      // Store pending trade with server-determined outcome
+      const { data: trade, error: tradeError } = await serviceClient
+        .from("ai_trades")
+        .insert({
+          user_id: user.id,
+          stake: amount,
+          direction: type,
+          outcome,
+          profit,
+          status: "pending",
+        })
+        .select("id")
+        .single();
+
+      if (tradeError) {
+        console.error("[AI TRADING] Failed to store trade:", tradeError);
+        throw new Error("Failed to create trade");
+      }
+
+      // Return trade ID — client does NOT learn the outcome until resolution
+      return trade.id;
     },
 
-    resolveAiTrade: async (
-      _: any,
-      { amount, profit, isWin }: any, // isWin passed from client is trusted? NO.
-      // Ideally client sends back the 'outcome' it received from startAiTrade?
-      // For now, to match existing frontend flow without massive refactor, we trust client BUT
-      // since we determine outcome in startAiTrade, a malicious client could try to swap it.
-      // Security fix: Client should just say "resolve" and server checks... but server is stateless here.
-      // For this task, we will trust the client provided "isWin" MATCHES what we sent,
-      // but in a real app we'd store the pending trade in DB.
-      // Given user request is "admin sees profits", the 'startAiTrade' logic protects the pool
-      // because even if client cheats, the 'safety override' was done at entry (probabilistic).
-      // actually, if client sends isWin=true when we sent LOSS, house loses.
-      // For V1, we accept this risk or store pending trade.
-      // Let's implement pending trade storage for safety?
-      // That's complex. Let's stick to trusted params for now but Log it.
-      context: any,
-    ) => {
+    resolveAiTrade: async (_: any, { tradeId }: any, context: any) => {
       const client = getClient(context);
       const user = await getUser(client);
       if (!user) throw new Error("Unauthorized");
 
       const serviceClient = getServiceClient();
 
-      if (!isWin) {
-        // No transaction needed for loss usually, but user wants to track "losses" explicitly?
-        // Actually we already deducted at entry.
-        return true;
+      // Look up the pending trade
+      const { data: trade, error: findError } = await serviceClient
+        .from("ai_trades")
+        .select("*")
+        .eq("id", tradeId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (findError || !trade) {
+        throw new Error("Trade not found");
       }
 
-      const totalPayout = amount + profit;
+      if (trade.status !== "pending") {
+        throw new Error("Trade already resolved");
+      }
 
-      // Fetch current manual balance
-      const { data: userData } = await serviceClient
-        .from("users")
-        .select("balance")
-        .eq("id", user.id)
-        .single();
-      const currentManualBalance = userData?.balance || 0;
+      // Check expiry (90 seconds max)
+      const tradeAge =
+        (Date.now() - new Date(trade.created_at).getTime()) / 1000;
+      if (tradeAge > 90) {
+        // Mark as expired
+        await serviceClient
+          .from("ai_trades")
+          .update({ status: "expired", resolved_at: new Date().toISOString() })
+          .eq("id", tradeId);
 
-      // Credit Balance
-      const { error: updateError } = await serviceClient
-        .from("users")
-        .update({ balance: currentManualBalance + totalPayout })
-        .eq("id", user.id);
+        // Record loss transaction (stake was already deducted)
+        await serviceClient.from("transactions").insert({
+          user_id: user.id,
+          type: "trade_loss",
+          amount: 0,
+          description: `AI Trade Expired (Stake: $${trade.stake})`,
+        });
 
-      if (updateError) throw new Error("Failed to credit winnings");
+        return JSON.stringify({ outcome: "LOSS", profit: 0, expired: true });
+      }
 
-      // Record Transaction
-      const { error: winTxError } = await serviceClient
-        .from("transactions")
-        .insert({
+      // Apply the SERVER-DETERMINED outcome
+      const isWin = trade.outcome === "WIN";
+      const profit = isWin ? trade.profit : 0;
+
+      // Mark trade as resolved
+      await serviceClient
+        .from("ai_trades")
+        .update({ status: "resolved", resolved_at: new Date().toISOString() })
+        .eq("id", tradeId);
+
+      if (isWin) {
+        const totalPayout = trade.stake + profit;
+
+        // Credit balance
+        const { data: userData } = await serviceClient
+          .from("users")
+          .select("balance")
+          .eq("id", user.id)
+          .single();
+        const currentBalance = userData?.balance || 0;
+
+        const { error: updateError } = await serviceClient
+          .from("users")
+          .update({ balance: currentBalance + totalPayout })
+          .eq("id", user.id);
+
+        if (updateError) throw new Error("Failed to credit winnings");
+
+        // Record win transaction
+        await serviceClient.from("transactions").insert({
           user_id: user.id,
           type: "trade_win",
           amount: totalPayout,
           description: `AI Trade Win (Profit: $${profit.toFixed(2)})`,
         });
-      if (winTxError) {
-        console.error(
-          "[AI TRADING] Failed to record win transaction:",
-          winTxError,
-        );
+      } else {
+        // Record loss (stake already deducted at entry)
+        await serviceClient.from("transactions").insert({
+          user_id: user.id,
+          type: "trade_loss",
+          amount: 0,
+          description: `AI Trade Loss (Stake: $${trade.stake})`,
+        });
       }
 
-      return true;
+      return JSON.stringify({ outcome: trade.outcome, profit });
     },
   },
 };
