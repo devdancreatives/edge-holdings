@@ -19,6 +19,16 @@ interface DepositResult {
   processed: number;
   pending: number;
   errors: number;
+  debug?: {
+    lastBlock: number;
+    currentBlock: number;
+    scanFromBlock: number;
+    scanToBlock: number;
+    walletsMonitored: number;
+    walletAddresses: string[];
+    rawTransactionsFound: number;
+    skipped?: string;
+  };
 }
 
 /**
@@ -73,6 +83,16 @@ export async function monitorDeposits(): Promise<DepositResult> {
 
     if (currentBlock <= lastBlock && currentBlock - lastBlock <= 100000) {
       console.log("No new blocks to scan.");
+      result.debug = {
+        lastBlock,
+        currentBlock,
+        scanFromBlock: 0,
+        scanToBlock: 0,
+        walletsMonitored: 0,
+        walletAddresses: [],
+        rawTransactionsFound: 0,
+        skipped: "No new blocks to scan (currentBlock <= lastBlock)",
+      };
       return result;
     }
 
@@ -86,6 +106,16 @@ export async function monitorDeposits(): Promise<DepositResult> {
       .select("address, user_id");
 
     if (!wallets || wallets.length === 0) {
+      result.debug = {
+        lastBlock,
+        currentBlock,
+        scanFromBlock: fromBlock,
+        scanToBlock: toBlock,
+        walletsMonitored: 0,
+        walletAddresses: [],
+        rawTransactionsFound: 0,
+        skipped: "No wallets found in database",
+      };
       return result;
     }
 
@@ -104,6 +134,17 @@ export async function monitorDeposits(): Promise<DepositResult> {
       walletAddresses,
     );
     const minConfirmations = getMinConfirmations();
+
+    // Set debug info
+    result.debug = {
+      lastBlock,
+      currentBlock,
+      scanFromBlock: fromBlock,
+      scanToBlock: toBlock,
+      walletsMonitored: wallets.length,
+      walletAddresses,
+      rawTransactionsFound: transactions.length,
+    };
 
     for (const tx of transactions) {
       const userId = walletMap.get(tx.to.toLowerCase());
