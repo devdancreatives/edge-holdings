@@ -66,18 +66,29 @@ export async function sendPushNotification(
       };
 
       try {
-        await webpush.sendNotification(
+        console.log(
+          `[PUSH DEBUG] Attempting send to endpoint: ${sub.endpoint.substring(0, 30)}...`,
+        );
+        const result = await webpush.sendNotification(
           pushSubscription,
           JSON.stringify(payload),
+        );
+        console.log(
+          `[PUSH DEBUG] Successfully sent! Status code: ${result.statusCode}`,
         );
         sentCount++;
       } catch (err: any) {
         if (err.statusCode === 410 || err.statusCode === 404) {
           // Subscription has expired or is no longer valid, delete it
-          console.log("Cleaning up expired subscription", sub.id);
+          console.log("[PUSH DEBUG] Cleaning up expired subscription", sub.id);
           await supabase.from("push_subscriptions").delete().eq("id", sub.id);
         } else {
-          console.error("Error sending push:", err);
+          console.error(
+            "[PUSH DEBUG] Error sending push:",
+            err.statusCode,
+            err.message,
+          );
+          if (err.body) console.log("[PUSH DEBUG] Error body:", err.body);
         }
       }
     });

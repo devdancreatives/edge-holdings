@@ -53,14 +53,10 @@ BEGIN
         last_checked_at = EXCLUDED.last_checked_at,
         confirmed_at = CASE WHEN EXCLUDED.status = 'confirmed' AND (deposits.status IS NULL OR deposits.status != 'confirmed') THEN now() ELSE deposits.confirmed_at END;
 
-    -- 2. If it's a NEW confirmation, update balance and transactions
+    -- 2. If it's a NEW confirmation, update transactions ledger
+    -- User balance is calculated dynamically via getAvailableBalance in the app
     IF p_status = 'confirmed' AND (v_existing_status IS NULL OR v_existing_status != 'confirmed') THEN
-        -- Update user balance
-        UPDATE public.users 
-        SET balance = COALESCE(balance, 0) + p_amount
-        WHERE id = p_user_id;
-
-        -- Log in general ledger (check if transactions table exists and matches)
+        -- Log in general ledger
         INSERT INTO public.transactions (user_id, type, amount, description)
         VALUES (
             p_user_id, 
