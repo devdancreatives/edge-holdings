@@ -52,6 +52,7 @@ async function handleMonitoring(request: NextRequest) {
       },
       pendingConfirmed: confirmedPending,
       total: newDeposits.processed + confirmedPending,
+      debug: newDeposits.debug,
     };
 
     console.log("✅ Deposit monitoring complete:", result);
