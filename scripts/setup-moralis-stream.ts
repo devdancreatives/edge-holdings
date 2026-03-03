@@ -2,6 +2,7 @@ import Moralis from "moralis";
 import { EvmChain } from "@moralisweb3/common-evm-utils";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
+import { createClient } from "@supabase/supabase-js";
 
 // Manually load .env.local because ts-node/tsx doesn't do it automatically
 const envPath = join(process.cwd(), ".env.local");
@@ -25,13 +26,24 @@ const WEBHOOK_URL =
 
 const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
 
-// Your monitored wallet addresses
-const WALLET_ADDRESSES = [
-  "0x635aB8aD55b6920E2E6Eb4d56F238b990CFa3D42",
-  "0x35638B6940b0AAdf2E01046C69eCC6A986925ab2",
-  "0x7985f793DA45a53f5BECbCf24bC1b4edDc263541",
-  "0x444F35a614bAA60d804055DE6121DC4d61b9586D",
-];
+// Initialize Supabase
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
+
+async function getWalletAddresses(): Promise<string[]> {
+  const { data: wallets, error } = await supabase
+    .from("wallets")
+    .select("address");
+
+  if (error) {
+    console.error("❌ Error fetching wallets from Supabase:", error);
+    return [];
+  }
+
+  return wallets.map((w: any) => w.address);
+}
 
 const ERC20_TRANSFER_ABI = [
   {
@@ -56,6 +68,17 @@ async function setupStream() {
     await Moralis.start({
       apiKey: MORALIS_API_KEY,
     });
+
+    const walletAddresses = await getWalletAddresses();
+    if (walletAddresses.length === 0) {
+      console.warn(
+        "⚠️ No wallet addresses found in Supabase. Monitoring will be empty.",
+      );
+    } else {
+      console.log(
+        `📡 Monitoring ${walletAddresses.length} wallet addresses...`,
+      );
+    }
 
     console.log("📡 Setting up Moralis Stream via SDK...\n");
     console.log(`  Contract: ${USDT_CONTRACT}`);
@@ -83,7 +106,7 @@ async function setupStream() {
           {
             topic0: "Transfer(address,address,uint256)",
             filter: {
-              or: WALLET_ADDRESSES.map((addr) => ({
+              or: walletAddresses.map((addr: string) => ({
                 eq: ["to", addr.toLowerCase()],
               })),
             },
@@ -104,7 +127,7 @@ async function setupStream() {
           {
             topic0: "Transfer(address,address,uint256)",
             filter: {
-              or: WALLET_ADDRESSES.map((addr) => ({
+              or: walletAddresses.map((addr: string) => ({
                 eq: ["to", addr.toLowerCase()],
               })),
             },
