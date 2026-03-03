@@ -164,7 +164,7 @@ export default function AiTradingPage() {
                 {/* Controls Section */}
                 <div className="w-full lg:w-80 shrink-0">
                     <TradeControls
-                        balance={userData.me?.balance || 0}
+                        balance={userData.me?.availableBalance || 0}
                         isTrading={isTrading}
                         isLoading={isSubmitting}
                         currentProfit={currentProfit}
