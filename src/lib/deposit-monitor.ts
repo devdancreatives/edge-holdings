@@ -328,7 +328,7 @@ export async function checkPendingDeposits(): Promise<number> {
   }
 }
 
-async function handleNotifications(
+export async function handleNotifications(
   userId: string,
   amount: number,
   txHash: string,
