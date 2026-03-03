@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { createHmac } from "crypto";
+import { keccak256 } from "js-sha3";
 import { handleNotifications } from "@/lib/deposit-monitor";
 import { getMinConfirmations } from "@/lib/bsc";
 
@@ -22,18 +22,20 @@ function verifySignature(body: string, signature: string): boolean {
   const secret = process.env.MORALIS_WEBHOOK_SECRET;
   if (!secret) return false;
 
-  const hmac = createHmac("sha3-256", secret).update(body).digest("hex");
+  // Moralis signature verification uses Keccak-256(body + secret)
+  // NOT standard HMAC.
+  const computedHash = keccak256(body + secret);
 
   // Normalize by removing '0x' prefix if present
   const normalizedSignature = signature.toLowerCase().startsWith("0x")
     ? signature.slice(2).toLowerCase()
     : signature.toLowerCase();
 
-  const isMatch = hmac.toLowerCase() === normalizedSignature;
+  const isMatch = computedHash.toLowerCase() === normalizedSignature;
 
   if (!isMatch) {
-    console.log(`[MORALIS DIAGNOSTIC] HMAC Mismatch:`);
-    console.log(`  Expected: ${hmac.substring(0, 8)}...`);
+    console.log(`[MORALIS DIAGNOSTIC] Signature Mismatch:`);
+    console.log(`  Expected (Keccak): ${computedHash.substring(0, 8)}...`);
     console.log(`  Received: ${normalizedSignature.substring(0, 8)}...`);
   }
 
