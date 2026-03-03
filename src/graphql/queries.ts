@@ -512,8 +512,8 @@ export const START_AI_TRADE = gql`
 `;
 
 export const RESOLVE_AI_TRADE = gql`
-  mutation ResolveAiTrade($amount: Float!, $profit: Float!, $isWin: Boolean!) {
-    resolveAiTrade(amount: $amount, profit: $profit, isWin: $isWin)
+  mutation ResolveAiTrade($tradeId: String!) {
+    resolveAiTrade(tradeId: $tradeId)
   }
 `;
 export const GET_ADMIN_TRANSACTIONS = gql`

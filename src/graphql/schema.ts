@@ -192,8 +192,8 @@ export const typeDefs = `
     processMatureInvestments: String # Returns summary message
 
     # AI Trading
-    startAiTrade(amount: Float!, type: String!): String # Returns 'WIN' or 'LOSS'
-    resolveAiTrade(amount: Float!, profit: Float!, isWin: Boolean!): Boolean
+    startAiTrade(amount: Float!, type: String!): String # Returns trade ID
+    resolveAiTrade(tradeId: String!): String # Returns JSON {outcome, profit}
   }
 
   type AdminAiStats {
