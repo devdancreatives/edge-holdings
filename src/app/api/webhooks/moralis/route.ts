@@ -20,13 +20,24 @@ const supabase = createClient(
  */
 function verifySignature(body: string, signature: string): boolean {
   const secret = process.env.MORALIS_WEBHOOK_SECRET;
-  if (!secret) {
-    console.error("[MORALIS WEBHOOK] MORALIS_WEBHOOK_SECRET not set");
-    return false;
-  }
+  if (!secret) return false;
 
   const hmac = createHmac("sha3-256", secret).update(body).digest("hex");
-  return hmac === signature;
+
+  // Normalize by removing '0x' prefix if present
+  const normalizedSignature = signature.toLowerCase().startsWith("0x")
+    ? signature.slice(2).toLowerCase()
+    : signature.toLowerCase();
+
+  const isMatch = hmac.toLowerCase() === normalizedSignature;
+
+  if (!isMatch) {
+    console.log(`[MORALIS DIAGNOSTIC] HMAC Mismatch:`);
+    console.log(`  Expected: ${hmac.substring(0, 8)}...`);
+    console.log(`  Received: ${normalizedSignature.substring(0, 8)}...`);
+  }
+
+  return isMatch;
 }
 
 /**
