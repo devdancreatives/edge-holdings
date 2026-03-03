@@ -73,7 +73,11 @@ export async function monitorDeposits(): Promise<DepositResult> {
 
     // 1b. Automatic Jump Logic
     // If we are more than 100,000 blocks behind, jump to caught up - 5000 blocks
-    let scanFrom = lastBlock + 1;
+    // Use a lookback buffer to prevent race conditions where a tx is mined
+    // right before/after the checkpoint advances. process_bsc_deposit is
+    // idempotent on tx_hash, so re-scanning a few blocks is safe.
+    const LOOKBACK_BUFFER = 50; // ~2.5 minutes at 3s/block
+    let scanFrom = Math.max(0, lastBlock - LOOKBACK_BUFFER + 1);
     if (currentBlock - lastBlock > 100000) {
       console.log(
         `[DEPOSIT MONITOR] Lag too large (${currentBlock - lastBlock}). Jumping to ${currentBlock - 5000}`,
