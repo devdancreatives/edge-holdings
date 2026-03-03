@@ -47,12 +47,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "OK (test)" });
     }
 
-    // Verify signature
+    const payload = JSON.parse(rawBody);
+
+    // Moralis sends a "ping" or "test" request which might have confirmed: true but NO transfers.
+    // We should allow these to pass with a 200 to satisfy the Moralis setup handshake.
+    const erc20Transfers = payload.erc20Transfers || [];
+    if (erc20Transfers.length === 0) {
+      console.log(
+        "[MORALIS WEBHOOK] No transfers found - acknowledging as setup ping",
+      );
+      return NextResponse.json({ message: "OK (ping/no transfers)" });
+    }
+
+    // Verify signature (Only required if there is actual data to process)
     const signature = request.headers.get("x-signature");
     let secret = process.env.MORALIS_WEBHOOK_SECRET;
 
-    // Extremely lenient check for bootstrap mode:
-    // Only verify if we have a real-looking secret (not empty, not placeholder)
     const isSecretSet =
       secret &&
       secret.length > 20 &&
@@ -73,8 +83,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
-    const payload = JSON.parse(rawBody);
-
     // Moralis sends confirmed: true once block is confirmed
     const confirmed: boolean = payload.confirmed ?? false;
     const chainId: string = payload.chainId;
@@ -85,10 +93,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Process ERC-20 transfer events
-    const erc20Transfers = payload.erc20Transfers || [];
-    if (erc20Transfers.length === 0) {
-      return NextResponse.json({ message: "No ERC-20 transfers" });
-    }
+    // (erc20Transfers already extracted above)
 
     let processed = 0;
     let skipped = 0;
