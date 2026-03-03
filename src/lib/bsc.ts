@@ -8,6 +8,15 @@ const TRANSFER_TOPIC =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"; // Transfer(address,address,uint256)
 const BSC_RPC_URL = "https://bsc-dataseed.binance.org/";
 
+// Reuse a single provider to avoid repeated TCP/TLS connection setup
+let _providerInstance: ethers.JsonRpcProvider | null = null;
+function getProvider(): ethers.JsonRpcProvider {
+  if (!_providerInstance) {
+    _providerInstance = new ethers.JsonRpcProvider(BSC_RPC_URL);
+  }
+  return _providerInstance;
+}
+
 // Interface for BscScan transaction
 export interface BscScanTransaction {
   hash: string;
@@ -47,9 +56,7 @@ export async function getWalletTransactions(
   _limit: number = 20,
 ): Promise<BscScanTransaction[]> {
   try {
-    const provider = new ethers.JsonRpcProvider(
-      "https://bsc-dataseed.binance.org/",
-    );
+    const provider = getProvider();
 
     // Filter for Transfer event to 'address' on USDT contract
     const topicTo = ethers.zeroPadValue(address, 32);
@@ -120,7 +127,7 @@ export async function getGlobalTransactions(
   const MAX_BLOCKS_PER_CHUNK = 5000;
 
   try {
-    const provider = new ethers.JsonRpcProvider(BSC_RPC_URL);
+    const provider = getProvider();
 
     // If block range is too large, split and recurse
     if (toBlock - fromBlock > MAX_BLOCKS_PER_CHUNK) {
@@ -237,7 +244,7 @@ export async function getGlobalTransactions(
  */
 export async function getCurrentBlockNumber(): Promise<number> {
   try {
-    const provider = new ethers.JsonRpcProvider(BSC_RPC_URL);
+    const provider = getProvider();
     return await provider.getBlockNumber();
   } catch (error) {
     console.error("Error getting current block:", error);
@@ -252,9 +259,11 @@ export async function getTransactionConfirmations(
   txHash: string,
 ): Promise<number> {
   try {
-    const provider = new ethers.JsonRpcProvider(BSC_RPC_URL);
-    const tx = await provider.getTransaction(txHash);
-    const currentBlock = await provider.getBlockNumber();
+    const provider = getProvider();
+    const [tx, currentBlock] = await Promise.all([
+      provider.getTransaction(txHash),
+      provider.getBlockNumber(),
+    ]);
 
     if (tx && tx.blockNumber) {
       return currentBlock - tx.blockNumber;

@@ -3,6 +3,7 @@ import { monitorDeposits, checkPendingDeposits } from "@/lib/deposit-monitor";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 60; // Allow up to 60s for BSC RPC calls
 
 /**
  * Cron endpoint to monitor deposits
@@ -64,7 +65,7 @@ async function handleMonitoring(request: NextRequest) {
         error: error.message,
         timestamp: new Date().toISOString(),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
