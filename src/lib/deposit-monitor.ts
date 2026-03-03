@@ -366,6 +366,8 @@ export async function handleNotifications(
               amount,
               txHash,
             );
+            // Small delay to avoid Resend rate limit (429)
+            await new Promise((resolve) => setTimeout(resolve, 500));
           }
         }
       }
