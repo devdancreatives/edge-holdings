@@ -4,6 +4,7 @@ import { sendOtpEmail } from "@/lib/email";
 import { createClient } from "@supabase/supabase-js";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { syncSpecificWallet } from "@/lib/deposit-monitor";
+import { addAddressToMoralisStream } from "@/lib/moralis-streams";
 
 const getClient = (context: any) => {
   // Handle both standard Request (App Router) and NextApiRequest (Pages Router)
@@ -905,6 +906,12 @@ export const resolvers = {
         .single();
 
       if (error) throw new Error(error.message);
+
+      // Add new wallet to Moralis Stream
+      addAddressToMoralisStream(address).catch((e) =>
+        console.error("Moralis Stream Add Error:", e),
+      );
+
       return data;
     },
     adminDistributeProfit: async (_: any, { amount }: any, context: any) => {
