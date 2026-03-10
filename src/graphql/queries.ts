@@ -161,8 +161,8 @@ export const CREATE_MY_WALLET = gql`
 `;
 
 export const CLOSE_INVESTMENT = gql`
-  mutation CloseInvestment($id: ID!) {
-    closeInvestment(id: $id) {
+  mutation CloseInvestment($id: ID!, $includeRoi: Boolean) {
+    closeInvestment(id: $id, includeRoi: $includeRoi) {
       id
       status
     }
