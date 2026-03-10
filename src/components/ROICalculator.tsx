@@ -50,8 +50,9 @@ export function ROICalculator() {
                                 onClick={() => setDuration(m)}
                                 className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors border ${duration === m
                                     ? 'bg-yellow-500 text-zinc-900 border-yellow-500'
-                                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent hover:bg-zinc-200 dark:bg-zinc-700'
+                                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent hover:bg-zinc-200'
                                     }`}
+
                             >
                                 {m}M
                             </button>

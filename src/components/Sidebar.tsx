@@ -29,6 +29,8 @@ import { GET_ME } from '@/graphql/queries'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useAuth } from '@/lib/auth-context'
+import Image from 'next/image'
+
 
 function cn(...inputs: (string | undefined | null | false)[]) {
     return twMerge(clsx(inputs))
@@ -85,13 +87,23 @@ const SidebarContent: React.FC<{
     handleSignOut: () => void
 }> = ({ navItems, pathname, setMobileMenuOpen, handleSignOut }) => (
     <div className="flex flex-col h-full w-full relative">
-        <div className="pt-16 lg:pt-4 px-4 mb-6 flex items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-linear-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/50" />
+        <div className="pt-16 lg:pt-4 px-4 mb-10 flex items-center justify-between gap-2 shrink-0">
+            <Link href="/" className="flex items-center gap-3 group">
+                <div className="relative h-9 w-9 transition-transform group-hover:scale-105">
+                    <Image src="/logo-v4.png" alt="EdgePoint Holdings" fill className="object-contain" />
+                </div>
+
+
+
+
+
+
                 <span className="text-lg font-bold bg-linear-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">EdgePoint Holdings</span>
-            </div>
+            </Link>
             <ThemeToggle />
         </div>
+
+
 
         <nav className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 px-3 pb-32 scrollbar-none">
             {navItems.map((item) => {
