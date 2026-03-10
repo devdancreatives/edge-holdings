@@ -17,7 +17,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "EdgePoint Holdings - AI Powered Trading",
   description: "Advanced AI-driven crypto trading platform and investment management.",
+  icons: {
+    icon: "/favicon-v4.png",
+    apple: "/favicon-v4.png",
+  }
+
+
+
+
+
 };
+
 
 export default function RootLayout({
   children,
@@ -28,7 +38,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
+
         <Providers>
           {children}
           <Analytics />

@@ -6,6 +6,8 @@ import { useAuth } from '@/lib/auth-context'
 import { Menu, X } from 'lucide-react'
 import { motion, AnimatePresence, Variants } from 'framer-motion'
 import { ThemeToggle } from '@/components/theme-toggle'
+import Image from 'next/image'
+
 
 export function PublicNavbar() {
     const { user } = useAuth()
@@ -30,22 +32,34 @@ export function PublicNavbar() {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 items-center justify-between">
                         {/* Logo */}
-                        <Link href="/" className="flex items-center gap-2 z-50 relative">
-                            <div className="h-8 w-8 rounded-full bg-yellow-500" />
-                            <span className="text-lg font-bold text-zinc-900 dark:text-white">EdgePoint Holdings</span>
+                        <Link href="/" className="flex items-center gap-2.5 z-50 relative group">
+                            <div className="relative h-9 w-9 transition-transform group-hover:scale-105">
+                                <Image src="/logo-v4.png" alt="EdgePoint Holdings" fill className="object-contain" />
+                            </div>
+                            <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">EdgePoint Holdings</span>
                         </Link>
+
+
+
+
+
+
+
+
 
                         {/* Desktop Menu */}
                         <div className="hidden md:flex items-center gap-6">
-                            <Link href="/about" className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white transition-colors">
+                            <Link href="/about" className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
                                 About
                             </Link>
-                            <Link href="/terms" className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white transition-colors">
+                            <Link href="/terms" className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
                                 Terms
                             </Link>
-                            <Link href="/privacy" className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white transition-colors">
+
+                            <Link href="/privacy" className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
                                 Privacy
                             </Link>
+
                             {user ? (
                                 <Link
                                     href="/dashboard"

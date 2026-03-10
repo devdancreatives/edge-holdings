@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import Image from 'next/image'
+
 import { TrendingUp, ShieldCheck, Users, Clock, ArrowRight, Quote } from 'lucide-react'
 import { Ticker } from '@/components/Ticker'
 import { ROICalculator } from '@/components/ROICalculator'
@@ -10,17 +12,29 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className="relative overflow-hidden pt-24 pb-32">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                    <div className="inline-flex items-center rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-sm font-medium text-yellow-500 mb-8">
-                        <span className="flex h-2 w-2 rounded-full bg-yellow-500 mr-2 animate-pulse"></span>
+                    <div className="flex justify-center mb-10">
+                        <div className="relative h-24 w-24 md:h-32 md:w-32 animate-fade-in">
+                            <Image src="/logo-v4.png" alt="EdgePoint Holdings" fill className="object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]" />
+                        </div>
+
+
+
+
+
+
+                    </div>
+                    <div className="inline-flex items-center rounded-full border border-yellow-500/20 bg-yellow-500/5 px-4 py-1.5 text-sm font-medium text-yellow-500 mb-10 backdrop-blur-sm">
+                        <span className="flex h-2 w-2 rounded-full bg-yellow-500 mr-2.5 animate-pulse"></span>
                         Now Accepting New Investors
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white sm:text-5xl md:text-7xl">
+                    <h1 className="text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white sm:text-6xl md:text-8xl lg:leading-[1.1]">
                         Human Expertise. <br />
-                        <span className="text-yellow-500">AI Precision.</span>
+                        <span className="bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-600 bg-clip-text text-transparent">AI Precision.</span>
                     </h1>
-                    <p className="mt-6 max-w-2xl mx-auto text-lg text-zinc-600 dark:text-zinc-400">
-                        EdgePoint Holdings combines professional human traders with advanced AI analytics to deliver superior ROI on your crypto capital. No bots, just results.
+                    <p className="mt-8 max-w-2xl mx-auto text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        EdgePoint Holdings merges veteran market intuition with high-frequency AI analysis to generate consistent, institutional-grade returns on your digital assets.
                     </p>
+
                     <div className="mt-10 flex justify-center gap-4">
                         <Link
                             href="/login"
@@ -30,10 +44,11 @@ export default function LandingPage() {
                         </Link>
                         <Link
                             href="/about"
-                            className="rounded-full border border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 px-8 py-4 text-base font-semibold text-zinc-900 dark:text-white transition-all hover:bg-zinc-100 dark:bg-zinc-800"
+                            className="rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 px-8 py-4 text-base font-semibold text-zinc-900 dark:text-white transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800"
                         >
                             Learn More
                         </Link>
+
                     </div>
 
                     <div className="mt-20 flex justify-center">
@@ -105,7 +120,7 @@ export default function LandingPage() {
                             <div className="text-zinc-800 font-medium">Active Investors</div>
                         </div>
                         <div className="p-8 md:border-l md:border-r border-zinc-900/10">
-                            <div className="text-5xl font-bold text-zinc-900 dark:text-white mb-2">$8.5M</div>
+                            <div className="text-5xl font-bold text-zinc-900 dark:text-white mb-2">$800M</div>
                             <div className="text-zinc-800 font-medium">Assets Under Management</div>
                         </div>
                         <div className="p-8">
