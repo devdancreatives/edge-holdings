@@ -183,8 +183,9 @@ export const typeDefs = `
 
   type Mutation {
     createInvestment(amount: Float!, durationMonths: Int!, durationHours: Int, planType: String, roiRate: Float): Investment
-    closeInvestment(id: ID!): Investment
+    closeInvestment(id: ID!, includeRoi: Boolean): Investment
     simulateDeposit(amount: Float!, txHash: String!): Deposit
+
     createMyWallet: Wallet
     requestOtp(email: String!, fullName: String!): Boolean
     registerWithOtp(email: String!, otp: String!, password: String!, fullName: String!, referralCode: String): User

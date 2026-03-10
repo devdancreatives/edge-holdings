@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from '@apollo/client/react'
 import { GET_ADMIN_INVESTMENTS, CLOSE_INVESTMENT } from '@/graphql/queries'
-import { TrendingUp, User, XCircle, Loader2 } from 'lucide-react'
+import { TrendingUp, User, XCircle, Loader2, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'
 
@@ -10,18 +10,18 @@ export default function AdminInvestmentsPage() {
     const { data, loading, refetch } = useQuery<any>(GET_ADMIN_INVESTMENTS, { pollInterval: 30000 })
     const [closeInvestment] = useMutation(CLOSE_INVESTMENT)
     const [processingId, setProcessingId] = useState<string | null>(null)
+    const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
     if (loading && !data) return <div className="p-8 text-zinc-600 dark:text-zinc-400">Loading investments...</div>
 
     const investments = data?.adminInvestments || []
 
-    const handleClose = async (id: string) => {
-        if (!confirm('Are you sure you want to close this investment? This will immediately return the principal and profit to the user.')) return
-
+    const handleClose = async (id: string, includeRoi: boolean) => {
         setProcessingId(id)
         try {
-            await closeInvestment({ variables: { id } })
-            toast.success('Investment closed and funds returned successfully')
+            await closeInvestment({ variables: { id, includeRoi } })
+            toast.success(`Investment closed ${includeRoi ? 'with' : 'without'} ROI successfully`)
+            setConfirmingId(null)
             refetch()
         } catch (error: any) {
             toast.error(error.message || 'Failed to close investment')
@@ -82,18 +82,45 @@ export default function AdminInvestmentsPage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         {inv.status === 'active' && (
-                                            <button
-                                                onClick={() => handleClose(inv.id)}
-                                                disabled={processingId === inv.id}
-                                                className="inline-flex items-center gap-1 text-red-500 hover:text-red-400 disabled:opacity-50 transition-colors font-medium"
-                                            >
-                                                {processingId === inv.id ? (
-                                                    <Loader2 size={14} className="animate-spin" />
+                                            <div className="flex justify-end items-center gap-2">
+                                                {confirmingId === inv.id ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleClose(inv.id, true)}
+                                                            disabled={processingId === inv.id}
+                                                            className="text-[10px] bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded font-bold"
+                                                        >
+                                                            WITH ROI
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleClose(inv.id, false)}
+                                                            disabled={processingId === inv.id}
+                                                            className="text-[10px] bg-zinc-500 hover:bg-zinc-600 text-white px-2 py-1 rounded font-bold"
+                                                        >
+                                                            NO ROI
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setConfirmingId(null)}
+                                                            className="text-zinc-400 hover:text-white"
+                                                        >
+                                                            <XCircle size={14} />
+                                                        </button>
+                                                    </>
                                                 ) : (
-                                                    <XCircle size={14} />
+                                                    <button
+                                                        onClick={() => setConfirmingId(inv.id)}
+                                                        disabled={processingId === inv.id}
+                                                        className="inline-flex items-center gap-1 text-red-500 hover:text-red-400 disabled:opacity-50 transition-colors font-medium"
+                                                    >
+                                                        {processingId === inv.id ? (
+                                                            <Loader2 size={14} className="animate-spin" />
+                                                        ) : (
+                                                            <XCircle size={14} />
+                                                        )}
+                                                        Close
+                                                    </button>
                                                 )}
-                                                Close
-                                            </button>
+                                            </div>
                                         )}
                                     </td>
                                 </tr>

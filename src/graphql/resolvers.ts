@@ -907,7 +907,11 @@ export const resolvers = {
 
       return data;
     },
-    closeInvestment: async (_: any, { id }: any, context: any) => {
+    closeInvestment: async (
+      _: any,
+      { id, includeRoi = true }: any,
+      context: any,
+    ) => {
       const client = getClient(context);
       const user = await getUser(client);
 
@@ -931,18 +935,20 @@ export const resolvers = {
       if (inv.status !== "active") throw new Error("Investment is not active");
 
       // 2. Calculate Profit (similar to cron logic)
-      const ROI_PERCENTAGE_PER_MONTH_DEFAULT = 0.25;
       let profit = 0;
       let roiPercentageTotal = 0;
 
-      if (inv.duration_months === 0) {
-        // Test Investment
-        roiPercentageTotal = 0.001;
-        profit = inv.amount * roiPercentageTotal;
-      } else {
-        const rateToUse = inv.roi_rate || ROI_PERCENTAGE_PER_MONTH_DEFAULT;
-        roiPercentageTotal = rateToUse * inv.duration_months;
-        profit = inv.amount * roiPercentageTotal;
+      if (includeRoi) {
+        const ROI_PERCENTAGE_PER_MONTH_DEFAULT = 0.25;
+        if (inv.duration_months === 0) {
+          // Test Investment
+          roiPercentageTotal = 0.001;
+          profit = inv.amount * roiPercentageTotal;
+        } else {
+          const rateToUse = inv.roi_rate || ROI_PERCENTAGE_PER_MONTH_DEFAULT;
+          roiPercentageTotal = rateToUse * inv.duration_months;
+          profit = inv.amount * roiPercentageTotal;
+        }
       }
 
       // 3. Update status to completed
@@ -955,24 +961,25 @@ export const resolvers = {
 
       if (updateError) throw new Error(updateError.message);
 
-      // 4. Record ROI Snapshot
-      await serviceClient.from("roi_snapshots").insert({
-        user_id: inv.user_id,
-        date: new Date().toISOString(),
-        profit_amount: profit,
-        roi_percentage: roiPercentageTotal * 100,
-      });
+      // 4. Record ROI Snapshot (if profit > 0)
+      if (profit > 0) {
+        await serviceClient.from("roi_snapshots").insert({
+          user_id: inv.user_id,
+          date: new Date().toISOString(),
+          profit_amount: profit,
+          roi_percentage: roiPercentageTotal * 100,
+        });
 
-      // 5. Log Transactions
-      // Profit Payout
-      await serviceClient.from("transactions").insert({
-        user_id: inv.user_id,
-        type: "profit_payout",
-        amount: profit,
-        description: `Manual ROI Payout for ${inv.duration_months}-month investment`,
-      });
+        // Profit Payout Transaction
+        await serviceClient.from("transactions").insert({
+          user_id: inv.user_id,
+          type: "profit_payout",
+          amount: profit,
+          description: `Manual ROI Payout for ${inv.duration_months}-month investment`,
+        });
+      }
 
-      // Principal Return
+      // 5. Principal Return Transaction
       await serviceClient.from("transactions").insert({
         user_id: inv.user_id,
         type: "deposit",
@@ -981,9 +988,10 @@ export const resolvers = {
       });
 
       // 6. Notify user
+      const totalReturned = inv.amount + profit;
       await sendPushNotification(inv.user_id, {
         title: "Investment Closed",
-        body: `Your investment of $${inv.amount} has been closed by admin. $${(inv.amount + profit).toFixed(2)} credited to your balance.`,
+        body: `Your investment of $${inv.amount} has been closed by admin. $${totalReturned.toFixed(2)} credited to your balance${profit > 0 ? " (includes profit)" : ""}.`,
         url: "/dashboard/investments",
       });
 
