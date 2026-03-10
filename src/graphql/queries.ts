@@ -130,11 +130,15 @@ export const CREATE_INVESTMENT = gql`
     $amount: Float!
     $durationMonths: Int!
     $durationHours: Int
+    $planType: String
+    $roiRate: Float
   ) {
     createInvestment(
       amount: $amount
       durationMonths: $durationMonths
       durationHours: $durationHours
+      planType: $planType
+      roiRate: $roiRate
     ) {
       id
       amount

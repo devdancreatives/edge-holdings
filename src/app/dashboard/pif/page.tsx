@@ -141,11 +141,11 @@ export default function PIFPage() {
                         <span className="text-zinc-900 dark:text-white">{parsedAmount > 0 ? `$${parsedAmount.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between text-zinc-500">
-                        <span>Service Fee (0.1%):</span>
+                        <span>Service Fee (0.1% - from balance):</span>
                         <span>{parsedAmount > 0 ? `$${fee.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between font-medium text-zinc-900 dark:text-white border-t border-zinc-200 dark:border-zinc-800 pt-2">
-                        <span>Total Deduction:</span>
+                        <span>Total Balance Deduction:</span>
                         <span className="text-yellow-500">{parsedAmount > 0 ? `$${totalDeduction.toFixed(2)}` : '-'}</span>
                     </div>
 
@@ -167,7 +167,7 @@ export default function PIFPage() {
             </div>
 
             <div className="text-xs text-zinc-500 text-center">
-                PIF funds are locked for 1 month. Principal + 400% Profit is returned upon maturity. High risk, high reward.
+                PIF funds are locked for 1 month. Principle (full amount) + 400% Profit is returned upon maturity. High risk, high reward.
             </div>
         </div>
     )

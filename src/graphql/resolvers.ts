@@ -801,7 +801,7 @@ export const resolvers = {
         .insert({
           user_id: user.id,
           amount,
-          fee: fee,
+          fee: fee, // Record the fee separately
           duration_months: durationHours !== undefined ? 0 : durationMonths,
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),

@@ -2,13 +2,33 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { LayoutDashboard, Wallet, TrendingUp, TrendingDown, History, Settings, LogOut, User, Users, FileText, Shield, Menu, X, MessageSquare } from 'lucide-react'
+import {
+    LayoutDashboard,
+    Wallet,
+    TrendingUp,
+    TrendingDown,
+    History,
+    Settings,
+    LogOut,
+    User,
+    Users,
+    FileText,
+    Shield,
+    Menu,
+    X,
+    MessageSquare,
+    Bell,
+    BellOff
+} from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { usePathname, useRouter } from 'next/navigation'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useQuery, useApolloClient } from '@apollo/client/react'
 import { GET_ME } from '@/graphql/queries'
+import { usePushNotifications } from '@/hooks/use-push-notifications'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { useAuth } from '@/lib/auth-context'
 
 function cn(...inputs: (string | undefined | null | false)[]) {
     return twMerge(clsx(inputs))
@@ -18,19 +38,16 @@ const baseNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Invest', href: '/dashboard/invest', icon: TrendingUp },
     { name: 'PIF', href: '/dashboard/pif', icon: TrendingUp },
-    { name: 'AI Trading', href: '/dashboard/ai-trading', icon: TrendingUp }, // Added AI Trading
+    { name: 'AI Trading', href: '/dashboard/ai-trading', icon: TrendingUp },
     { name: 'Investments', href: '/dashboard/investments', icon: History },
     { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet },
     { name: 'Deposits', href: '/dashboard/deposits', icon: TrendingDown },
     { name: 'Transactions', href: '/dashboard/transactions', icon: FileText },
     { name: 'Referrals', href: '/dashboard/referrals', icon: Users },
     { name: 'Profile', href: '/dashboard/profile', icon: User },
-    { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare }, // Added Chat
+    { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
-
-import { Bell, BellOff } from 'lucide-react'
-import { usePushNotifications } from '@/hooks/use-push-notifications'
 
 function NotificationToggle() {
     const { isSubscribed, subscribeToPush, unsubscribeFromPush, permission } = usePushNotifications()
@@ -61,9 +78,6 @@ function NotificationToggle() {
     )
 }
 
-import { ThemeToggle } from '@/components/theme-toggle'
-
-// Component defined outside to avoid recreation on each render
 const SidebarContent: React.FC<{
     navItems: typeof baseNavItems
     pathname: string
@@ -71,7 +85,6 @@ const SidebarContent: React.FC<{
     handleSignOut: () => void
 }> = ({ navItems, pathname, setMobileMenuOpen, handleSignOut }) => (
     <div className="flex flex-col h-full w-full relative">
-        {/* Header */}
         <div className="pt-16 lg:pt-4 px-4 mb-6 flex items-center justify-between gap-2 shrink-0">
             <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-linear-to-br from-yellow-400 to-yellow-600 shadow-lg shadow-yellow-500/50" />
@@ -80,7 +93,6 @@ const SidebarContent: React.FC<{
             <ThemeToggle />
         </div>
 
-        {/* Navigation - Added large padding bottom to prevent overlap with absolute footer */}
         <nav className="flex flex-col gap-1 flex-1 overflow-y-auto min-h-0 px-3 pb-32 scrollbar-none">
             {navItems.map((item) => {
                 const Icon = item.icon
@@ -97,19 +109,17 @@ const SidebarContent: React.FC<{
                                 : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white hover:translate-x-1'
                         )}
                     >
-                        <Icon size={20} />
+                        {Icon && <Icon size={20} />}
                         {item.name}
                     </Link>
                 )
             })}
         </nav>
 
-        {/* Notifications Toggle */}
         <div className="px-3 pb-2 z-50">
             <NotificationToggle />
         </div>
 
-        {/* Footer - Fixed positioning to ensure visibility above everything */}
         <div className="fixed bottom-0 left-0 w-64 p-4 pb-[calc(2rem+env(safe-area-inset-bottom))] bg-linear-to-t from-white via-white/95 to-white/0 dark:from-zinc-950 dark:via-zinc-950/95 dark:to-zinc-950/0 backdrop-blur-sm z-50 border-r border-zinc-200 dark:border-zinc-800">
             <button
                 onClick={handleSignOut}
@@ -119,23 +129,20 @@ const SidebarContent: React.FC<{
                 Sign Out
             </button>
         </div>
-    </div >
+    </div>
 )
-
-import { useAuth } from '@/lib/auth-context'
 
 export function Sidebar() {
     const pathname = usePathname()
     const router = useRouter()
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const { session, loading } = useAuth()
+    const client = useApolloClient()
 
     const { data } = useQuery<any>(GET_ME, {
         skip: loading || !session
     })
     const userRole = data?.me?.role || 'user'
-
-    const client = useApolloClient()
 
     const handleSignOut = async () => {
         await supabase.auth.signOut()
@@ -153,7 +160,6 @@ export function Sidebar() {
 
     return (
         <>
-            {/* Mobile Menu Button */}
             <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
@@ -162,7 +168,6 @@ export function Sidebar() {
                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
 
-            {/* Mobile Sidebar Overlay */}
             {mobileMenuOpen && (
                 <div
                     className="lg:hidden fixed inset-0 bg-black/20 dark:bg-black/50 z-40"
@@ -170,7 +175,6 @@ export function Sidebar() {
                 />
             )}
 
-            {/* Sidebar */}
             <div className={cn(
                 "fixed lg:static inset-y-0 left-0 z-40 flex h-dvh w-64 flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white transition-transform duration-300 overflow-hidden",
                 mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
