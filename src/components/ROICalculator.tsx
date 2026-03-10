@@ -9,8 +9,8 @@ export function ROICalculator() {
 
     // Base calculation logic: Base rate 2% weekly * 4 weeks/month * duration
     // Plus compounding effect (simplified)
-    // Let's assume average 7% monthly for simplicity in this demo calculator
-    const monthlyRate = 0.07
+    // Let's assume average 25% monthly for simplicity in this demo calculator
+    const monthlyRate = 0.25
     const estimatedProfit = amount * monthlyRate * duration
     const totalReturn = amount + estimatedProfit
 
@@ -71,7 +71,7 @@ export function ROICalculator() {
                         </div>
                     </div>
                     <p className="text-xs text-zinc-600 mt-2 text-center">
-                        *Estimates based on historical performance (avg 7% monthly). Not a guarantee.
+                        *Estimates based on historical performance (avg 25% monthly). Not a guarantee.
                     </p>
                 </div>
             </div>

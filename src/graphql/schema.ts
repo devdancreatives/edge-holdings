@@ -40,6 +40,8 @@ export const typeDefs = `
     startDate: DateTime!
     endDate: DateTime!
     status: String!
+    planType: String
+    roiRate: Float
     user: User
     createdAt: DateTime
     profitPercent: Float # Calculated on the fly
@@ -164,7 +166,7 @@ export const typeDefs = `
   }
 
   type Mutation {
-    createInvestment(amount: Float!, durationMonths: Int!, durationHours: Int): Investment
+    createInvestment(amount: Float!, durationMonths: Int!, durationHours: Int, planType: String, roiRate: Float): Investment
     simulateDeposit(amount: Float!, txHash: String!): Deposit
     createMyWallet: Wallet
     requestOtp(email: String!, fullName: String!): Boolean

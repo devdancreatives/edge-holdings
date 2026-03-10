@@ -17,13 +17,14 @@ function cn(...inputs: (string | undefined | null | false)[]) {
 const baseNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Invest', href: '/dashboard/invest', icon: TrendingUp },
+    { name: 'PIF', href: '/dashboard/pif', icon: TrendingUp },
+    { name: 'AI Trading', href: '/dashboard/ai-trading', icon: TrendingUp }, // Added AI Trading
+    { name: 'Investments', href: '/dashboard/investments', icon: History },
     { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet },
     { name: 'Deposits', href: '/dashboard/deposits', icon: TrendingDown },
     { name: 'Transactions', href: '/dashboard/transactions', icon: FileText },
-    { name: 'Investments', href: '/dashboard/investments', icon: History },
     { name: 'Referrals', href: '/dashboard/referrals', icon: Users },
     { name: 'Profile', href: '/dashboard/profile', icon: User },
-    { name: 'AI Trading', href: '/dashboard/ai-trading', icon: TrendingUp }, // Added AI Trading
     { name: 'Chat', href: '/dashboard/chat', icon: MessageSquare }, // Added Chat
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]

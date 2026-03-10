@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     // 2. Process each investment
     for (const inv of maturedInvestments) {
       // Calculate Profit
-      const ROI_PERCENTAGE_PER_MONTH = 0.07;
+      const ROI_PERCENTAGE_PER_MONTH_DEFAULT = 0.25;
       let profit = 0;
       let roiPercentageTotal = 0;
 
@@ -45,7 +45,8 @@ export async function GET(request: Request) {
         roiPercentageTotal = 0.001;
         profit = inv.amount * roiPercentageTotal;
       } else {
-        roiPercentageTotal = ROI_PERCENTAGE_PER_MONTH * inv.duration_months;
+        const rateToUse = inv.roi_rate || ROI_PERCENTAGE_PER_MONTH_DEFAULT;
+        roiPercentageTotal = rateToUse * inv.duration_months;
         profit = inv.amount * roiPercentageTotal;
       }
 

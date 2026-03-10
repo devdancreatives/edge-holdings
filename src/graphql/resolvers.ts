@@ -653,6 +653,8 @@ export const resolvers = {
     createdAt: (parent: any) => parent.created_at,
     profitPercent: (parent: any) => parent.profitPercent || 0,
     expectedProfit: (parent: any) => parent.expectedProfit || 0,
+    planType: (parent: any) => parent.plan_type,
+    roiRate: (parent: any) => parent.roi_rate,
   },
   Transaction: {
     createdAt: (parent: any) => parent.created_at,
@@ -752,7 +754,7 @@ export const resolvers = {
   Mutation: {
     createInvestment: async (
       _: any,
-      { amount, durationMonths, durationHours }: any,
+      { amount, durationMonths, durationHours, planType, roiRate }: any,
       context: any,
     ) => {
       const client = getClient(context);
@@ -799,11 +801,13 @@ export const resolvers = {
         .insert({
           user_id: user.id,
           amount,
-          fee: fee, // Record the fee
+          fee: fee,
           duration_months: durationHours !== undefined ? 0 : durationMonths,
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
           status: "active",
+          plan_type: planType || "standard",
+          roi_rate: roiRate || 0.25,
         })
         .select()
         .single();

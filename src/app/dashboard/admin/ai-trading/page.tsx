@@ -270,7 +270,7 @@ function InvestmentsTable() {
                         <th className="p-4">Capital</th>
                         <th className="p-4">Start Date</th>
                         <th className="p-4">Duration</th>
-                        <th className="p-4">Gain (7%/mo)</th>
+                        <th className="p-4">Gain (25%/mo)</th>
                         <th className="p-4">Est. Payout</th>
                         <th className="p-4">Maturity</th>
                     </tr>
@@ -291,8 +291,8 @@ function InvestmentsTable() {
                                 <td className="p-4 font-mono text-zinc-900 dark:text-white">${inv.amount}</td>
                                 <td className="p-4">{startDate.toLocaleDateString()}</td>
                                 <td className="p-4">{inv.durationMonths} Months</td>
-                                <td className="p-4 text-green-400 font-mono">+{(inv.durationMonths * 7).toFixed(2)}%</td>
-                                <td className="p-4 text-green-400 font-mono">+${(inv.amount * (inv.durationMonths * 0.07)).toFixed(2)}</td>
+                                <td className="p-4 text-green-400 font-mono">+{(inv.durationMonths * 25).toFixed(2)}%</td>
+                                <td className="p-4 text-green-400 font-mono">+${(inv.amount * (inv.durationMonths * 0.25)).toFixed(2)}</td>
                                 <td className={`p-4 font-bold ${isMature ? 'text-yellow-500' : 'text-zinc-500'}`}>
                                     {maturityDate.toLocaleDateString()}
                                     {isMature && <span className="ml-2 text-xs bg-green-500/10 px-2 py-1 rounded border border-green-500/20">MATURE</span>}

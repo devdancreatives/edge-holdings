@@ -57,7 +57,7 @@ export default function LandingPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {[
                             { icon: Users, title: 'Expert Traders', desc: 'Real humans managing your portfolio, not static algorithms.' },
-                            { icon: TrendingUp, title: 'Superior ROI', desc: 'Targeting 2-10% weekly returns based on market conditions.' },
+                            { icon: TrendingUp, title: 'Superior ROI', desc: 'Targeting 5-15% weekly returns based on market conditions.' },
                             { icon: ShieldCheck, title: 'Secure Custody', desc: 'Funds secured in cold storage with strict access controls.' },
                             { icon: Clock, title: 'Flexible Terms', desc: 'Choose lock-in periods from 1 to 6 months to suit your goals.' }
                         ].map((feature, i) => (
