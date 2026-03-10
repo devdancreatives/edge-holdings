@@ -42,6 +42,7 @@ export const typeDefs = `
     status: String!
     planType: String
     roiRate: Float
+    fee: Float
     user: User
     createdAt: DateTime
     profitPercent: Float # Calculated on the fly
@@ -149,14 +150,29 @@ export const typeDefs = `
     adminAiStats: AdminAiStats
     adminInvestmentStats: AdminInvestmentStats
     adminTransactions: [Transaction]
+    adminFees: [PlatformFee]
   }
+
+  type PlatformFee {
+    id: ID!
+    type: String!
+    amount: Float!
+    originalAmount: Float!
+    user: User
+    createdAt: DateTime!
+  }
+
 
   type AdminStats {
     totalUsers: Int!
     totalDeposits: Float!
     totalWithdrawals: Float!
     pendingWithdrawals: Int!
+    totalFees: Float!
+    investmentFees: Float!
+    withdrawalFees: Float!
   }
+
 
   input AdminUpdateUserInput {
     fullName: String
@@ -167,6 +183,7 @@ export const typeDefs = `
 
   type Mutation {
     createInvestment(amount: Float!, durationMonths: Int!, durationHours: Int, planType: String, roiRate: Float): Investment
+    closeInvestment(id: ID!): Investment
     simulateDeposit(amount: Float!, txHash: String!): Deposit
     createMyWallet: Wallet
     requestOtp(email: String!, fullName: String!): Boolean

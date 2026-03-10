@@ -1,15 +1,34 @@
 'use client'
 
-import { useQuery } from '@apollo/client/react'
-import { GET_ADMIN_INVESTMENTS } from '@/graphql/queries'
-import { TrendingUp, User } from 'lucide-react'
+import { useQuery, useMutation } from '@apollo/client/react'
+import { GET_ADMIN_INVESTMENTS, CLOSE_INVESTMENT } from '@/graphql/queries'
+import { TrendingUp, User, XCircle, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { useState } from 'react'
 
 export default function AdminInvestmentsPage() {
-    const { data, loading } = useQuery<any>(GET_ADMIN_INVESTMENTS, { pollInterval: 30000 })
+    const { data, loading, refetch } = useQuery<any>(GET_ADMIN_INVESTMENTS, { pollInterval: 30000 })
+    const [closeInvestment] = useMutation(CLOSE_INVESTMENT)
+    const [processingId, setProcessingId] = useState<string | null>(null)
 
     if (loading && !data) return <div className="p-8 text-zinc-600 dark:text-zinc-400">Loading investments...</div>
 
     const investments = data?.adminInvestments || []
+
+    const handleClose = async (id: string) => {
+        if (!confirm('Are you sure you want to close this investment? This will immediately return the principal and profit to the user.')) return
+
+        setProcessingId(id)
+        try {
+            await closeInvestment({ variables: { id } })
+            toast.success('Investment closed and funds returned successfully')
+            refetch()
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to close investment')
+        } finally {
+            setProcessingId(null)
+        }
+    }
 
     return (
         <div className="space-y-6">
@@ -26,6 +45,7 @@ export default function AdminInvestmentsPage() {
                                 <th className="px-6 py-4">Start Date</th>
                                 <th className="px-6 py-4">End Date</th>
                                 <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -60,11 +80,27 @@ export default function AdminInvestmentsPage() {
                                             {inv.status.toUpperCase()}
                                         </span>
                                     </td>
+                                    <td className="px-6 py-4 text-right">
+                                        {inv.status === 'active' && (
+                                            <button
+                                                onClick={() => handleClose(inv.id)}
+                                                disabled={processingId === inv.id}
+                                                className="inline-flex items-center gap-1 text-red-500 hover:text-red-400 disabled:opacity-50 transition-colors font-medium"
+                                            >
+                                                {processingId === inv.id ? (
+                                                    <Loader2 size={14} className="animate-spin" />
+                                                ) : (
+                                                    <XCircle size={14} />
+                                                )}
+                                                Close
+                                            </button>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                             {investments.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-zinc-500">
+                                    <td colSpan={7} className="px-6 py-8 text-center text-zinc-500">
                                         No active investments found
                                     </td>
                                 </tr>
