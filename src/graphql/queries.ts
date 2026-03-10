@@ -130,11 +130,15 @@ export const CREATE_INVESTMENT = gql`
     $amount: Float!
     $durationMonths: Int!
     $durationHours: Int
+    $planType: String
+    $roiRate: Float
   ) {
     createInvestment(
       amount: $amount
       durationMonths: $durationMonths
       durationHours: $durationHours
+      planType: $planType
+      roiRate: $roiRate
     ) {
       id
       amount
@@ -149,8 +153,18 @@ export const CREATE_INVESTMENT = gql`
 export const CREATE_MY_WALLET = gql`
   mutation CreateMyWallet {
     createMyWallet {
+      id
       address
       pathIndex
+    }
+  }
+`;
+
+export const CLOSE_INVESTMENT = gql`
+  mutation CloseInvestment($id: ID!) {
+    closeInvestment(id: $id) {
+      id
+      status
     }
   }
 `;
@@ -361,6 +375,9 @@ export const GET_ADMIN_STATS = gql`
       totalDeposits
       totalWithdrawals
       pendingWithdrawals
+      totalFees
+      investmentFees
+      withdrawalFees
     }
   }
 `;
@@ -527,6 +544,22 @@ export const GET_ADMIN_TRANSACTIONS = gql`
       user {
         email
         fullName
+      }
+    }
+  }
+`;
+
+export const GET_ADMIN_FEES = gql`
+  query GetAdminFees {
+    adminFees {
+      id
+      type
+      amount
+      originalAmount
+      createdAt
+      user {
+        fullName
+        email
       }
     }
   }

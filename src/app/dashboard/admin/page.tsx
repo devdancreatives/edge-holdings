@@ -2,7 +2,8 @@
 
 import { useQuery } from '@apollo/client/react'
 import { GET_ADMIN_STATS } from '@/graphql/queries'
-import { Users, ArrowDownLeft, ArrowUpRight, Clock, Shield } from 'lucide-react'
+import { Users, ArrowDownLeft, ArrowUpRight, Clock, Shield, DollarSign } from 'lucide-react'
+
 import Link from 'next/link'
 
 export default function AdminDashboard() {
@@ -42,14 +43,17 @@ export default function AdminDashboard() {
             href: '/dashboard/admin/withdrawals'
         },
         {
-            label: 'Pending Withdrawals',
-            value: stats?.pendingWithdrawals || 0,
-            icon: Clock,
+            label: 'Total Platform Fees',
+            value: `$${stats?.totalFees?.toFixed(2) || '0.00'}`,
+            icon: DollarSign,
             color: 'text-yellow-500',
             bg: 'bg-yellow-500/10',
-            href: '/dashboard/admin/withdrawals'
+            href: '/dashboard/admin/fees',
+            details: `Inv: $${stats?.investmentFees?.toFixed(2) || '0.00'} | With: $${stats?.withdrawalFees?.toFixed(2) || '0.00'}`
+
         }
     ]
+
 
     return (
         <div className="space-y-6 md:space-y-8">
@@ -77,7 +81,11 @@ export default function AdminDashboard() {
                         </div>
                         <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-1">{stat.label}</p>
                         <p className="text-2xl font-bold text-zinc-900 dark:text-white">{stat.value}</p>
+                        {(stat as any).details && (
+                            <p className="text-[10px] text-zinc-500 mt-2 font-mono">{(stat as any).details}</p>
+                        )}
                     </Link>
+
                 ))}
             </div>
 

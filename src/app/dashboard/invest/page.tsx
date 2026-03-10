@@ -158,11 +158,11 @@ export default function InvestPage() {
                         <span className="text-zinc-900 dark:text-white">{parsedAmount > 0 ? `$${parsedAmount.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between text-zinc-500">
-                        <span>Service Fee (0.1%):</span>
+                        <span>Service Fee (0.1% - from balance):</span>
                         <span>{parsedAmount > 0 ? `$${fee.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between font-medium text-zinc-900 dark:text-white border-t border-zinc-200 dark:border-zinc-800 pt-2">
-                        <span>Total Deduction:</span>
+                        <span>Total Balance Deduction:</span>
                         <span className="text-yellow-500">{parsedAmount > 0 ? `$${totalDeduction.toFixed(2)}` : '-'}</span>
                     </div>
 

@@ -352,10 +352,18 @@ export const resolvers = {
 
       const { data: withdrawals } = await serviceClient
         .from("withdrawal_requests")
-        .select("amount")
+        .select("amount, fee")
         .eq("status", "completed");
       const totalWithdrawals =
         withdrawals?.reduce((sum, w) => sum + w.amount, 0) || 0;
+      const withdrawalFees =
+        withdrawals?.reduce((sum, w) => sum + (w.fee || 0), 0) || 0;
+
+      const { data: investments } = await serviceClient
+        .from("investments")
+        .select("fee");
+      const investmentFees =
+        investments?.reduce((sum, i) => sum + (i.fee || 0), 0) || 0;
 
       const { count: pendingWithdrawals } = await serviceClient
         .from("withdrawal_requests")
@@ -365,8 +373,11 @@ export const resolvers = {
       return {
         totalUsers: totalUsers || 0,
         totalDeposits: totalDeposited,
-        totalWithdrawals: totalWithdrawals,
+        totalWithdrawals,
         pendingWithdrawals: pendingWithdrawals || 0,
+        investmentFees,
+        withdrawalFees,
+        totalFees: investmentFees + withdrawalFees,
       };
     },
 
@@ -644,6 +655,56 @@ export const resolvers = {
       return data;
     },
 
+    adminFees: async (_: any, __: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const serviceClient = getServiceClient();
+
+      // 1. Fetch investment fees
+      const { data: investments } = await serviceClient
+        .from("investments")
+        .select("id, amount, fee, created_at, user:user_id(email, full_name)")
+        .gt("fee", 0);
+
+      const investmentFees = (investments || []).map((inv) => ({
+        id: `inv-fee-${inv.id}`,
+        type: "investment",
+        amount: inv.fee,
+        originalAmount: inv.amount,
+        user: inv.user,
+        createdAt: inv.created_at,
+      }));
+
+      // 2. Fetch withdrawal fees
+      const { data: withdrawals } = await serviceClient
+        .from("withdrawal_requests")
+        .select("id, amount, fee, created_at, user:user_id(email, full_name)")
+        .eq("status", "completed")
+        .gt("fee", 0);
+
+      const withdrawalFees = (withdrawals || []).map((w) => ({
+        id: `with-fee-${w.id}`,
+        type: "withdrawal",
+        amount: w.fee,
+        originalAmount: w.amount,
+        user: w.user,
+        createdAt: w.created_at,
+      }));
+
+      // 3. Combine and sort
+      return [...investmentFees, ...withdrawalFees].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+    },
+
     // End of New Admin Resolvers
   },
   Investment: {
@@ -751,6 +812,10 @@ export const resolvers = {
     processedAt: (parent: any) => parent.processed_at,
     user: (parent: any) => parent.user,
   },
+  PlatformFee: {
+    createdAt: (parent: any) => parent.createdAt || parent.created_at,
+  },
+
   Mutation: {
     createInvestment: async (
       _: any,
@@ -801,7 +866,7 @@ export const resolvers = {
         .insert({
           user_id: user.id,
           amount,
-          fee: fee,
+          fee: fee, // Record the fee separately
           duration_months: durationHours !== undefined ? 0 : durationMonths,
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
@@ -842,6 +907,89 @@ export const resolvers = {
 
       return data;
     },
+    closeInvestment: async (_: any, { id }: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const serviceClient = getServiceClient();
+
+      // 1. Fetch investment
+      const { data: inv, error: fetchError } = await serviceClient
+        .from("investments")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (fetchError || !inv) throw new Error("Investment not found");
+      if (inv.status !== "active") throw new Error("Investment is not active");
+
+      // 2. Calculate Profit (similar to cron logic)
+      const ROI_PERCENTAGE_PER_MONTH_DEFAULT = 0.25;
+      let profit = 0;
+      let roiPercentageTotal = 0;
+
+      if (inv.duration_months === 0) {
+        // Test Investment
+        roiPercentageTotal = 0.001;
+        profit = inv.amount * roiPercentageTotal;
+      } else {
+        const rateToUse = inv.roi_rate || ROI_PERCENTAGE_PER_MONTH_DEFAULT;
+        roiPercentageTotal = rateToUse * inv.duration_months;
+        profit = inv.amount * roiPercentageTotal;
+      }
+
+      // 3. Update status to completed
+      const { data: updatedInv, error: updateError } = await serviceClient
+        .from("investments")
+        .update({ status: "completed" })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (updateError) throw new Error(updateError.message);
+
+      // 4. Record ROI Snapshot
+      await serviceClient.from("roi_snapshots").insert({
+        user_id: inv.user_id,
+        date: new Date().toISOString(),
+        profit_amount: profit,
+        roi_percentage: roiPercentageTotal * 100,
+      });
+
+      // 5. Log Transactions
+      // Profit Payout
+      await serviceClient.from("transactions").insert({
+        user_id: inv.user_id,
+        type: "profit_payout",
+        amount: profit,
+        description: `Manual ROI Payout for ${inv.duration_months}-month investment`,
+      });
+
+      // Principal Return
+      await serviceClient.from("transactions").insert({
+        user_id: inv.user_id,
+        type: "deposit",
+        amount: inv.amount,
+        description: `Principal returned from manually closed investment`,
+      });
+
+      // 6. Notify user
+      await sendPushNotification(inv.user_id, {
+        title: "Investment Closed",
+        body: `Your investment of $${inv.amount} has been closed by admin. $${(inv.amount + profit).toFixed(2)} credited to your balance.`,
+        url: "/dashboard/investments",
+      });
+
+      return updatedInv;
+    },
+
     simulateDeposit: async (_: any, { amount, txHash }: any, context: any) => {
       const client = getClient(context);
       const user = await getUser(client);
