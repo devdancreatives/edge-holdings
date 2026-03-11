@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 
 
 export function Footer() {
@@ -9,7 +8,6 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
-                            <Image src="/logo.png" alt="EdgePoint Holdings" width={24} height={24} className="rounded-sm" />
                             <span className="text-lg font-bold text-zinc-900 dark:text-white">EdgePoint Holdings</span>
                         </div>
 
