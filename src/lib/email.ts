@@ -1,9 +1,17 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: process.env.SMTP_PORT === "465",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 export async function sendOtpEmail(to: string, otp: string) {
-  console.log(`🚀 Attempting to send OTP email via Resend to: ${to}`);
+  console.log(`🚀 Attempting to send OTP email via SMTP to: ${to}`);
 
   const html = `
       <!DOCTYPE html>
@@ -51,24 +59,19 @@ export async function sendOtpEmail(to: string, otp: string) {
     `;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: "Edgepoint Holdings <noreply@kraftkonect.com>",
-      to: [to],
+    const info = await transporter.sendMail({
+      from: '"EdgePoint Holdings" <support@edgepointholdings.com>',
+      to: to,
       subject: "Verify Your Email - EdgePoint Holdings",
       html,
     });
 
-    if (error) {
-      console.error(`❌ Resend failed to send email to ${to}:`, error);
-      throw new Error(error.message);
-    }
-
     console.log(
-      `✅ OTP email sent successfully via Resend to ${to}. MessageId: ${data?.id}`,
+      `✅ OTP email sent successfully via SMTP to ${to}. MessageId: ${info.messageId}`,
     );
-    return data;
+    return info;
   } catch (error: any) {
-    console.error(`❌ Resend failed to send email to ${to}:`, error.message);
+    console.error(`❌ SMTP failed to send email to ${to}:`, error.message);
     throw error;
   }
 }
@@ -121,7 +124,7 @@ export async function sendDepositNotification(
                 <p class="amount-label">Deposited Amount</p>
                 <div class="amount">$${amount.toLocaleString()} USDT</div>
               </div>
-
+ 
               <div class="details">
                 <div class="detail-row">
                   <span class="detail-label">Network</span>
@@ -136,11 +139,11 @@ export async function sendDepositNotification(
                   <span class="detail-value tx-hash">${txHash}</span>
                 </div>
               </div>
-
+ 
               <div style="text-align: center;">
                 <a href="https://bscscan.com/tx/${txHash}" class="button" target="_blank">View on BscScan</a>
               </div>
-
+ 
               <p class="text" style="font-size: 14px; margin-top: 30px;">Your funds are now available for investment. Start growing your portfolio today!</p>
             </div>
             <div class="footer">
@@ -153,23 +156,17 @@ export async function sendDepositNotification(
     `;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: "EdgePoint Holdings <noreply@kraftkonect.com>",
-      to: [to],
+    const info = await transporter.sendMail({
+      from: '"EdgePoint Holdings" <support@edgepointholdings.com>',
+      to: to,
       subject: `✅ Deposit Confirmed - $${amount.toLocaleString()} USDT`,
       html,
     });
 
-    if (error) {
-      console.error(`❌ Failed to send deposit notification to ${to}:`, error);
-      // Don't throw - notification failure shouldn't stop deposit processing
-      return null;
-    }
-
     console.log(
-      `✅ Deposit notification sent to ${to}. MessageId: ${data?.id}`,
+      `✅ Deposit notification sent to ${to}. MessageId: ${info.messageId}`,
     );
-    return data;
+    return info;
   } catch (error: any) {
     console.error(`❌ Error sending deposit notification:`, error.message);
     return null;
@@ -225,7 +222,7 @@ export async function sendAdminDepositAlert(
                   <span class="stat-value" style="font-family: monospace; font-size: 12px;">${txHash.substring(0, 10)}...</span>
                 </div>
               </div>
-
+ 
               <div style="text-align: center; margin-top: 30px;">
                 <a href="https://bscscan.com/tx/${txHash}" style="color: #eab308; text-decoration: none; font-size: 14px;">View on BscScan</a>
               </div>
@@ -239,19 +236,14 @@ export async function sendAdminDepositAlert(
     `;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: "EdgePoint Admin <noreply@kraftkonect.com>",
-      to: [to],
+    const info = await transporter.sendMail({
+      from: '"EdgePoint Admin" <support@edgepointholdings.com>',
+      to: to,
       subject: `🚨 Admin Alert: New Deposit - $${amount.toLocaleString()} USDT`,
       html,
     });
 
-    if (error) {
-      console.error(`❌ Failed to send admin alert to ${to}:`, error);
-      return null;
-    }
-
-    return data;
+    return info;
   } catch (error: any) {
     console.error(`❌ Error sending admin alert:`, error.message);
     return null;
