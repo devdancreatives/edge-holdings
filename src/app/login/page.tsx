@@ -99,11 +99,11 @@ function LoginContent() {
       <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-8 backdrop-blur-xl">
           <div className="text-center">
-            <div className="mx-auto mb-8 relative h-20 w-20">
-              <Image src="/logo-v4.png" alt="EdgePoint Holdings" fill className="object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.2)]" />
+            <div className="mx-auto mb-8 relative h-20 w-64">
+              <Image src="/logo-v8.png" alt="EdgePoint Holdings" fill className="object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.2)]" />
             </div>
 
-            <h2 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">EdgePoint Holdings</h2>
+
             <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
               {isSignUp ? (showOtpInput ? 'Verify your email' : 'Create your account') : 'Sign in to your portfolio'}
             </p>

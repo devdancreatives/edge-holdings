@@ -33,10 +33,10 @@ export function PublicNavbar() {
                     <div className="flex h-16 items-center justify-between">
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-2.5 z-50 relative group">
-                            <div className="relative h-9 w-9 transition-transform group-hover:scale-105">
-                                <Image src="/logo-v4.png" alt="EdgePoint Holdings" fill className="object-contain" />
+                            <div className="relative h-9 w-32 transition-transform group-hover:scale-105">
+                                <Image src="/logo-v8.png" alt="EdgePoint Holdings" fill className="object-contain" />
                             </div>
-                            <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">EdgePoint Holdings</span>
+
                         </Link>
 
 
