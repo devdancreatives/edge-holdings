@@ -1,9 +1,10 @@
 import nodemailer from "nodemailer";
 
+const port = Number(process.env.SMTP_PORT || 465);
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_PORT === "465",
+  host: process.env.SMTP_HOST || "smtp.hostinger.com",
+  port,
+  secure: port === 465,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -60,9 +61,10 @@ export async function sendOtpEmail(to: string, otp: string) {
 
   try {
     const info = await transporter.sendMail({
-      from: '"EdgePoint Holdings" <support@edgepointholdings.com>',
+      from: `"EdgePoint Holdings" <${process.env.SMTP_USER}>`,
       to: to,
       subject: "Verify Your Email - EdgePoint Holdings",
+      text: `Your Verification Code is: ${otp}. This code is valid for 10 minutes. If you didn't request this, please ignore this email.`,
       html,
     });
 
@@ -157,9 +159,10 @@ export async function sendDepositNotification(
 
   try {
     const info = await transporter.sendMail({
-      from: '"EdgePoint Holdings" <support@edgepointholdings.com>',
+      from: `"EdgePoint Holdings" <${process.env.SMTP_USER}>`,
       to: to,
       subject: `✅ Deposit Confirmed - $${amount.toLocaleString()} USDT`,
+      text: `Hi ${name}, your deposit of $${amount.toLocaleString()} USDT has been confirmed and credited to your account. Transaction Hash: ${txHash}`,
       html,
     });
 
@@ -237,9 +240,10 @@ export async function sendAdminDepositAlert(
 
   try {
     const info = await transporter.sendMail({
-      from: '"EdgePoint Admin" <support@edgepointholdings.com>',
+      from: `"EdgePoint Admin" <${process.env.SMTP_USER}>`,
       to: to,
       subject: `🚨 Admin Alert: New Deposit - $${amount.toLocaleString()} USDT`,
+      text: `Admin Alert: A new deposit of $${amount.toLocaleString()} USDT has been confirmed from user ${userName}. Transaction Hash: ${txHash}`,
       html,
     });
 
