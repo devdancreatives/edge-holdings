@@ -89,8 +89,8 @@ const SidebarContent: React.FC<{
     <div className="flex flex-col h-full w-full relative">
         <div className="pt-16 lg:pt-4 px-4 mb-10 flex items-center justify-between gap-2 shrink-0">
             <Link href="/" className="flex items-center gap-3 group">
-                <div className="relative h-9 w-9 transition-transform group-hover:scale-105">
-                    <Image src="/logo-v4.png" alt="EdgePoint Holdings" fill className="object-contain" />
+                <div className="relative h-9 w-32 transition-transform group-hover:scale-105">
+                    <Image src="/logo-v8.png" alt="EdgePoint Holdings" fill className="object-contain" />
                 </div>
 
 
@@ -98,7 +98,7 @@ const SidebarContent: React.FC<{
 
 
 
-                <span className="text-lg font-bold bg-linear-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">EdgePoint Holdings</span>
+
             </Link>
             <ThemeToggle />
         </div>

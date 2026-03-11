@@ -12,17 +12,11 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className="relative overflow-hidden pt-24 pb-32">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                    <div className="flex justify-center mb-10">
-                        <div className="relative h-24 w-24 md:h-32 md:w-32 animate-fade-in">
-                            <Image src="/logo-v4.png" alt="EdgePoint Holdings" fill className="object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]" />
+                    {/* <div className="flex justify-center mb-10">
+                        <div className="relative h-24 w-64 md:h-32 md:w-80 animate-fade-in">
+                            <Image src="/logo-v8.png" alt="EdgePoint Holdings" fill className="object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]" />
                         </div>
-
-
-
-
-
-
-                    </div>
+                    </div> */}
                     <div className="inline-flex items-center rounded-full border border-yellow-500/20 bg-yellow-500/5 px-4 py-1.5 text-sm font-medium text-yellow-500 mb-10 backdrop-blur-sm">
                         <span className="flex h-2 w-2 rounded-full bg-yellow-500 mr-2.5 animate-pulse"></span>
                         Now Accepting New Investors
@@ -50,6 +44,8 @@ export default function LandingPage() {
                         </Link>
 
                     </div>
+
+
 
                     <div className="mt-20 flex justify-center">
                         <div className="w-full max-w-xl text-left">
