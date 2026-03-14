@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   title: "EdgePoint Holdings - AI Powered Trading",
   description: "Advanced AI-driven crypto trading platform and investment management.",
   icons: {
-    icon: "/favicon-v8.png",
-    apple: "/favicon-v8.png",
+    icon: "/favicon-eh.png",
+    apple: "/favicon-eh.png",
   }
 
 
