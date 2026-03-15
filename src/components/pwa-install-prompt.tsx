@@ -26,17 +26,17 @@ export function PwaInstallPrompt() {
             e.preventDefault()
             setInstallPrompt(e)
             // Show prompt after a delay to not be annoying
-            setTimeout(() => setIsVisible(true), 3000)
+            setTimeout(() => setIsVisible(true), 1000)
         }
 
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
         // iOS detection - showing prompt if not standalone
         if (isIosDevice && !isStandalone) {
-            // Only show once per session or use local storage to respect dismissal
-            const hasDismissed = localStorage.getItem('pwa_prompt_dismissed')
+            // Only show once per session or use session storage to respect dismissal
+            const hasDismissed = sessionStorage.getItem('pwa_prompt_dismissed')
             if (!hasDismissed) {
-                setTimeout(() => setIsVisible(true), 3000)
+                setTimeout(() => setIsVisible(true), 1000)
             }
         }
 
@@ -58,7 +58,7 @@ export function PwaInstallPrompt() {
 
     const handleDismiss = () => {
         setIsVisible(false)
-        localStorage.setItem('pwa_prompt_dismissed', 'true')
+        sessionStorage.setItem('pwa_prompt_dismissed', 'true')
     }
 
     if (!isVisible) return null

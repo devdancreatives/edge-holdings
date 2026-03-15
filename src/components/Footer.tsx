@@ -36,6 +36,7 @@ export function Footer() {
                     <div>
                         <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Connect</h3>
                         <ul className="mt-4 space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+                            <li><a href="https://wa.me/message/CVXXI63ZJY76J1" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-500">WhatsApp</a></li>
                             <li><a href="#" className="hover:text-yellow-500">Twitter</a></li>
                             <li><a href="#" className="hover:text-yellow-500">Telegram</a></li>
                             <li><a href="#" className="hover:text-yellow-500">Support</a></li>
