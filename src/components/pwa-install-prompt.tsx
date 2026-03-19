@@ -33,11 +33,8 @@ export function PwaInstallPrompt() {
 
         // iOS detection - showing prompt if not standalone
         if (isIosDevice && !isStandalone) {
-            // Only show once per session or use session storage to respect dismissal
-            const hasDismissed = sessionStorage.getItem('pwa_prompt_dismissed')
-            if (!hasDismissed) {
-                setTimeout(() => setIsVisible(true), 1000)
-            }
+            // Show every time on refresh to be more frequent as requested
+            setTimeout(() => setIsVisible(true), 1000)
         }
 
         return () => {
@@ -58,7 +55,7 @@ export function PwaInstallPrompt() {
 
     const handleDismiss = () => {
         setIsVisible(false)
-        sessionStorage.setItem('pwa_prompt_dismissed', 'true')
+        // No longer setting sessionStorage to allow prompt to reappear on refresh
     }
 
     if (!isVisible) return null
