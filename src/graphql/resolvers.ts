@@ -826,17 +826,17 @@ export const resolvers = {
       const user = await getUser(client);
       if (!user) throw new Error("Unauthorized");
 
-      // Check for Admin only for durationHours
-      if (durationHours !== undefined) {
+      // Check for Admin only for durationHours, unless it's a PIF plan
+      if (durationHours !== undefined && planType !== "PIF") {
         const { data: profile } = await client
           .from("users")
           .select("role")
           .eq("id", user.id)
           .single();
-
+  
         if (profile?.role !== "admin") {
           throw new Error(
-            "Only admins can create test investments (hours based)",
+            "Only admins can create custom test investments",
           );
         }
       }
@@ -870,6 +870,7 @@ export const resolvers = {
           duration_months: durationHours !== undefined ? 0 : durationMonths,
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
+          last_payout_date: startDate.toISOString(),
           status: "active",
           plan_type: planType || "standard",
           roi_rate: roiRate || 0.25,
