@@ -17,95 +17,102 @@ export async function GET(request: Request) {
   );
 
   try {
-    // 1. Find active investments that have ended
-    const now = new Date().toISOString();
-    const { data: maturedInvestments, error: fetchError } = await supabase
+    // 1. Find all active investments
+    const now = new Date();
+    const { data: activeInvestments, error: fetchError } = await supabase
       .from("investments")
       .select("*")
-      .eq("status", "active")
-      .lte("end_date", now);
+      .eq("status", "active");
 
     if (fetchError) throw fetchError;
 
-    if (!maturedInvestments || maturedInvestments.length === 0) {
-      return NextResponse.json({ message: "No matured investments found" });
+    if (!activeInvestments || activeInvestments.length === 0) {
+      return NextResponse.json({ message: "No active investments found" });
     }
 
     const results = [];
 
     // 2. Process each investment
-    for (const inv of maturedInvestments) {
-      // Calculate Profit
-      const ROI_PERCENTAGE_PER_MONTH_DEFAULT = 0.25;
-      let profit = 0;
-      let roiPercentageTotal = 0;
+    for (const inv of activeInvestments) {
+      const lastPayout = new Date(inv.last_payout_date || inv.start_date);
+      const endDate = new Date(inv.end_date);
+      
+      // Calculate how many full days have passed since last payout
+      const diffMs = now.getTime() - lastPayout.getTime();
+      const daysToPay = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-      if (inv.duration_months === 0) {
-        // Test Investment: Fixed 0.1% profit
-        roiPercentageTotal = 0.001;
-        profit = inv.amount * roiPercentageTotal;
-      } else {
+      let profitPaidToday = 0;
+      let statusUpdated = false;
+
+      if (daysToPay >= 1) {
+        let totalDailyProfit = 0;
+        const ROI_PERCENTAGE_PER_MONTH_DEFAULT = 0.25;
         const rateToUse = inv.roi_rate || ROI_PERCENTAGE_PER_MONTH_DEFAULT;
-        roiPercentageTotal = rateToUse * inv.duration_months;
-        profit = inv.amount * roiPercentageTotal;
+
+        // Formula: ROI is per month. Monthly Profit = Amount * Rate. Daily Profit = Monthly Profit / 30.
+        const dailyProfit = (inv.amount * rateToUse) / 30;
+
+        for (let i = 0; i < daysToPay; i++) {
+          totalDailyProfit += dailyProfit;
+          
+          // Record ROI Snapshot for each day
+          const payoutDate = new Date(lastPayout);
+          payoutDate.setDate(payoutDate.getDate() + i + 1);
+
+          await supabase.from("roi_snapshots").insert({
+            user_id: inv.user_id,
+            date: payoutDate.toISOString().split("T")[0],
+            profit_amount: dailyProfit,
+            roi_percentage: (rateToUse / 30) * 100,
+          });
+
+          // Log Transaction
+          await supabase.from("transactions").insert({
+            user_id: inv.user_id,
+            type: "profit_payout",
+            amount: dailyProfit,
+            description: `Daily ROI Payout for ${inv.duration_months === 0 ? "test" : inv.duration_months + "-month"} investment`,
+          });
+        }
+
+        profitPaidToday = totalDailyProfit;
+
+        // Update last_payout_date
+        const newPayoutDate = new Date(lastPayout);
+        newPayoutDate.setDate(newPayoutDate.getDate() + daysToPay);
+        
+        await supabase
+          .from("investments")
+          .update({ last_payout_date: newPayoutDate.toISOString() })
+          .eq("id", inv.id);
       }
 
-      // Update Investment Status -> completed
-      const { error: updateError } = await supabase
-        .from("investments")
-        .update({ status: "completed" })
-        .eq("id", inv.id);
+      // 3. Check if matured
+      if (now >= endDate) {
+        // Update Investment Status -> completed
+        const { error: updateError } = await supabase
+          .from("investments")
+          .update({ status: "completed" })
+          .eq("id", inv.id);
 
-      if (updateError) {
-        console.error(`Failed to update investment ${inv.id}:`, updateError);
-        results.push({
-          id: inv.id,
-          status: "failed",
-          error: updateError.message,
-        });
-        continue;
+        if (!updateError) {
+          // Return Principal
+          await supabase.from("transactions").insert({
+            user_id: inv.user_id,
+            type: "deposit",
+            amount: inv.amount,
+            description: `Principal returned from matured investment`,
+          });
+          statusUpdated = true;
+        }
       }
 
-      // Record ROI Snapshot (This credits the profit to the user's "profit" balance calculation)
-      // Note: Principal is returned because 'getAvailableBalance' stops deducting it when status is 'completed'.
-      const { error: roiError } = await supabase.from("roi_snapshots").insert({
-        user_id: inv.user_id,
-        date: new Date().toISOString(),
-        profit_amount: profit,
-        roi_percentage: roiPercentageTotal * 100,
-      });
-
-      if (roiError) {
-        console.error(`Failed to create ROI snapshot for ${inv.id}:`, roiError);
-        // Warning: Status is completed but ROI might be missing. Transactional integrity issue here without stored procedures.
-        // For this MVP, we log it.
-        results.push({
-          id: inv.id,
-          status: "partial_fail",
-          error: roiError.message,
+      if (profitPaidToday > 0 || statusUpdated) {
+        results.push({ 
+          id: inv.id, 
+          profit: profitPaidToday, 
+          completed: statusUpdated 
         });
-      } else {
-        // Log Transactions
-        // 1. Profit Payout
-        await supabase.from("transactions").insert({
-          user_id: inv.user_id,
-          type: "profit_payout",
-          amount: profit,
-          description:
-            inv.duration_months === 0
-              ? `ROI Payout for test investment`
-              : `ROI Payout for ${inv.duration_months}-month investment`,
-        });
-
-        // 2. Principal Return
-        await supabase.from("transactions").insert({
-          user_id: inv.user_id,
-          type: "deposit", // Using 'deposit' as a proxy for 'credit' since it shows as '+'
-          amount: inv.amount,
-          description: `Principal returned from matured investment`,
-        });
-
-        results.push({ id: inv.id, status: "success", profit });
       }
     }
 

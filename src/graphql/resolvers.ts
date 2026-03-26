@@ -870,6 +870,7 @@ export const resolvers = {
           duration_months: durationHours !== undefined ? 0 : durationMonths,
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
+          last_payout_date: startDate.toISOString(),
           status: "active",
           plan_type: planType || "standard",
           roi_rate: roiRate || 0.25,
