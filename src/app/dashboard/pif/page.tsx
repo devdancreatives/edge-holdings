@@ -8,7 +8,8 @@ import { CREATE_INVESTMENT, GET_ME, GET_MY_INVESTMENTS, GET_MY_TRANSACTIONS, GET
 
 export default function PIFPage() {
     const [amount, setAmount] = useState('5000')
-    const [error, setError] = useState<string | null>(null)
+    const [duration, setDuration] = useState<'1month' | '2weeks'>('1month')
+    const [error, setError] = useState<boolean | string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
 
     const { data: userData } = useQuery<any>(GET_ME)
@@ -32,6 +33,8 @@ export default function PIFPage() {
         }
     })
 
+    const roiRate = 4.0 // 400% for both plans
+
     const handleInvest = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
@@ -44,14 +47,19 @@ export default function PIFPage() {
         }
 
         try {
-            await createInvestment({
-                variables: {
-                    amount: parsedAmount,
-                    durationMonths: 1,
-                    planType: 'PIF',
-                    roiRate: 4.0 // 400%
-                }
-            })
+            const variables: any = {
+                amount: parsedAmount,
+                planType: 'PIF',
+                roiRate: roiRate
+            }
+
+            if (duration === '1month') {
+                variables.durationMonths = 1
+            } else {
+                variables.durationHours = 336 // 14 days
+            }
+
+            await createInvestment({ variables })
         } catch (err: any) {
             // Error handled by onError callback
         }
@@ -61,10 +69,14 @@ export default function PIFPage() {
     const parsedAmount = parseFloat(amount) || 0
     const fee = parsedAmount * 0.001 // 0.1%
     const totalDeduction = parsedAmount + fee
-    const estimatedProfit = parsedAmount * 4.0 // 400%
+    const estimatedProfit = parsedAmount * roiRate
     const totalReturn = parsedAmount + estimatedProfit
     const maturityDate = new Date()
-    maturityDate.setMonth(maturityDate.getMonth() + 1)
+    if (duration === '1month') {
+        maturityDate.setMonth(maturityDate.getMonth() + 1)
+    } else {
+        maturityDate.setDate(maturityDate.getDate() + 14)
+    }
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
@@ -77,7 +89,7 @@ export default function PIFPage() {
 
             <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500 flex gap-3 text-sm">
                 <Info className="shrink-0" size={20} />
-                <p>The PIF is a high-yield short-term pool. Funds are locked for exactly 1 month with a guaranteed ROI of 400% based on our current high-frequency strategy.</p>
+                <p>The PIF is a high-yield short-term pool. Funds are locked for the chosen duration with a guaranteed ROI based on our current high-frequency strategy.</p>
             </div>
 
             <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 p-6 backdrop-blur-xl">
@@ -101,14 +113,24 @@ export default function PIFPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
+                        <button
+                            type="button"
+                            onClick={() => setDuration('1month')}
+                            className={`p-4 rounded-lg border text-left transition-all ${duration === '1month' ? 'bg-yellow-500/10 border-yellow-500 ring-1 ring-yellow-500' : 'bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700'}`}
+                        >
                             <p className="text-xs text-zinc-500 uppercase font-bold">Duration</p>
                             <p className="text-lg font-bold text-zinc-900 dark:text-white">1 Month</p>
-                        </div>
-                        <div className="p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
-                            <p className="text-xs text-zinc-500 uppercase font-bold">Monthly ROI</p>
-                            <p className="text-lg font-bold text-green-500">400%</p>
-                        </div>
+                            <p className="text-sm text-green-500 font-bold">400% ROI</p>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setDuration('2weeks')}
+                            className={`p-4 rounded-lg border text-left transition-all ${duration === '2weeks' ? 'bg-yellow-500/10 border-yellow-500 ring-1 ring-yellow-500' : 'bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700'}`}
+                        >
+                            <p className="text-xs text-zinc-500 uppercase font-bold">Duration</p>
+                            <p className="text-lg font-bold text-zinc-900 dark:text-white">2 Weeks</p>
+                            <p className="text-sm text-green-500 font-bold">400% ROI</p>
+                        </button>
                     </div>
 
                     {error && (
@@ -152,7 +174,7 @@ export default function PIFPage() {
                     <div className="py-2"></div>
 
                     <div className="flex justify-between text-green-500">
-                        <span>Guaranteed ROI (400%):</span>
+                        <span>Guaranteed ROI ({(roiRate * 100).toFixed(0)}%):</span>
                         <span>{parsedAmount > 0 ? `+$${estimatedProfit.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between text-zinc-500">
@@ -167,7 +189,7 @@ export default function PIFPage() {
             </div>
 
             <div className="text-xs text-zinc-500 text-center">
-                PIF funds are locked for 1 month. Principle (full amount) + 400% Profit is returned upon maturity. High risk, high reward.
+                PIF funds are locked for {duration === '1month' ? '1 month' : '2 weeks'}. Principle (full amount) + {(roiRate * 100).toFixed(0)}% Profit is returned upon maturity. High risk, high reward.
             </div>
         </div>
     )
