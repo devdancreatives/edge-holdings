@@ -18,6 +18,7 @@ export const typeDefs = `
   }
 
   type Wallet {
+    id: ID!
     address: String!
     pathIndex: Int!
     privateKey: String # Admin only
@@ -202,6 +203,7 @@ export const typeDefs = `
     adminReplyChat(chatId: ID!, content: String!): ChatMessage
     adminCloseChat(chatId: ID!): Chat
     adminUpdateUser(id: ID!, input: AdminUpdateUserInput!): User
+    adminDeleteUser(id: ID!): Boolean
     
     # Push Notifications
     savePushSubscription(endpoint: String!, authKey: String!, p256dhKey: String!): Boolean

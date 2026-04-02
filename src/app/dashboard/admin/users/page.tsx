@@ -1,12 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation } from '@apollo/client/react'
-import { GET_ADMIN_USERS, ADMIN_UPDATE_USER } from '@/graphql/queries'
-import { Edit2, X, Save, Check, Eye, EyeOff, ExternalLink, Lock } from 'lucide-react'
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client/react'
+import { GET_ADMIN_USERS, ADMIN_UPDATE_USER, GET_ADMIN_USERS_KEYS, ADMIN_DELETE_USER } from '@/graphql/queries'
+import { Edit2, X, Save, Check, Eye, EyeOff, ExternalLink, Lock, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { useLazyQuery } from '@apollo/client/react'
-import { GET_ADMIN_USERS_KEYS } from '@/graphql/queries'
 import { toast } from 'sonner'
 import { createClient } from '@supabase/supabase-js'
 
@@ -23,6 +21,7 @@ interface AdminUsersKeysData {
 export default function AdminUsersPage() {
     const { data, loading, refetch } = useQuery<any>(GET_ADMIN_USERS)
     const [updateUser] = useMutation(ADMIN_UPDATE_USER)
+    const [deleteUser] = useMutation(ADMIN_DELETE_USER)
 
     const [editingUser, setEditingUser] = useState<any>(null)
     const [formData, setFormData] = useState({
@@ -73,6 +72,23 @@ export default function AdminUsersPage() {
             toast.error('Failed to update user')
         } finally {
             setIsSaving(false)
+        }
+    }
+  
+    const handleDelete = async (userId: string, email: string) => {
+        if (!confirm(`Are you sure you want to permanently delete user ${email}? This action cannot be undone and will remove all their financial history.`)) {
+            return
+        }
+
+        try {
+            await deleteUser({
+                variables: { id: userId }
+            })
+            await refetch()
+            toast.success('User deleted successfully')
+        } catch (e) {
+            console.error(e)
+            toast.error('Failed to delete user')
         }
     }
 
@@ -221,13 +237,20 @@ export default function AdminUsersPage() {
                                     <td className="px-6 py-4 text-zinc-500 text-xs">
                                         {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
                                     </td>
-                                    <td className="px-6 py-4 text-right">
+                                    <td className="px-6 py-4 text-right flex justify-end gap-2">
                                         <button
                                             onClick={() => handleEdit(u)}
                                             className="p-1.5 rounded bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white transition-colors"
                                             title="Edit User"
                                         >
                                             <Edit2 size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(u.id, u.email)}
+                                            className="p-1.5 rounded bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors"
+                                            title="Delete User"
+                                        >
+                                            <Trash2 size={16} />
                                         </button>
                                     </td>
                                 </tr>

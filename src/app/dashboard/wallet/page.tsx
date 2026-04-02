@@ -45,6 +45,7 @@ export default function WalletPage() {
         onError: (error) => {
             console.error('Error creating wallet:', error)
             setCreating(false)
+            toast.error('Server error. Please try again.')
         }
     })
 

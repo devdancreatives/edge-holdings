@@ -564,3 +564,9 @@ export const GET_ADMIN_FEES = gql`
     }
   }
 `;
+
+export const ADMIN_DELETE_USER = gql`
+  mutation AdminDeleteUser($id: ID!) {
+    adminDeleteUser(id: $id)
+  }
+`;

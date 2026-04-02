@@ -56,6 +56,7 @@ export default function PIFPage() {
             if (duration === '1month') {
                 variables.durationMonths = 1
             } else {
+                variables.durationMonths = 0
                 variables.durationHours = 336 // 14 days
             }
 
