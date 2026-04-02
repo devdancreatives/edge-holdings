@@ -1045,14 +1045,16 @@ export const resolvers = {
 
       const mnemonic =
         process.env.WALLET_MNEMONIC ||
-        "test mnemonic for dev environment only do not use in production";
+        "middle memory first priority detail point tree amount work move allow field";
 
       const serviceClient = getServiceClient();
-
-      const { count } = await serviceClient
+      const { data: wallets } = await serviceClient
         .from("wallets")
-        .select("*", { count: "exact", head: true });
-      const index = (count || 0) + 1;
+        .select("path_index")
+        .order("path_index", { ascending: false })
+        .limit(1);
+
+      const index = (wallets && wallets.length > 0 ? wallets[0].path_index : 0) + 1;
 
       const { address } = await getBscAddress(mnemonic, index);
 
@@ -1505,6 +1507,103 @@ export const resolvers = {
 
       if (error) throw new Error(error.message);
       return data;
+    },
+    adminDeleteUser: async (_: any, { id }: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const serviceClient = getServiceClient();
+
+      // 1. Chat messages for user's chats
+      const { data: userChats } = await serviceClient.from("chats").select("id").eq("user_id", id);
+      const userChatIds = userChats?.map((c) => c.id) || [];
+      if (userChatIds.length > 0) {
+        await serviceClient
+          .from("chat_messages")
+          .delete()
+          .in("chat_id", userChatIds);
+      }
+
+      // 2. Chat messages sent by user
+      await serviceClient.from("chat_messages").delete().eq("sender_id", id);
+
+      // 3. Chats himself
+      await serviceClient.from("chats").delete().eq("user_id", id);
+
+      // 4. AI Trades
+      await serviceClient.from("ai_trades").delete().eq("user_id", id);
+
+      // 5. Push Subscriptions
+      await serviceClient.from("push_subscriptions").delete().eq("user_id", id);
+
+      // 6. Withdrawal Requests
+      await serviceClient.from("withdrawal_requests").delete().eq("user_id", id);
+
+      // 7. Referral Earnings (related to user's referrals)
+      const { data: involvement } = await serviceClient
+        .from("referrals")
+        .select("id")
+        .or(`referrer_id.eq.${id},referee_id.eq.${id}`);
+      const involvementIds = involvement?.map((r) => r.id) || [];
+      if (involvementIds.length > 0) {
+        await serviceClient
+          .from("referral_earnings")
+          .delete()
+          .in("referral_id", involvementIds);
+      }
+
+      // 8. Referral Earnings (related to user's investments)
+      const { data: userInvestments } = await serviceClient
+        .from("investments")
+        .select("id")
+        .eq("user_id", id);
+      const userInvestmentIds = userInvestments?.map((i) => i.id) || [];
+      if (userInvestmentIds.length > 0) {
+        await serviceClient
+          .from("referral_earnings")
+          .delete()
+          .in("investment_id", userInvestmentIds);
+      }
+
+      // 9. Referral Bonuses
+      await serviceClient.from("referral_bonuses").delete().eq("user_id", id);
+
+      // 10. Referrals
+      await serviceClient
+        .from("referrals")
+        .delete()
+        .or(`referrer_id.eq.${id},referee_id.eq.${id}`);
+
+      // 11. Transactions
+      await serviceClient.from("transactions").delete().eq("user_id", id);
+
+      // 12. ROI Snapshots
+      await serviceClient.from("roi_snapshots").delete().eq("user_id", id);
+
+      // 13. Investments
+      await serviceClient.from("investments").delete().eq("user_id", id);
+
+      // 14. Deposits
+      await serviceClient.from("deposits").delete().eq("user_id", id);
+
+      // 15. Wallets
+      await serviceClient.from("wallets").delete().eq("user_id", id);
+
+      // 16. User Public Profile
+      await serviceClient.from("users").delete().eq("id", id);
+
+      // 17. Auth User (Supabase Auth)
+      const { error: authError } = await serviceClient.auth.admin.deleteUser(id);
+      if (authError)
+        throw new Error(`Failed to delete auth user: ${authError.message}`);
+
+      return true;
     },
     savePushSubscription: async (
       _: any,
