@@ -48,6 +48,8 @@ export const typeDefs = `
     createdAt: DateTime
     profitPercent: Float # Calculated on the fly
     expectedProfit: Float # Calculated on the fly
+    isPaused: Boolean
+    pausedAt: DateTime
   }
 
   type ROISnapshot {
@@ -185,6 +187,7 @@ export const typeDefs = `
   type Mutation {
     createInvestment(amount: Float!, durationMonths: Int!, durationHours: Int, planType: String, roiRate: Float): Investment
     closeInvestment(id: ID!, includeRoi: Boolean): Investment
+    toggleInvestmentPause(id: ID!): Investment
     simulateDeposit(amount: Float!, txHash: String!): Deposit
 
     createMyWallet: Wallet

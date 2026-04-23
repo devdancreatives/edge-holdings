@@ -22,7 +22,8 @@ export async function GET(request: Request) {
     const { data: activeInvestments, error: fetchError } = await supabase
       .from("investments")
       .select("*")
-      .eq("status", "active");
+      .eq("status", "active")
+      .eq("is_paused", false);
 
     if (fetchError) throw fetchError;
 

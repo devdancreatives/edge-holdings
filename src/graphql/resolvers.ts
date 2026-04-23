@@ -716,6 +716,8 @@ export const resolvers = {
     expectedProfit: (parent: any) => parent.expectedProfit || 0,
     planType: (parent: any) => parent.plan_type,
     roiRate: (parent: any) => parent.roi_rate,
+    isPaused: (parent: any) => parent.is_paused || false,
+    pausedAt: (parent: any) => parent.paused_at,
   },
   Transaction: {
     createdAt: (parent: any) => parent.created_at,
@@ -995,6 +997,66 @@ export const resolvers = {
         body: `Your investment of $${inv.amount} has been closed by admin. $${totalReturned.toFixed(2)} credited to your balance${profit > 0 ? " (includes profit)" : ""}.`,
         url: "/dashboard/investments",
       });
+
+      return updatedInv;
+    },
+    toggleInvestmentPause: async (_: any, { id }: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const serviceClient = getServiceClient();
+
+      // 1. Fetch investment
+      const { data: inv, error: fetchError } = await serviceClient
+        .from("investments")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (fetchError || !inv) throw new Error("Investment not found");
+      if (inv.status !== "active") throw new Error("Investment is not active");
+
+      let updates: any = {};
+
+      if (inv.is_paused) {
+        // RESUME logic
+        const pausedAt = new Date(inv.paused_at).getTime();
+        const now = new Date().getTime();
+        const durationPausedMs = now - pausedAt;
+
+        const newEndDate = new Date(new Date(inv.end_date).getTime() + durationPausedMs);
+        const newLastPayoutDate = new Date(new Date(inv.last_payout_date || inv.start_date).getTime() + durationPausedMs);
+
+        updates = {
+          is_paused: false,
+          paused_at: null,
+          end_date: newEndDate.toISOString(),
+          last_payout_date: newLastPayoutDate.toISOString(),
+        };
+
+      } else {
+        // PAUSE logic
+        updates = {
+          is_paused: true,
+          paused_at: new Date().toISOString(),
+        };
+      }
+
+      const { data: updatedInv, error: updateError } = await serviceClient
+        .from("investments")
+        .update(updates)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (updateError) throw new Error(updateError.message);
 
       return updatedInv;
     },

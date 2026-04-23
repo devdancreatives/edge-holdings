@@ -1,14 +1,15 @@
 'use client'
 
 import { useQuery, useMutation } from '@apollo/client/react'
-import { GET_ADMIN_INVESTMENTS, CLOSE_INVESTMENT } from '@/graphql/queries'
-import { TrendingUp, User, XCircle, Loader2, CheckCircle2 } from 'lucide-react'
+import { GET_ADMIN_INVESTMENTS, CLOSE_INVESTMENT, TOGGLE_INVESTMENT_PAUSE } from '@/graphql/queries'
+import { TrendingUp, User, XCircle, Loader2, CheckCircle2, PauseCircle, PlayCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useState } from 'react'
 
 export default function AdminInvestmentsPage() {
     const { data, loading, refetch } = useQuery<any>(GET_ADMIN_INVESTMENTS, { pollInterval: 30000 })
     const [closeInvestment] = useMutation(CLOSE_INVESTMENT)
+    const [togglePause] = useMutation(TOGGLE_INVESTMENT_PAUSE)
     const [processingId, setProcessingId] = useState<string | null>(null)
     const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
@@ -25,6 +26,19 @@ export default function AdminInvestmentsPage() {
             refetch()
         } catch (error: any) {
             toast.error(error.message || 'Failed to close investment')
+        } finally {
+            setProcessingId(null)
+        }
+    }
+
+    const handleTogglePause = async (id: string, currentlyPaused: boolean) => {
+        setProcessingId(`pause-${id}`)
+        try {
+            await togglePause({ variables: { id } })
+            toast.success(`Investment ${currentlyPaused ? 'resumed' : 'paused'} successfully`)
+            refetch()
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to toggle pause status')
         } finally {
             setProcessingId(null)
         }
@@ -75,9 +89,9 @@ export default function AdminInvestmentsPage() {
                                         {new Date(inv.endDate).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${inv.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${inv.isPaused ? 'bg-orange-500/10 text-orange-500' : inv.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                                             }`}>
-                                            {inv.status.toUpperCase()}
+                                            {inv.isPaused ? 'PAUSED' : inv.status.toUpperCase()}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
@@ -107,18 +121,34 @@ export default function AdminInvestmentsPage() {
                                                         </button>
                                                     </>
                                                 ) : (
-                                                    <button
-                                                        onClick={() => setConfirmingId(inv.id)}
-                                                        disabled={processingId === inv.id}
-                                                        className="inline-flex items-center gap-1 text-red-500 hover:text-red-400 disabled:opacity-50 transition-colors font-medium"
-                                                    >
-                                                        {processingId === inv.id ? (
-                                                            <Loader2 size={14} className="animate-spin" />
-                                                        ) : (
-                                                            <XCircle size={14} />
-                                                        )}
-                                                        Close
-                                                    </button>
+                                                    <div className="flex gap-2 items-center">
+                                                        <button
+                                                            onClick={() => handleTogglePause(inv.id, inv.isPaused)}
+                                                            disabled={processingId === `pause-${inv.id}` || processingId === inv.id}
+                                                            className={`inline-flex items-center gap-1 hover:opacity-80 disabled:opacity-50 transition-colors font-medium ${inv.isPaused ? 'text-green-500' : 'text-orange-500'}`}
+                                                        >
+                                                            {processingId === `pause-${inv.id}` ? (
+                                                                <Loader2 size={14} className="animate-spin" />
+                                                            ) : inv.isPaused ? (
+                                                                <PlayCircle size={14} />
+                                                            ) : (
+                                                                <PauseCircle size={14} />
+                                                            )}
+                                                            {inv.isPaused ? 'Resume' : 'Pause'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setConfirmingId(inv.id)}
+                                                            disabled={processingId === inv.id || processingId === `pause-${inv.id}`}
+                                                            className="inline-flex items-center gap-1 text-red-500 hover:text-red-400 disabled:opacity-50 transition-colors font-medium"
+                                                        >
+                                                            {processingId === inv.id ? (
+                                                                <Loader2 size={14} className="animate-spin" />
+                                                            ) : (
+                                                                <XCircle size={14} />
+                                                            )}
+                                                            Close
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </div>
                                         )}

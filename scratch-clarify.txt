@@ -1,0 +1,1 @@
+I will ask the user to clarify if they mean pausing individual investments or globally pausing the investment feature.

@@ -502,6 +502,7 @@ export const GET_ADMIN_INVESTMENTS = gql`
       startDate
       endDate
       status
+      isPaused
       user {
         email
         fullName
@@ -570,3 +571,14 @@ export const ADMIN_DELETE_USER = gql`
     adminDeleteUser(id: $id)
   }
 `;
+
+export const TOGGLE_INVESTMENT_PAUSE = gql`
+  mutation ToggleInvestmentPause($id: ID!) {
+    toggleInvestmentPause(id: $id) {
+      id
+      isPaused
+      endDate
+    }
+  }
+`;
+
