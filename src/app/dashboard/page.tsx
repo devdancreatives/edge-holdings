@@ -18,8 +18,10 @@ export default function DashboardPage() {
         status: string
         createdAt: string
         endDate: string
+        isPaused: boolean
     }>
     const activeInvestments = investments.filter(inv => inv.status === 'active')
+    const pausedCount = activeInvestments.filter(inv => inv.isPaused).length
     const totalInvested = activeInvestments.reduce((sum, inv) => sum + inv.amount, 0)
     const balance = user?.availableBalance || 0
     const roiData = (data?.myROI || []) as Array<{ profitAmount: number }>
@@ -89,7 +91,12 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-bold text-purple-500">{activeInvestments.length}</span>
-                        <span className="text-sm text-zinc-500">Active</span>
+                        <div className="flex flex-col">
+                            <span className="text-sm text-zinc-500">Active</span>
+                            {pausedCount > 0 && (
+                                <span className="text-[10px] text-amber-500 font-bold leading-none">({pausedCount} PAUSED)</span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

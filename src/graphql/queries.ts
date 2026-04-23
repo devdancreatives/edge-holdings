@@ -29,6 +29,7 @@ export const GET_MY_INVESTMENTS = gql`
       startDate
       endDate
       status
+      isPaused
     }
   }
 `;
@@ -146,6 +147,7 @@ export const CREATE_INVESTMENT = gql`
       startDate
       endDate
       status
+      isPaused
     }
   }
 `;
@@ -243,6 +245,7 @@ export const GET_DASHBOARD_DATA = gql`
       amount
       status
       durationMonths
+      isPaused
     }
     myROI {
       date

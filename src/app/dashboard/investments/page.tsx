@@ -13,6 +13,8 @@ export default function InvestmentsPage() {
         switch (status) {
             case 'active':
                 return 'bg-green-500/10 text-green-500 border-green-500/20'
+            case 'paused':
+                return 'bg-amber-500/10 text-amber-500 border-amber-500/20'
             case 'completed':
                 return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
             case 'cancelled':
@@ -81,10 +83,20 @@ export default function InvestmentsPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(investment.status)}`}>
-                                        {investment.status}
-                                    </span>
+                                    <div className="flex flex-col items-end gap-2">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(investment.isPaused ? 'paused' : investment.status)}`}>
+                                            {investment.isPaused ? 'PAUSED' : investment.status.toUpperCase()}
+                                        </span>
+                                    </div>
                                 </div>
+
+                                {investment.isPaused && (
+                                    <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                        <p className="text-xs text-amber-500 leading-relaxed">
+                                            This investment is currently paused by administration. ROI accumulation is temporarily suspended and your end date will be extended.
+                                        </p>
+                                    </div>
+                                )}
 
                                 <div className="space-y-3 mb-4">
                                     <div className="flex items-center gap-2 text-sm">
@@ -118,7 +130,11 @@ export default function InvestmentsPage() {
                                         </div>
                                         <div className="h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-linear-to-r from-yellow-500 to-yellow-600 transition-all duration-500 rounded-full"
+                                                className={`h-full transition-all duration-500 rounded-full ${
+                                                    investment.isPaused 
+                                                    ? 'bg-zinc-400 dark:bg-zinc-600' 
+                                                    : 'bg-linear-to-r from-yellow-500 to-yellow-600'
+                                                }`}
                                                 style={{ width: `${progress}%` }}
                                             />
                                         </div>
