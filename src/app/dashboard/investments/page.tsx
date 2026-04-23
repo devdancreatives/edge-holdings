@@ -92,8 +92,8 @@ export default function InvestmentsPage() {
 
                                 {investment.isPaused && (
                                     <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                                        <p className="text-xs text-amber-500 leading-relaxed">
-                                            This investment is currently paused by administration. ROI accumulation is temporarily suspended and your end date will be extended.
+                                        <p className="text-xs text-amber-500 leading-relaxed font-medium">
+                                            Your investment is currently paused. An immediate account upgrade is required to prevent potential losses.
                                         </p>
                                     </div>
                                 )}
