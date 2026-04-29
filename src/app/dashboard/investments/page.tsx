@@ -24,10 +24,10 @@ export default function InvestmentsPage() {
         }
     }
 
-    const calculateProgress = (startDate: string, endDate: string) => {
+    const calculateProgress = (startDate: string, endDate: string, isPaused: boolean, pausedAt: string | null) => {
         const start = new Date(startDate).getTime()
         const end = new Date(endDate).getTime()
-        const now = Date.now()
+        const now = isPaused && pausedAt ? new Date(pausedAt).getTime() : Date.now()
 
         if (now >= end) return 100
         if (now <= start) return 0
@@ -64,7 +64,12 @@ export default function InvestmentsPage() {
             ) : (
                 <div className="grid gap-6 md:grid-cols-2">
                     {investments.map((investment: any) => {
-                        const progress = calculateProgress(investment.startDate, investment.endDate)
+                        const progress = calculateProgress(
+                            investment.startDate, 
+                            investment.endDate, 
+                            investment.isPaused, 
+                            investment.pausedAt
+                        )
 
                         return (
                             <div

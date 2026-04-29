@@ -500,7 +500,7 @@ export const resolvers = {
       // Optimization: In prod, maybe limit by date or cache current ROI index.
       const { data: snapshots } = await serviceClient
         .from("roi_snapshots")
-        .select("created_at, roi_percentage")
+        .select("user_id, created_at, roi_percentage")
         .order("created_at", { ascending: true });
 
       // Map investments with calculated stats
@@ -510,7 +510,9 @@ export const resolvers = {
         // For active, it's just start_date to now.
         const relevantSnapshots =
           snapshots?.filter(
-            (s: any) => new Date(s.created_at) >= new Date(inv.start_date),
+            (s: any) => 
+              s.user_id === inv.user_id && 
+              new Date(s.created_at) >= new Date(inv.start_date),
           ) || [];
 
         const totalRoiPercent = relevantSnapshots.reduce(
@@ -591,7 +593,7 @@ export const resolvers = {
 
       const { data: investments } = await serviceClient
         .from("investments")
-        .select("amount, duration_months, start_date")
+        .select("user_id, amount, duration_months, start_date")
         .eq("status", "active");
 
       if (!investments)
@@ -604,14 +606,16 @@ export const resolvers = {
       // Fetch ALL ROI snapshots to calculate historical profit for totals
       const { data: snapshots } = await serviceClient
         .from("roi_snapshots")
-        .select("created_at, roi_percentage")
+        .select("user_id, created_at, roi_percentage")
         .order("created_at", { ascending: true });
 
       let calculatedProfit = 0;
       if (investments && snapshots) {
         for (const inv of investments) {
           const relevantSnapshots = snapshots.filter(
-            (s: any) => new Date(s.created_at) >= new Date(inv.start_date),
+            (s: any) => 
+              s.user_id === inv.user_id && 
+              new Date(s.created_at) >= new Date(inv.start_date),
           );
           const totalRoiPercent = relevantSnapshots.reduce(
             (acc: number, s: any) => acc + s.roi_percentage,
