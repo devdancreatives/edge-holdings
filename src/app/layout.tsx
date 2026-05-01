@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EdgePoint Holdings - AI Powered Trading",
+  title: "EdgePoint Holdings - AI Powered Mining",
   description: "Advanced AI-Driven Crypto Mining Platform & Investment Management",
   icons: {
     icon: "/favicon-eh-plain.png",
