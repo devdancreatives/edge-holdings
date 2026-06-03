@@ -85,11 +85,15 @@ export default function TransactionsPage() {
                                         </div>
                                         <div>
                                             <p className="font-medium text-zinc-900 dark:text-white capitalize">
-                                                {tx.type.replace('_', ' ')}
+                                                {tx.type === 'admin_adjustment'
+                                                    ? (tx.description || 'Admin Adjustment')
+                                                    : tx.type.replace(/_/g, ' ')}
                                             </p>
-                                            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                                                {tx.description || 'No description'}
-                                            </p>
+                                            {tx.type !== 'admin_adjustment' && (
+                                                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                                                    {tx.description || 'No description'}
+                                                </p>
+                                            )}
                                             <p className="text-xs text-zinc-500 mt-1">
                                                 {new Date(tx.createdAt).toLocaleString()}
                                             </p>
