@@ -73,7 +73,7 @@ export default function TransactionsPage() {
                     </div>
                 ) : (
                     <div className="divide-y divide-zinc-800">
-                        {transactions.map((tx: { id: string; type: string; amount: number; description?: string; createdAt: string }) => (
+                        {transactions.map((tx: { id: string; type: string; amount: number; title?: string; description?: string; createdAt: string }) => (
                             <div
                                 key={tx.id}
                                 className="p-4 hover:bg-zinc-100 dark:bg-zinc-800/30 transition-all cursor-pointer group"
@@ -86,12 +86,12 @@ export default function TransactionsPage() {
                                         <div>
                                             <p className="font-medium text-zinc-900 dark:text-white capitalize">
                                                 {tx.type === 'admin_adjustment'
-                                                    ? (tx.description || 'Admin Adjustment')
+                                                    ? (tx.title || tx.type.replace(/_/g, ' '))
                                                     : tx.type.replace(/_/g, ' ')}
                                             </p>
-                                            {tx.type !== 'admin_adjustment' && (
+                                            {(tx.type === 'admin_adjustment' ? tx.description : (tx.description || null)) && (
                                                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                                                    {tx.description || 'No description'}
+                                                    {tx.description}
                                                 </p>
                                             )}
                                             <p className="text-xs text-zinc-500 mt-1">

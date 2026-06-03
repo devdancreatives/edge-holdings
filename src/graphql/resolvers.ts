@@ -1625,7 +1625,8 @@ export const resolvers = {
           user_id: id,
           type: "admin_adjustment",
           amount: diff,
-          description: input.transactionTitle.trim(),
+          title: input.transactionTitle.trim(),
+          description: input.transactionDescription?.trim() || null,
           created_at: new Date().toISOString(),
         });
       }

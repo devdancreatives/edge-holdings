@@ -62,6 +62,7 @@ export const typeDefs = `
     id: ID!
     type: String!
     amount: Float!
+    title: String
     description: String
     createdAt: DateTime!
     user: User
@@ -183,6 +184,7 @@ export const typeDefs = `
     role: String
     balance: Float
     transactionTitle: String
+    transactionDescription: String
   }
 
   type Mutation {

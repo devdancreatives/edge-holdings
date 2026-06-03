@@ -30,7 +30,8 @@ export default function AdminUsersPage() {
         email: '',
         role: '',
         balance: '',
-        transactionTitle: ''
+        transactionTitle: '',
+        transactionDescription: ''
     })
     const [visibleKeys, setVisibleKeys] = useState<Record<string, string>>({}) // Map userId -> privateKey
     const [verificationModal, setVerificationModal] = useState<{ isOpen: boolean, userId: string | null }>({ isOpen: false, userId: null })
@@ -47,7 +48,8 @@ export default function AdminUsersPage() {
             email: user.email || '',
             role: user.role || 'user',
             balance: user.balance?.toString() || '0',
-            transactionTitle: ''
+            transactionTitle: '',
+            transactionDescription: ''
         })
     }
 
@@ -72,7 +74,10 @@ export default function AdminUsersPage() {
                         email: formData.email,
                         role: formData.role,
                         balance: newBalance,
-                        ...(balanceChanged ? { transactionTitle: formData.transactionTitle.trim() } : {})
+                        ...(balanceChanged ? {
+                            transactionTitle: formData.transactionTitle.trim(),
+                            transactionDescription: formData.transactionDescription.trim() || undefined
+                        } : {})
                     }
                 }
             })
@@ -252,7 +257,7 @@ export default function AdminUsersPage() {
                                     <td className="px-6 py-4 text-right flex justify-end gap-2">
                                         <button
                                             onClick={() => handleEdit(u)}
-                                            className="p-1.5 rounded bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white transition-colors"
+                                            className="p-1.5 rounded bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                                             title="Edit User"
                                         >
                                             <Edit2 size={16} />
@@ -304,7 +309,7 @@ export default function AdminUsersPage() {
                                 <button
                                     type="button"
                                     onClick={() => setVerificationModal({ isOpen: false, userId: null })}
-                                    className="px-4 py-2 rounded text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white text-sm"
+                                    className="px-4 py-2 rounded text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white text-sm"
                                 >
                                     Cancel
                                 </button>
@@ -327,7 +332,7 @@ export default function AdminUsersPage() {
                     <div className="w-full max-w-md rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden">
                         <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
                             <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Edit User</h2>
-                            <button onClick={() => setEditingUser(null)} className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white">
+                            <button onClick={() => setEditingUser(null)} className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
                                 <X size={20} />
                             </button>
                         </div>
@@ -378,21 +383,30 @@ export default function AdminUsersPage() {
                                     </label>
                                     <input
                                         type="text"
-                                        placeholder="e.g. Manual credit, Bonus, Correction"
+                                        placeholder="e.g. Bonus Payment, Manual Credit"
                                         value={formData.transactionTitle}
                                         onChange={(e) => setFormData({ ...formData, transactionTitle: e.target.value })}
                                         className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500"
                                     />
-                                    <p className="text-xs text-zinc-500 mt-1">
-                                        This will appear in the user&apos;s transaction history.
-                                    </p>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                                        Transaction Description
+                                    </label>
+                                    <textarea
+                                        rows={2}
+                                        placeholder="Optional details about this adjustment"
+                                        value={formData.transactionDescription}
+                                        onChange={(e) => setFormData({ ...formData, transactionDescription: e.target.value })}
+                                        className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500 resize-none"
+                                    />
                                 </div>
                             )}
                         </div>
                         <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex justify-end gap-3">
                             <button
                                 onClick={() => setEditingUser(null)}
-                                className="px-4 py-2 rounded text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white text-sm"
+                                className="px-4 py-2 rounded text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white text-sm"
                             >
                                 Cancel
                             </button>

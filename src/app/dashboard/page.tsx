@@ -30,6 +30,7 @@ export default function DashboardPage() {
         id: string
         type: string
         amount: number
+        title?: string
         createdAt: string
     }>
 
@@ -139,17 +140,23 @@ export default function DashboardPage() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-zinc-900 dark:text-white capitalize">
-                                                {tx.type.replace('_', ' ')}
+                                                {tx.type === 'admin_adjustment'
+                                                    ? (tx.title || 'Admin Adjustment')
+                                                    : tx.type.replace(/_/g, ' ')}
                                             </p>
                                             <p className="text-xs text-zinc-500">
                                                 {new Date(tx.createdAt).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
-                                    <p className={`text-sm font-semibold ${tx.type === 'deposit' || tx.type === 'profit_payout' ? 'text-green-500' : 'text-red-500'
+                                    <p className={`text-sm font-semibold ${tx.type === 'admin_adjustment'
+                                            ? (tx.amount >= 0 ? 'text-green-500' : 'text-red-500')
+                                            : (tx.type === 'deposit' || tx.type === 'profit_payout' ? 'text-green-500' : 'text-red-500')
                                         }`}>
-                                        {tx.type === 'withdrawal' || tx.type === 'investment_start' ? '-' : '+'}
-                                        ${tx.amount.toLocaleString()}
+                                        {tx.type === 'admin_adjustment'
+                                            ? (tx.amount >= 0 ? '+' : '')
+                                            : (tx.type === 'withdrawal' || tx.type === 'investment_start' ? '-' : '+')}
+                                        ${Math.abs(tx.amount).toLocaleString()}
                                     </p>
                                 </div>
                             ))

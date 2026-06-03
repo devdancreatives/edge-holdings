@@ -54,6 +54,7 @@ export const GET_MY_TRANSACTIONS = gql`
       id
       type
       amount
+      title
       description
       createdAt
     }
@@ -257,6 +258,7 @@ export const GET_DASHBOARD_DATA = gql`
       id
       type
       amount
+      title
       description
       createdAt
     }
@@ -529,8 +531,8 @@ export const ADMIN_UPDATE_USER = gql`
 `;
 
 export const ADMIN_ADJUST_BALANCE = gql`
-  mutation AdminAdjustBalance($id: ID!, $balance: Float!, $transactionTitle: String!) {
-    adminUpdateUser(id: $id, input: { balance: $balance, transactionTitle: $transactionTitle }) {
+  mutation AdminAdjustBalance($id: ID!, $balance: Float!, $transactionTitle: String!, $transactionDescription: String) {
+    adminUpdateUser(id: $id, input: { balance: $balance, transactionTitle: $transactionTitle, transactionDescription: $transactionDescription }) {
       id
       balance
     }
@@ -554,6 +556,7 @@ export const GET_ADMIN_TRANSACTIONS = gql`
       id
       type
       amount
+      title
       description
       createdAt
       user {

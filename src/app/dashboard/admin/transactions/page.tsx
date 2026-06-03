@@ -67,7 +67,12 @@ export default function AdminTransactionsPage() {
                                             {isPositive ? '+' : ''}{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
                                         </td>
                                         <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400">
-                                            {tx.description}
+                                            {tx.type === 'admin_adjustment' ? (
+                                                <div>
+                                                    <div className="text-zinc-900 dark:text-white font-medium">{tx.title}</div>
+                                                    {tx.description && <div className="text-xs text-zinc-500 mt-0.5">{tx.description}</div>}
+                                                </div>
+                                            ) : tx.description}
                                         </td>
                                     </tr>
                                 )
