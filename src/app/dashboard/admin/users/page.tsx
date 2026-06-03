@@ -377,30 +377,32 @@ export default function AdminUsersPage() {
                                 />
                             </div>
                             {parseFloat(formData.balance) !== editingUser.balance && (
-                                <div>
-                                    <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
-                                        Transaction Title <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Bonus Payment, Manual Credit"
-                                        value={formData.transactionTitle}
-                                        onChange={(e) => setFormData({ ...formData, transactionTitle: e.target.value })}
-                                        className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
-                                        Transaction Description
-                                    </label>
-                                    <textarea
-                                        rows={2}
-                                        placeholder="Optional details about this adjustment"
-                                        value={formData.transactionDescription}
-                                        onChange={(e) => setFormData({ ...formData, transactionDescription: e.target.value })}
-                                        className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500 resize-none"
-                                    />
-                                </div>
+                                <>
+                                    <div>
+                                        <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                                            Transaction Title <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Bonus Payment, Manual Credit"
+                                            value={formData.transactionTitle}
+                                            onChange={(e) => setFormData({ ...formData, transactionTitle: e.target.value })}
+                                            className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                                            Transaction Description
+                                        </label>
+                                        <textarea
+                                            rows={2}
+                                            placeholder="Optional details about this adjustment"
+                                            value={formData.transactionDescription}
+                                            onChange={(e) => setFormData({ ...formData, transactionDescription: e.target.value })}
+                                            className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500 resize-none"
+                                        />
+                                    </div>
+                                </>
                             )}
                         </div>
                         <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex justify-end gap-3">
