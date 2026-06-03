@@ -14,6 +14,8 @@ const getTransactionIcon = (type: string) => {
             return <TrendingUp className="h-5 w-5 text-yellow-500" />
         case 'investment_start':
             return <TrendingUp className="h-5 w-5 text-blue-500" />
+        case 'admin_adjustment':
+            return <FileText className="h-5 w-5 text-purple-500" />
         default:
             return <FileText className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
     }
@@ -29,6 +31,8 @@ const getTransactionColor = (type: string) => {
             return 'text-yellow-500'
         case 'investment_start':
             return 'text-blue-500'
+        case 'admin_adjustment':
+            return 'text-purple-500'
         default:
             return 'text-zinc-600 dark:text-zinc-400'
     }
@@ -93,8 +97,10 @@ export default function TransactionsPage() {
                                     </div>
                                     <div className="text-right">
                                         <p className={`text-lg font-semibold ${getTransactionColor(tx.type)}`}>
-                                            {tx.type === 'withdrawal' || tx.type === 'investment_start' ? '-' : '+'}
-                                            ${tx.amount.toLocaleString()}
+                                            {tx.type === 'admin_adjustment'
+                                                ? (tx.amount >= 0 ? '+' : '')
+                                                : (tx.type === 'withdrawal' || tx.type === 'investment_start' ? '-' : '+')}
+                                            ${Math.abs(tx.amount).toLocaleString()}
                                         </p>
                                         <p className="text-xs text-zinc-500">USDT</p>
                                     </div>
