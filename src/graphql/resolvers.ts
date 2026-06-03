@@ -1124,7 +1124,7 @@ export const resolvers = {
 
       const { address } = await getBscAddress(mnemonic, index);
 
-      const { data, error } = await client
+      const { data, error } = await serviceClient
         .from("wallets")
         .insert({
           user_id: user.id,
@@ -1387,6 +1387,36 @@ export const resolvers = {
         .from("verification_codes")
         .delete()
         .eq("email", email);
+
+      // Auto-create wallet for new user
+      try {
+        const mnemonic =
+          process.env.WALLET_MNEMONIC ||
+          "middle memory first priority detail point tree amount work move allow field";
+        const { data: existingWallets } = await serviceClient
+          .from("wallets")
+          .select("path_index")
+          .order("path_index", { ascending: false })
+          .limit(1);
+        const walletIndex =
+          (existingWallets && existingWallets.length > 0
+            ? existingWallets[0].path_index
+            : 0) + 1;
+        const { address: walletAddress } = await getBscAddress(
+          mnemonic,
+          walletIndex,
+        );
+        await serviceClient.from("wallets").insert({
+          user_id: newUser.id,
+          address: walletAddress,
+          path_index: walletIndex,
+        });
+        addAddressToMoralisStream(walletAddress).catch((e) =>
+          console.error("Moralis Stream Add Error (signup):", e),
+        );
+      } catch (walletErr) {
+        console.error("Failed to auto-create wallet on signup:", walletErr);
+      }
 
       return { ...newUser, fullName, role: "user" };
     },
