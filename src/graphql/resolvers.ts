@@ -852,6 +852,9 @@ export const resolvers = {
       const fee = amount * FEE_PERCENTAGE;
       const totalDeduction = amount + fee;
 
+      if (amount < 500)
+        throw new Error("Minimum investment amount is $500");
+
       const balance = await getAvailableBalance(client, user.id);
       if (balance < totalDeduction)
         throw new Error(
@@ -879,7 +882,7 @@ export const resolvers = {
           last_payout_date: startDate.toISOString(),
           status: "active",
           plan_type: planType || "standard",
-          roi_rate: roiRate || 0.25,
+          roi_rate: roiRate || 2.0,
         })
         .select()
         .single();
@@ -1588,6 +1591,19 @@ export const resolvers = {
       const serviceClient = getServiceClient();
 
       // Helper to convert camelCase to snake_case
+      if (input.balance !== undefined && !input.transactionTitle?.trim())
+        throw new Error("Transaction title is required when adjusting balance");
+
+      let prevBalance = 0;
+      if (input.balance !== undefined) {
+        const { data: prevUser } = await serviceClient
+          .from("users")
+          .select("balance")
+          .eq("id", id)
+          .single();
+        prevBalance = prevUser?.balance ?? 0;
+      }
+
       const updates: any = {};
       if (input.fullName !== undefined) updates.full_name = input.fullName;
       if (input.email !== undefined) updates.email = input.email;
@@ -1602,6 +1618,18 @@ export const resolvers = {
         .single();
 
       if (error) throw new Error(error.message);
+
+      if (input.balance !== undefined) {
+        const diff = input.balance - prevBalance;
+        await serviceClient.from("transactions").insert({
+          user_id: id,
+          type: "admin_adjustment",
+          amount: diff,
+          description: input.transactionTitle.trim(),
+          created_at: new Date().toISOString(),
+        });
+      }
+
       return data;
     },
     adminDeleteUser: async (_: any, { id }: any, context: any) => {

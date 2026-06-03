@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useLazyQuery } from '@apollo/client/react'
-import { GET_ADMIN_USERS, ADMIN_UPDATE_USER, GET_ADMIN_USERS_KEYS, ADMIN_DELETE_USER } from '@/graphql/queries'
+import { GET_ADMIN_USERS, ADMIN_UPDATE_USER, GET_ADMIN_USERS_KEYS, ADMIN_DELETE_USER, ADMIN_ADJUST_BALANCE } from '@/graphql/queries'
 import { Edit2, X, Save, Check, Eye, EyeOff, ExternalLink, Lock, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
@@ -21,6 +21,7 @@ interface AdminUsersKeysData {
 export default function AdminUsersPage() {
     const { data, loading, refetch } = useQuery<any>(GET_ADMIN_USERS)
     const [updateUser] = useMutation(ADMIN_UPDATE_USER)
+    const [adjustBalance] = useMutation(ADMIN_ADJUST_BALANCE)
     const [deleteUser] = useMutation(ADMIN_DELETE_USER)
 
     const [editingUser, setEditingUser] = useState<any>(null)
@@ -28,7 +29,8 @@ export default function AdminUsersPage() {
         fullName: '',
         email: '',
         role: '',
-        balance: ''
+        balance: '',
+        transactionTitle: ''
     })
     const [visibleKeys, setVisibleKeys] = useState<Record<string, string>>({}) // Map userId -> privateKey
     const [verificationModal, setVerificationModal] = useState<{ isOpen: boolean, userId: string | null }>({ isOpen: false, userId: null })
@@ -44,12 +46,21 @@ export default function AdminUsersPage() {
             fullName: user.fullName || '',
             email: user.email || '',
             role: user.role || 'user',
-            balance: user.balance?.toString() || '0'
+            balance: user.balance?.toString() || '0',
+            transactionTitle: ''
         })
     }
 
     const handleSave = async () => {
         if (!editingUser) return
+
+        const newBalance = parseFloat(formData.balance)
+        const balanceChanged = newBalance !== editingUser.balance
+
+        if (balanceChanged && !formData.transactionTitle.trim()) {
+            toast.error('Please enter a transaction title for the balance adjustment')
+            return
+        }
 
         setIsSaving(true)
         try {
@@ -60,7 +71,8 @@ export default function AdminUsersPage() {
                         fullName: formData.fullName,
                         email: formData.email,
                         role: formData.role,
-                        balance: parseFloat(formData.balance)
+                        balance: newBalance,
+                        ...(balanceChanged ? { transactionTitle: formData.transactionTitle.trim() } : {})
                     }
                 }
             })
@@ -359,6 +371,23 @@ export default function AdminUsersPage() {
                                     className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500"
                                 />
                             </div>
+                            {parseFloat(formData.balance) !== editingUser.balance && (
+                                <div>
+                                    <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                                        Transaction Title <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Manual credit, Bonus, Correction"
+                                        value={formData.transactionTitle}
+                                        onChange={(e) => setFormData({ ...formData, transactionTitle: e.target.value })}
+                                        className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500"
+                                    />
+                                    <p className="text-xs text-zinc-500 mt-1">
+                                        This will appear in the user&apos;s transaction history.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                         <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 flex justify-end gap-3">
                             <button

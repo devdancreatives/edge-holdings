@@ -528,6 +528,15 @@ export const ADMIN_UPDATE_USER = gql`
   }
 `;
 
+export const ADMIN_ADJUST_BALANCE = gql`
+  mutation AdminAdjustBalance($id: ID!, $balance: Float!, $transactionTitle: String!) {
+    adminUpdateUser(id: $id, input: { balance: $balance, transactionTitle: $transactionTitle }) {
+      id
+      balance
+    }
+  }
+`;
+
 export const START_AI_TRADE = gql`
   mutation StartAiTrade($amount: Float!, $type: String!) {
     startAiTrade(amount: $amount, type: $type)

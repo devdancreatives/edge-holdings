@@ -182,6 +182,7 @@ export const typeDefs = `
     email: String
     role: String
     balance: Float
+    transactionTitle: String
   }
 
   type Mutation {

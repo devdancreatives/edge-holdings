@@ -64,7 +64,7 @@ export default function InvestPage() {
         maturityDate.setHours(maturityDate.getHours() + 1)
     } else {
         const durationNum = parseInt(duration)
-        estimatedProfit = parsedAmount * 0.25 * durationNum // 25% per month * duration
+        estimatedProfit = parsedAmount * 2.0 * durationNum // 200% per month * duration
         maturityDate.setMonth(maturityDate.getMonth() + durationNum)
     }
 
@@ -85,9 +85,9 @@ export default function InvestPage() {
                             type="number"
                             step="0.01"
                             required
-                            min="10"
+                            min="500"
                             className="mt-2 block w-full rounded-lg border border-zinc-700 bg-zinc-100 dark:bg-zinc-800/50 px-3 py-2 text-zinc-900 dark:text-white placeholder-zinc-500 focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500"
-                            placeholder="1000.00"
+                            placeholder="500.00"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                         />
@@ -169,7 +169,7 @@ export default function InvestPage() {
                     <div className="py-2"></div>
 
                     <div className="flex justify-between text-green-500">
-                        <span>Est. ROI ({duration === '1h' ? '0.1%' : '25%'}):</span>
+                        <span>Est. ROI ({duration === '1h' ? '0.1%' : '200%'}):</span>
                         <span>{parsedAmount > 0 ? `+$${estimatedProfit.toFixed(2)}` : '-'}</span>
                     </div>
                     <div className="flex justify-between text-zinc-500">

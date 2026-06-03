@@ -47,7 +47,7 @@ export async function GET(request: Request) {
 
       if (daysToPay >= 1) {
         let totalDailyProfit = 0;
-        const ROI_PERCENTAGE_PER_MONTH_DEFAULT = 0.25;
+        const ROI_PERCENTAGE_PER_MONTH_DEFAULT = 2.0;
         const rateToUse = inv.roi_rate || ROI_PERCENTAGE_PER_MONTH_DEFAULT;
 
         // Formula: ROI is per month. Monthly Profit = Amount * Rate. Daily Profit = Monthly Profit / 30.
