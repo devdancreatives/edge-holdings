@@ -1600,21 +1600,33 @@ export const resolvers = {
       if (input.balance !== undefined && !input.transactionTitle?.trim())
         throw new Error("Transaction title is required when adjusting balance");
 
-      let prevBalance = 0;
+      let prevAdjustment = 0;
+      let currentAvailable = 0;
+      const updates: any = {};
+      if (input.fullName !== undefined) updates.full_name = input.fullName;
+      if (input.email !== undefined) updates.email = input.email;
+      if (input.role !== undefined) updates.role = input.role;
+
       if (input.balance !== undefined) {
+        // Fetch current manual offset stored in users.balance
         const { data: prevUser } = await serviceClient
           .from("users")
           .select("balance")
           .eq("id", id)
           .single();
-        prevBalance = prevUser?.balance ?? 0;
-      }
+        prevAdjustment = prevUser?.balance ?? 0;
 
-      const updates: any = {};
-      if (input.fullName !== undefined) updates.full_name = input.fullName;
-      if (input.email !== undefined) updates.email = input.email;
-      if (input.role !== undefined) updates.role = input.role;
-      if (input.balance !== undefined) updates.balance = input.balance;
+        // Compute the full available balance BEFORE this adjustment.
+        // users.balance is an OFFSET on top of the computed base:
+        //   availableBalance = offset + (deposits + roi - investments - withdrawals)
+        // To make availableBalance == desiredTotal without double-counting:
+        //   new_offset = desiredTotal - computedBase
+        //              = desiredTotal - (currentAvailable - prevAdjustment)
+        currentAvailable = await getAvailableBalance(serviceClient, id);
+        const computedBase = currentAvailable - prevAdjustment;
+        const newAdjustment = input.balance - computedBase;
+        updates.balance = newAdjustment;
+      }
 
       const { data, error } = await serviceClient
         .from("users")
@@ -1626,11 +1638,12 @@ export const resolvers = {
       if (error) throw new Error(error.message);
 
       if (input.balance !== undefined) {
-        const diff = input.balance - prevBalance;
+        // The ledger amount is the actual change to the user's visible balance
+        const ledgerAmount = input.balance - currentAvailable;
         await serviceClient.from("transactions").insert({
           user_id: id,
           type: "admin_adjustment",
-          amount: diff,
+          amount: ledgerAmount,
           title: input.transactionTitle.trim(),
           description: input.transactionDescription?.trim() || null,
           created_at: new Date().toISOString(),
