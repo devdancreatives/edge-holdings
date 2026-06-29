@@ -47,7 +47,7 @@ export default function AdminUsersPage() {
             fullName: user.fullName || '',
             email: user.email || '',
             role: user.role || 'user',
-            balance: user.balance?.toString() || '0',
+            balance: user.availableBalance?.toString() || '0',
             transactionTitle: '',
             transactionDescription: ''
         })
@@ -57,7 +57,8 @@ export default function AdminUsersPage() {
         if (!editingUser) return
 
         const newBalance = parseFloat(formData.balance)
-        const balanceChanged = newBalance !== editingUser.balance
+        const currentBalance = editingUser.availableBalance ?? 0
+        const balanceChanged = newBalance !== currentBalance
 
         if (balanceChanged && !formData.transactionTitle.trim()) {
             toast.error('Please enter a transaction title for the balance adjustment')
@@ -215,7 +216,7 @@ export default function AdminUsersPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-zinc-900 dark:text-white font-mono">
-                                        ${u.balance?.toFixed(2) || '0.00'}
+                                        ${(u.availableBalance ?? 0).toFixed(2)}
                                     </td>
                                     <td className="px-6 py-4 text-xs font-mono">
                                         {u.wallet ? (
@@ -376,7 +377,7 @@ export default function AdminUsersPage() {
                                     className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded p-2 text-zinc-900 dark:text-white focus:outline-hidden focus:border-yellow-500"
                                 />
                             </div>
-                            {parseFloat(formData.balance) !== editingUser.balance && (
+                            {parseFloat(formData.balance) !== (editingUser.availableBalance ?? 0) && (
                                 <>
                                     <div>
                                         <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">

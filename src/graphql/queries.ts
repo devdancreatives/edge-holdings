@@ -397,6 +397,7 @@ export const GET_ADMIN_USERS = gql`
       fullName
       role
       balance
+      availableBalance
       createdAt
       wallet {
         address

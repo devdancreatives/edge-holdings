@@ -745,10 +745,11 @@ export const resolvers = {
     referralCode: (parent: any) => parent.referral_code,
     referralEarnings: (parent: any) => parent.referral_earnings,
     availableBalance: async (parent: any, _: any, context: any) => {
-      // If parent has availableBalance already (e.g. from custom query), use it?
-      // Actually standard resolver is fine, but rigorous check:
-      const client = getClient(context);
-      return getAvailableBalance(client, parent.id);
+      // Use service client so RLS doesn't block admin from reading
+      // another user's deposits / investments / withdrawals.
+      // The getUser() guard on the parent resolver already enforces auth.
+      const serviceClient = getServiceClient();
+      return getAvailableBalance(serviceClient, parent.id);
     },
     wallet: async (parent: any, _: any, context: any) => {
       const client = getClient(context);
