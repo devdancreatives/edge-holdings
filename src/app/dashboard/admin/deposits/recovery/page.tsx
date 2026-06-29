@@ -49,6 +49,7 @@ interface RecoverResponse {
     minConfirmations?: number
     wasAlreadyPending?: boolean
     alreadyProcessed?: boolean
+    fixApplied?: string
     message?: string
     error?: string
 }
@@ -432,11 +433,11 @@ function RecoverDepositPanel() {
                             </div>
                         )}
 
-                        {/* Pending warning */}
-                        {result.success && result.status === 'pending' && (
-                            <div className="flex items-center gap-2 text-xs text-yellow-400">
-                                <Clock className="h-3.5 w-3.5 shrink-0" />
-                                Deposit is pending. Re-run this tool once enough blocks have passed, or wait for the cron to pick it up automatically.
+                        {/* Fix applied indicator */}
+                        {result.fixApplied === 'missing_ledger_entry' && (
+                            <div className="flex items-start gap-2 text-xs text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded p-3">
+                                <Activity className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                                <span>The deposit was already <strong>confirmed</strong> in the database but the balance ledger entry was missing. The balance has now been repaired.</span>
                             </div>
                         )}
 
