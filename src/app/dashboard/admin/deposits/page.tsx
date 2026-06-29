@@ -2,7 +2,8 @@
 
 import { useQuery } from '@apollo/client/react'
 import { GET_ADMIN_DEPOSITS } from '@/graphql/queries'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, ShieldAlert } from 'lucide-react'
+import Link from 'next/link'
 
 export default function AdminDepositsPage() {
     const { data, loading } = useQuery<any>(GET_ADMIN_DEPOSITS, { pollInterval: 30000 })
@@ -13,7 +14,16 @@ export default function AdminDepositsPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Deposit History</h1>
+            <div className="flex items-center justify-between gap-4">
+                <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Deposit History</h1>
+                <Link
+                    href="/dashboard/admin/deposits/recovery"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors shrink-0"
+                >
+                    <ShieldAlert className="h-4 w-4" />
+                    Recovery Tools
+                </Link>
+            </div>
 
             <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 overflow-hidden">
                 <div className="overflow-x-auto">

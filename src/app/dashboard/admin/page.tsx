@@ -2,7 +2,7 @@
 
 import { useQuery } from '@apollo/client/react'
 import { GET_ADMIN_STATS } from '@/graphql/queries'
-import { Users, ArrowDownLeft, ArrowUpRight, Clock, Shield, DollarSign } from 'lucide-react'
+import { Users, ArrowDownLeft, ArrowUpRight, Clock, Shield, DollarSign, ShieldAlert } from 'lucide-react'
 
 import Link from 'next/link'
 
@@ -104,6 +104,19 @@ export default function AdminDashboard() {
                                 <ArrowUpRight className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
                             </div>
                             <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Manage user support conversations</p>
+                        </Link>
+                        <Link
+                            href="/dashboard/admin/deposits/recovery"
+                            className="block p-4 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors border border-amber-500/20"
+                        >
+                            <div className="flex items-center justify-between">
+                                <span className="font-medium text-amber-400 flex items-center gap-2">
+                                    <ShieldAlert className="h-4 w-4" />
+                                    Deposit Recovery
+                                </span>
+                                <ArrowUpRight className="h-4 w-4 text-amber-500" />
+                            </div>
+                            <p className="text-sm text-zinc-500 mt-1">Fix missed deposits &amp; re-sync Moralis stream</p>
                         </Link>
                         <Link
                             href="/dashboard/admin/users"
