@@ -1139,10 +1139,12 @@ export const resolvers = {
 
       if (error) throw new Error(error.message);
 
-      // Add new wallet to Moralis Stream
-      addAddressToMoralisStream(address).catch((e) =>
-        console.error("Moralis Stream Add Error:", e),
-      );
+      // Add new wallet to Moralis Stream (fire-and-forget — won't block wallet creation)
+      addAddressToMoralisStream(address).then((r) => {
+        if (!r.success) {
+          console.error("[MORALIS] Failed to register wallet in stream:", r);
+        }
+      });
 
       return data;
     },
@@ -1414,9 +1416,12 @@ export const resolvers = {
           address: walletAddress,
           path_index: walletIndex,
         });
-        addAddressToMoralisStream(walletAddress).catch((e) =>
-          console.error("Moralis Stream Add Error (signup):", e),
-        );
+        // Register new wallet with Moralis stream (fire-and-forget — won't block signup)
+        addAddressToMoralisStream(walletAddress).then((r) => {
+          if (!r.success) {
+            console.error("[MORALIS] Failed to register wallet on signup:", r);
+          }
+        });
       } catch (walletErr) {
         console.error("Failed to auto-create wallet on signup:", walletErr);
       }
