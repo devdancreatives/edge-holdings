@@ -286,15 +286,6 @@ export default function WalletPage() {
                                     </p>
                                 </div>
 
-                                <a
-                                    href={`https://bscscan.com/address/${companyWallet}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 text-sm text-yellow-500 hover:text-yellow-400 transition-colors"
-                                >
-                                    <ExternalLink className="h-4 w-4" />
-                                    View on BscScan
-                                </a>
                             </div>
                         ) : (
                             <div className="p-6 text-center text-zinc-500 text-sm">
