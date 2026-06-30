@@ -253,3 +253,156 @@ export async function sendAdminDepositAlert(
     return null;
   }
 }
+
+export async function sendAdminDepositRequestAlert(
+  to: string,
+  userName: string,
+  amount: number,
+  txHash: string,
+) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #09090b; margin: 0; padding: 0; color: #e4e4e7; }
+          .container { max-width: 600px; margin: 40px auto; background: #18181b; border-radius: 16px; overflow: hidden; border: 1px solid #27272a; }
+          .header { background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%); padding: 30px; text-align: center; }
+          .header h1 { margin: 0; font-size: 20px; font-weight: bold; color: #18181b; }
+          .content { padding: 32px 30px; }
+          .text { color: #a1a1aa; font-size: 15px; line-height: 1.6; margin-bottom: 20px; }
+          .badge { display: inline-block; background: #eab308; color: #18181b; font-weight: 700; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 99px; margin-bottom: 20px; }
+          .stats-box { background: #27272a; border-radius: 12px; padding: 20px; margin: 20px 0; }
+          .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #3f3f46; }
+          .stat-row:last-child { border-bottom: none; }
+          .stat-label { color: #a1a1aa; font-size: 14px; }
+          .stat-value { color: #ffffff; font-size: 14px; font-weight: 500; }
+          .cta { display: inline-block; background: #eab308; color: #18181b; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 20px; }
+          .footer { background: #09090b; padding: 20px; text-align: center; color: #52525b; font-size: 12px; border-top: 1px solid #27272a; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>⏳ New Deposit Request</h1>
+          </div>
+          <div class="content">
+            <span class="badge">Awaiting Approval</span>
+            <p class="text">A user has submitted a deposit request that requires your review and approval.</p>
+            <div class="stats-box">
+              <div class="stat-row">
+                <span class="stat-label">User</span>
+                <span class="stat-value">${userName}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Amount</span>
+                <span class="stat-value">$${amount.toLocaleString()} USDT</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">TX Hash</span>
+                <span class="stat-value" style="font-family: monospace; font-size: 12px;">${txHash.substring(0, 16)}...</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Verify</span>
+                <span class="stat-value"><a href="https://bscscan.com/tx/${txHash}" style="color: #eab308;">BscScan ↗</a></span>
+              </div>
+            </div>
+            <div style="text-align: center;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/dashboard/admin/deposits" class="cta">Review Deposit →</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>© EdgePoint Holdings Admin Dashboard</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"EdgePoint Admin" <${process.env.SMTP_USER}>`,
+      to,
+      subject: `⏳ New Deposit Request — $${amount.toLocaleString()} USDT from ${userName}`,
+      text: `New deposit request from ${userName} for $${amount.toLocaleString()} USDT. TX: ${txHash}. Review at /dashboard/admin/deposits`,
+      html,
+    });
+    return info;
+  } catch (error: any) {
+    console.error(`❌ Error sending admin deposit request alert:`, error.message);
+    return null;
+  }
+}
+
+export async function sendAdminSignupAlert(
+  to: string,
+  newUserName: string,
+  newUserEmail: string,
+) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #09090b; margin: 0; padding: 0; color: #e4e4e7; }
+          .container { max-width: 600px; margin: 40px auto; background: #18181b; border-radius: 16px; overflow: hidden; border: 1px solid #27272a; }
+          .header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 30px; text-align: center; }
+          .header h1 { margin: 0; font-size: 20px; font-weight: bold; color: #ffffff; }
+          .content { padding: 32px 30px; }
+          .text { color: #a1a1aa; font-size: 15px; line-height: 1.6; margin-bottom: 20px; }
+          .stats-box { background: #27272a; border-radius: 12px; padding: 20px; margin: 20px 0; }
+          .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #3f3f46; }
+          .stat-row:last-child { border-bottom: none; }
+          .stat-label { color: #a1a1aa; font-size: 14px; }
+          .stat-value { color: #ffffff; font-size: 14px; font-weight: 500; }
+          .cta { display: inline-block; background: #6366f1; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 20px; }
+          .footer { background: #09090b; padding: 20px; text-align: center; color: #52525b; font-size: 12px; border-top: 1px solid #27272a; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎉 New User Registered</h1>
+          </div>
+          <div class="content">
+            <p class="text">A new user has just created an account on the platform.</p>
+            <div class="stats-box">
+              <div class="stat-row">
+                <span class="stat-label">Name</span>
+                <span class="stat-value">${newUserName}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Email</span>
+                <span class="stat-value">${newUserEmail}</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Joined</span>
+                <span class="stat-value">${new Date().toUTCString()}</span>
+              </div>
+            </div>
+            <div style="text-align: center;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/dashboard/admin/users" class="cta">View Users →</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>© EdgePoint Holdings Admin Dashboard</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"EdgePoint Admin" <${process.env.SMTP_USER}>`,
+      to,
+      subject: `🎉 New User: ${newUserName} just signed up`,
+      text: `New user registered: ${newUserName} (${newUserEmail}) at ${new Date().toUTCString()}.`,
+      html,
+    });
+    return info;
+  } catch (error: any) {
+    console.error(`❌ Error sending admin signup alert:`, error.message);
+    return null;
+  }
+}

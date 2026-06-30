@@ -117,3 +117,25 @@ export async function sendPushNotification(
     };
   }
 }
+
+/**
+ * Send a push notification to ALL admin users on the platform.
+ * Fire-and-forget safe — logs errors but never throws.
+ */
+export async function sendPushToAllAdmins(payload: PushPayload): Promise<void> {
+  try {
+    // Fetch all admin user IDs
+    const { data: admins } = await supabase
+      .from("users")
+      .select("id")
+      .eq("role", "admin");
+
+    if (!admins || admins.length === 0) return;
+
+    await Promise.all(
+      admins.map((admin) => sendPushNotification(admin.id, payload))
+    );
+  } catch (err: any) {
+    console.error("[PUSH] sendPushToAllAdmins error:", err.message);
+  }
+}

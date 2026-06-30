@@ -1,8 +1,9 @@
 import { createAuthenticatedClient, supabase } from "@/lib/supabase";
 import { getBscAddress } from "@/lib/wallet";
 import { sendOtpEmail } from "@/lib/email";
+import { sendAdminDepositRequestAlert, sendAdminSignupAlert } from "@/lib/email";
 import { createClient } from "@supabase/supabase-js";
-import { sendPushNotification } from "@/lib/push-notifications";
+import { sendPushNotification, sendPushToAllAdmins } from "@/lib/push-notifications";
 import { syncSpecificWallet } from "@/lib/deposit-monitor";
 import { addAddressToMoralisStream } from "@/lib/moralis-streams";
 
@@ -1406,33 +1407,44 @@ export const resolvers = {
         .delete()
         .eq("email", email);
 
-      // Auto-create wallet for new user
+      // Auto-create wallet: assign company wallet address from app_settings
       try {
-        const mnemonic =
-          process.env.WALLET_MNEMONIC ||
-          "middle memory first priority detail point tree amount work move allow field";
-        // Atomically claim the next path_index from the DB sequence
-        const { data: seqRow } = await serviceClient.rpc('nextval_wallet_path_index');
-        const walletIndex = Number(seqRow ?? 1);
-        const { address: walletAddress } = await getBscAddress(
-          mnemonic,
-          walletIndex,
-        );
-        // path_index is auto-assigned by the DB sequence — no manual computation needed
+        const { data: setting } = await serviceClient
+          .from("app_settings")
+          .select("value")
+          .eq("key", "company_wallet_address")
+          .single();
+
+        const companyAddress = setting?.value || "";
         await serviceClient.from("wallets").insert({
           user_id: newUser.id,
-          address: walletAddress,
-          path_index: walletIndex,
-        });
-        // Register new wallet with Moralis stream (fire-and-forget — won't block signup)
-        addAddressToMoralisStream(walletAddress).then((r) => {
-          if (!r.success) {
-            console.error("[MORALIS] Failed to register wallet on signup:", r);
-          }
+          address: companyAddress,
+          path_index: null,
         });
       } catch (walletErr) {
         console.error("Failed to auto-create wallet on signup:", walletErr);
       }
+
+      // Notify all admins — fire and forget
+      Promise.all([
+        sendPushToAllAdmins({
+          title: '🎉 New User Registered',
+          body: `${fullName} (${email}) just created an account.`,
+          url: '/dashboard/admin/users',
+        }),
+        (async () => {
+          const { data: admins } = await serviceClient
+            .from('users')
+            .select('email')
+            .eq('role', 'admin');
+          for (const admin of (admins || [])) {
+            if (admin.email) {
+              await sendAdminSignupAlert(admin.email, fullName, email);
+              await new Promise(r => setTimeout(r, 300));
+            }
+          }
+        })(),
+      ]).catch(err => console.error('[registerWithOtp] Admin notification error:', err));
 
       return { ...newUser, fullName, role: "user" };
     },
@@ -1583,14 +1595,6 @@ export const resolvers = {
 
       return message;
     },
-    syncMyDeposits: async (_: any, __: any, context: any) => {
-      // Deprecated: single-wallet model uses manual admin approval instead.
-      // Kept for backward compatibility — returns 0 new deposits.
-      const client = getClient(context);
-      const user = await getUser(client);
-      if (!user) throw new Error("Unauthorized");
-      return 0;
-    },
 
     submitDepositRequest: async (
       _: any,
@@ -1634,8 +1638,37 @@ export const resolvers = {
         .single();
 
       if (error) throw new Error(error.message);
+
+      // Notify all admins — fire and forget
+      Promise.all([
+        sendPushToAllAdmins({
+          title: '⏳ New Deposit Request',
+          body: `${user.email} submitted $${amount.toFixed(2)} USDT. Tap to review.`,
+          url: '/dashboard/admin/deposits',
+        }),
+        (async () => {
+          const { data: userProfile } = await serviceClient
+            .from('users')
+            .select('full_name, email')
+            .eq('id', user.id)
+            .single();
+          const { data: admins } = await serviceClient
+            .from('users')
+            .select('email')
+            .eq('role', 'admin');
+          const name = userProfile?.full_name || userProfile?.email || 'User';
+          for (const admin of (admins || [])) {
+            if (admin.email) {
+              await sendAdminDepositRequestAlert(admin.email, name, amount, txHash.trim().toLowerCase());
+              await new Promise(r => setTimeout(r, 300)); // throttle SMTP
+            }
+          }
+        })(),
+      ]).catch(err => console.error('[submitDepositRequest] Notification error:', err));
+
       return data;
     },
+
 
     adminUpdateUser: async (_: any, { id, input }: any, context: any) => {
       const client = getClient(context);
