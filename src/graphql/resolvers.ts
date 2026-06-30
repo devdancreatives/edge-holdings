@@ -413,10 +413,29 @@ export const resolvers = {
 
       const { data } = await serviceClient
         .from("deposits")
-        .select("*, user:user_id(email, full_name)")
+        .select("*, user:user_id(id, email, full_name)")
         .order("created_at", { ascending: false });
-      return data;
+      return (data || []).map((d: any) => ({
+        ...d,
+        user: d.user ? { id: d.user.id, email: d.user.email, fullName: d.user.full_name } : null,
+      }));
     },
+
+    appSettings: async (_: any, __: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      const serviceClient = getServiceClient();
+      const { data } = await serviceClient
+        .from("app_settings")
+        .select("value")
+        .eq("key", "company_wallet_address")
+        .single();
+
+      return { companyWalletAddress: data?.value || "" };
+    },
+
     adminWithdrawals: async (_: any, __: any, context: any) => {
       const client = getClient(context);
       const user = await getUser(client);
@@ -797,6 +816,8 @@ export const resolvers = {
     txHash: (parent: any) => parent.tx_hash,
     createdAt: (parent: any) => parent.created_at,
     confirmedAt: (parent: any) => parent.confirmed_at,
+    declineReason: (parent: any) => parent.decline_reason ?? null,
+    submittedByUser: (parent: any) => parent.submitted_by_user ?? true,
     user: (parent: any) => parent.user,
   },
 
@@ -1105,7 +1126,10 @@ export const resolvers = {
       const user = await getUser(client);
       if (!user) throw new Error("Unauthorized");
 
-      const { data: existing } = await client
+      const serviceClient = getServiceClient();
+
+      // Check if user already has a wallet record
+      const { data: existing } = await serviceClient
         .from("wallets")
         .select("*")
         .eq("user_id", user.id)
@@ -1113,40 +1137,28 @@ export const resolvers = {
 
       if (existing) return existing;
 
-      const mnemonic =
-        process.env.WALLET_MNEMONIC ||
-        "middle memory first priority detail point tree amount work move allow field";
+      // Fetch the company wallet address from app_settings
+      const { data: setting } = await serviceClient
+        .from("app_settings")
+        .select("value")
+        .eq("key", "company_wallet_address")
+        .single();
 
-      const serviceClient = getServiceClient();
-      const { data: wallets } = await serviceClient
-        .from("wallets")
-        .select("path_index")
-        .order("path_index", { ascending: false })
-        .limit(1);
+      const companyAddress = setting?.value || "";
 
-      const index = (wallets && wallets.length > 0 ? wallets[0].path_index : 0) + 1;
-
-      const { address } = await getBscAddress(mnemonic, index);
-
+      // Create a wallet record for this user pointing to the company address.
+      // path_index is null — no HD derivation in the single-wallet model.
       const { data, error } = await serviceClient
         .from("wallets")
         .insert({
           user_id: user.id,
-          address,
-          path_index: index,
+          address: companyAddress,
+          path_index: null,
         })
         .select()
         .single();
 
       if (error) throw new Error(error.message);
-
-      // Add new wallet to Moralis Stream (fire-and-forget — won't block wallet creation)
-      addAddressToMoralisStream(address).then((r) => {
-        if (!r.success) {
-          console.error("[MORALIS] Failed to register wallet in stream:", r);
-        }
-      });
-
       return data;
     },
     adminDistributeProfit: async (_: any, { amount }: any, context: any) => {
@@ -1399,19 +1411,14 @@ export const resolvers = {
         const mnemonic =
           process.env.WALLET_MNEMONIC ||
           "middle memory first priority detail point tree amount work move allow field";
-        const { data: existingWallets } = await serviceClient
-          .from("wallets")
-          .select("path_index")
-          .order("path_index", { ascending: false })
-          .limit(1);
-        const walletIndex =
-          (existingWallets && existingWallets.length > 0
-            ? existingWallets[0].path_index
-            : 0) + 1;
+        // Atomically claim the next path_index from the DB sequence
+        const { data: seqRow } = await serviceClient.rpc('nextval_wallet_path_index');
+        const walletIndex = Number(seqRow ?? 1);
         const { address: walletAddress } = await getBscAddress(
           mnemonic,
           walletIndex,
         );
+        // path_index is auto-assigned by the DB sequence — no manual computation needed
         await serviceClient.from("wallets").insert({
           user_id: newUser.id,
           address: walletAddress,
@@ -1577,11 +1584,57 @@ export const resolvers = {
       return message;
     },
     syncMyDeposits: async (_: any, __: any, context: any) => {
+      // Deprecated: single-wallet model uses manual admin approval instead.
+      // Kept for backward compatibility — returns 0 new deposits.
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+      return 0;
+    },
+
+    submitDepositRequest: async (
+      _: any,
+      { txHash, amount }: { txHash: string; amount: number },
+      context: any,
+    ) => {
       const client = getClient(context);
       const user = await getUser(client);
       if (!user) throw new Error("Unauthorized");
 
-      return await syncSpecificWallet(user.id);
+      if (!txHash?.trim()) throw new Error("Transaction hash is required");
+      if (!amount || amount <= 0) throw new Error("Amount must be greater than 0");
+
+      const serviceClient = getServiceClient();
+
+      // Prevent duplicate submissions for the same tx hash
+      const { data: existing } = await serviceClient
+        .from("deposits")
+        .select("id, status")
+        .eq("tx_hash", txHash.trim().toLowerCase())
+        .maybeSingle();
+
+      if (existing) {
+        throw new Error(
+          existing.status === "confirmed"
+            ? "This transaction has already been credited to your account."
+            : "A deposit request for this transaction already exists. Status: " + existing.status,
+        );
+      }
+
+      const { data, error } = await serviceClient
+        .from("deposits")
+        .insert({
+          user_id: user.id,
+          amount,
+          tx_hash: txHash.trim().toLowerCase(),
+          status: "pending",
+          submitted_by_user: true,
+        })
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
     },
 
     adminUpdateUser: async (_: any, { id, input }: any, context: any) => {
@@ -2031,6 +2084,131 @@ export const resolvers = {
       }
 
       return JSON.stringify({ outcome: trade.outcome, profit });
+    },
+    adminApproveDeposit: async (_: any, { id }: { id: string }, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const serviceClient = getServiceClient();
+
+      // Load the deposit
+      const { data: deposit, error: fetchErr } = await serviceClient
+        .from("deposits")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (fetchErr || !deposit) throw new Error("Deposit not found");
+      if (deposit.status === "confirmed") throw new Error("Deposit is already confirmed.");
+      if (deposit.status === "declined") throw new Error("Cannot approve a declined deposit. Decline it first to reset status.");
+
+      // Confirm the deposit
+      const { data: updated, error: updateErr } = await serviceClient
+        .from("deposits")
+        .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (updateErr) throw new Error(updateErr.message);
+
+      // Credit the transactions ledger
+      const { error: txErr } = await serviceClient.from("transactions").insert({
+        user_id: deposit.user_id,
+        type: "deposit",
+        amount: deposit.amount,
+        description: `USDT deposit (BEP20) — admin approved — ${deposit.tx_hash?.slice(0, 10)}...`,
+        created_at: new Date().toISOString(),
+      });
+
+      if (txErr) console.error("[adminApproveDeposit] Failed to insert tx ledger:", txErr.message);
+
+      return updated;
+    },
+
+    adminDeclineDeposit: async (
+      _: any,
+      { id, reason }: { id: string; reason: string },
+      context: any,
+    ) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      if (!reason?.trim()) throw new Error("A reason is required when declining a deposit.");
+
+      const serviceClient = getServiceClient();
+
+      const { data: deposit } = await serviceClient
+        .from("deposits")
+        .select("status")
+        .eq("id", id)
+        .single();
+
+      if (!deposit) throw new Error("Deposit not found");
+      if (deposit.status === "confirmed") throw new Error("Cannot decline an already confirmed deposit.");
+
+      const { data: updated, error } = await serviceClient
+        .from("deposits")
+        .update({ status: "declined", decline_reason: reason.trim() })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return updated;
+    },
+
+    adminUpdateAppWallet: async (
+      _: any,
+      { address }: { address: string },
+      context: any,
+    ) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const evmRegex = /^0x[a-fA-F0-9]{40}$/;
+      if (!evmRegex.test(address.trim())) {
+        throw new Error("Invalid BEP20 address. Must start with 0x and be 42 characters.");
+      }
+
+      const serviceClient = getServiceClient();
+      const normalizedAddress = address.trim();
+
+      // Update the setting
+      const { error: settingErr } = await serviceClient
+        .from("app_settings")
+        .upsert(
+          { key: "company_wallet_address", value: normalizedAddress, updated_at: new Date().toISOString(), updated_by: user!.id },
+          { onConflict: "key" },
+        );
+
+      if (settingErr) throw new Error(settingErr.message);
+
+      // Also update all existing user wallet records so they immediately show the new address
+      await serviceClient
+        .from("wallets")
+        .update({ address: normalizedAddress })
+        .neq("address", normalizedAddress); // only update rows that differ
+
+      return { companyWalletAddress: normalizedAddress };
     },
   },
 };

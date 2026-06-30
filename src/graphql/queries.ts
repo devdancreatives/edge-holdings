@@ -42,6 +42,7 @@ export const GET_MY_DEPOSITS = gql`
       amount
       txHash
       status
+      declineReason
       createdAt
       confirmedAt
     }
@@ -424,8 +425,11 @@ export const GET_ADMIN_DEPOSITS = gql`
       amount
       txHash
       status
+      declineReason
+      submittedByUser
       createdAt
       user {
+        id
         email
         fullName
       }
@@ -600,3 +604,50 @@ export const TOGGLE_INVESTMENT_PAUSE = gql`
   }
 `;
 
+export const GET_APP_SETTINGS = gql`
+  query GetAppSettings {
+    appSettings {
+      companyWalletAddress
+    }
+  }
+`;
+
+export const SUBMIT_DEPOSIT_REQUEST = gql`
+  mutation SubmitDepositRequest($txHash: String!, $amount: Float!) {
+    submitDepositRequest(txHash: $txHash, amount: $amount) {
+      id
+      amount
+      txHash
+      status
+      createdAt
+    }
+  }
+`;
+
+export const ADMIN_APPROVE_DEPOSIT = gql`
+  mutation AdminApproveDeposit($id: ID!) {
+    adminApproveDeposit(id: $id) {
+      id
+      status
+      confirmedAt
+    }
+  }
+`;
+
+export const ADMIN_DECLINE_DEPOSIT = gql`
+  mutation AdminDeclineDeposit($id: ID!, $reason: String!) {
+    adminDeclineDeposit(id: $id, reason: $reason) {
+      id
+      status
+      declineReason
+    }
+  }
+`;
+
+export const ADMIN_UPDATE_APP_WALLET = gql`
+  mutation AdminUpdateAppWallet($address: String!) {
+    adminUpdateAppWallet(address: $address) {
+      companyWalletAddress
+    }
+  }
+`;

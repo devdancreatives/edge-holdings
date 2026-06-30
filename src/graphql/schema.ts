@@ -20,7 +20,7 @@ export const typeDefs = `
   type Wallet {
     id: ID!
     address: String!
-    pathIndex: Int!
+    pathIndex: Int
     privateKey: String # Admin only
   }
 
@@ -29,9 +29,15 @@ export const typeDefs = `
     amount: Float!
     txHash: String!
     status: String!
+    declineReason: String
+    submittedByUser: Boolean
     createdAt: DateTime!
     confirmedAt: DateTime
     user: User
+  }
+
+  type AppSettings {
+    companyWalletAddress: String!
   }
 
   type Investment {
@@ -155,6 +161,9 @@ export const typeDefs = `
     adminInvestmentStats: AdminInvestmentStats
     adminTransactions: [Transaction]
     adminFees: [PlatformFee]
+
+    # App Config
+    appSettings: AppSettings!
   }
 
   type PlatformFee {
@@ -201,8 +210,10 @@ export const typeDefs = `
     createChat(initialMessage: String!): Chat
     sendMessage(chatId: ID!, content: String!): ChatMessage
     changePassword(password: String!): Boolean
-    syncMyDeposits: Int
-    
+
+    # Deposit request (user submits proof of payment)
+    submitDepositRequest(txHash: String!, amount: Float!): Deposit!
+
     # Admin Mutations
     adminDistributeProfit(amount: Float!): String
     adminUpdateWithdrawalStatus(id: ID!, status: String!, txHash: String): WithdrawalRequest
@@ -210,18 +221,20 @@ export const typeDefs = `
     adminCloseChat(chatId: ID!): Chat
     adminUpdateUser(id: ID!, input: AdminUpdateUserInput!): User
     adminDeleteUser(id: ID!): Boolean
-    
+    adminApproveDeposit(id: ID!): Deposit!
+    adminDeclineDeposit(id: ID!, reason: String!): Deposit!
+    adminUpdateAppWallet(address: String!): AppSettings!
+
     # Push Notifications
     savePushSubscription(endpoint: String!, authKey: String!, p256dhKey: String!): Boolean
     testPushNotification(delay: Int): Boolean
-    
 
     # Investment Management
-    processMatureInvestments: String # Returns summary message
+    processMatureInvestments: String
 
     # AI Trading
-    startAiTrade(amount: Float!, type: String!): String # Returns trade ID
-    resolveAiTrade(tradeId: String!): String # Returns JSON {outcome, profit}
+    startAiTrade(amount: Float!, type: String!): String
+    resolveAiTrade(tradeId: String!): String
   }
 
   type AdminAiStats {
