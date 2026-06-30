@@ -74,7 +74,7 @@ export default function WalletPage() {
 
     const [submitDepositRequest, { loading: submitting }] = useMutation(SUBMIT_DEPOSIT_REQUEST, {
         onCompleted: () => {
-            toast.success('Deposit request submitted! The admin will review it shortly.')
+            toast.success('Deposit request submitted! The support team will review it shortly.')
             setTxHash('')
             setDepositAmount('')
             setShowDepositModal(false)
@@ -202,7 +202,7 @@ export default function WalletPage() {
                             {pendingDeposits.length} deposit{pendingDeposits.length > 1 ? 's' : ''} pending review
                         </p>
                         <p className="text-xs text-yellow-500/80 mt-0.5">
-                            The admin will verify and credit your account once approved.
+                            The support team will verify and credit your account once approved.
                         </p>
                     </div>
                 </div>
@@ -282,7 +282,7 @@ export default function WalletPage() {
                                 <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
                                     <AlertCircle className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                                     <p className="text-sm text-zinc-600 dark:text-zinc-300">
-                                        After sending, click <strong className="text-yellow-500">I&apos;ve Made a Deposit</strong> and paste your transaction hash. The admin will verify and credit your account.
+                                        After sending, click <strong className="text-yellow-500">I&apos;ve Made a Deposit</strong> and paste your transaction hash. The support team will verify and credit your account.
                                     </p>
                                 </div>
 
@@ -433,7 +433,7 @@ export default function WalletPage() {
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-blue-400 mt-1">•</span>
-                                <span><strong>After sending:</strong> Submit your transaction hash to notify the admin for approval.</span>
+                                <span><strong>After sending:</strong> Submit your transaction hash to notify the support team for approval.</span>
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-blue-400 mt-1">•</span>
@@ -449,7 +449,7 @@ export default function WalletPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 w-full max-w-md shadow-2xl p-6">
                         <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1">Confirm Deposit</h3>
-                        <p className="text-sm text-zinc-500 mb-5">Paste your transaction hash and amount. The admin will verify and approve your deposit.</p>
+                        <p className="text-sm text-zinc-500 mb-5">Paste your transaction hash and amount. The support team will verify and approve your deposit.</p>
                         <form onSubmit={handleSubmitDeposit} className="space-y-4">
                             <div>
                                 <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-2">Transaction Hash (TX ID)</label>
