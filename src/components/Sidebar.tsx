@@ -166,6 +166,7 @@ export function Sidebar() {
         ? [
             ...baseNavItems,
             { name: 'Admin Users', href: '/dashboard/admin', icon: Shield },
+            { name: 'Admin Plans', href: '/dashboard/admin/plans', icon: Shield },
             { name: 'House Profit', href: '/dashboard/admin/ai-trading', icon: TrendingUp }
         ]
         : baseNavItems

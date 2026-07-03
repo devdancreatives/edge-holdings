@@ -132,10 +132,11 @@ export const GET_MY_WITHDRAWALS = gql`
 export const CREATE_INVESTMENT = gql`
   mutation CreateInvestment(
     $amount: Float!
-    $durationMonths: Int!
+    $durationMonths: Int
     $durationHours: Int
     $planType: String
     $roiRate: Float
+    $planId: ID
   ) {
     createInvestment(
       amount: $amount
@@ -143,6 +144,7 @@ export const CREATE_INVESTMENT = gql`
       durationHours: $durationHours
       planType: $planType
       roiRate: $roiRate
+      planId: $planId
     ) {
       id
       amount
@@ -515,6 +517,8 @@ export const GET_ADMIN_INVESTMENTS = gql`
       endDate
       status
       isPaused
+      expectedProfit
+      profitPercent
       user {
         email
         fullName
@@ -648,6 +652,117 @@ export const ADMIN_UPDATE_APP_WALLET = gql`
   mutation AdminUpdateAppWallet($address: String!) {
     adminUpdateAppWallet(address: $address) {
       companyWalletAddress
+    }
+  }
+`;
+
+export const GET_INVESTMENT_PLANS = gql`
+  query GetInvestmentPlans {
+    investmentPlans {
+      id
+      name
+      durationMonths
+      roiRate
+      minAmount
+      planType
+      isActive
+      createdAt
+    }
+  }
+`;
+
+export const GET_ADMIN_INVESTMENT_PLANS = gql`
+  query GetAdminInvestmentPlans {
+    adminInvestmentPlans {
+      id
+      name
+      durationMonths
+      roiRate
+      minAmount
+      planType
+      isActive
+      createdAt
+    }
+  }
+`;
+
+export const ADMIN_CREATE_INVESTMENT_PLAN = gql`
+  mutation AdminCreateInvestmentPlan(
+    $name: String!
+    $durationMonths: Int!
+    $roiRate: Float!
+    $minAmount: Float!
+    $planType: String
+  ) {
+    adminCreateInvestmentPlan(
+      name: $name
+      durationMonths: $durationMonths
+      roiRate: $roiRate
+      minAmount: $minAmount
+      planType: $planType
+    ) {
+      id
+      name
+      durationMonths
+      roiRate
+      minAmount
+      planType
+      isActive
+      createdAt
+    }
+  }
+`;
+
+export const ADMIN_TOGGLE_INVESTMENT_PLAN = gql`
+  mutation AdminToggleInvestmentPlan($id: ID!) {
+    adminToggleInvestmentPlan(id: $id) {
+      id
+      isActive
+    }
+  }
+`;
+
+export const ADMIN_DELETE_INVESTMENT_PLAN = gql`
+  mutation AdminDeleteInvestmentPlan($id: ID!) {
+    adminDeleteInvestmentPlan(id: $id)
+  }
+`;
+
+export const ADMIN_UPDATE_INVESTMENT_PLAN = gql`
+  mutation AdminUpdateInvestmentPlan(
+    $id: ID!
+    $name: String!
+    $durationMonths: Int!
+    $roiRate: Float!
+    $minAmount: Float!
+    $planType: String!
+  ) {
+    adminUpdateInvestmentPlan(
+      id: $id
+      name: $name
+      durationMonths: $durationMonths
+      roiRate: $roiRate
+      minAmount: $minAmount
+      planType: $planType
+    ) {
+      id
+      name
+      durationMonths
+      roiRate
+      minAmount
+      planType
+      isActive
+      createdAt
+    }
+  }
+`;
+
+export const ADMIN_ADJUST_INVESTMENT_PROFIT = gql`
+  mutation AdminAdjustInvestmentProfit($investmentId: ID!, $amount: Float!, $description: String!) {
+    adminAdjustInvestmentProfit(investmentId: $investmentId, amount: $amount, description: $description) {
+      id
+      expectedProfit
+      profitPercent
     }
   }
 `;

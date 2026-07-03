@@ -139,6 +139,19 @@ export default function AdminDashboard() {
                             <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Audit all platform-wide activities</p>
                         </Link>
                         <Link
+                            href="/dashboard/admin/plans"
+                            className="block p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-zinc-200 dark:border-zinc-700"
+                        >
+                            <div className="flex items-center justify-between">
+                                <span className="font-medium text-zinc-900 dark:text-white flex items-center gap-2">
+                                    <Shield className="h-4 w-4" />
+                                    Manage Plans
+                                </span>
+                                <ArrowUpRight className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                            </div>
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Create and configure user investment plans</p>
+                        </Link>
+                        <Link
                             href="/dashboard/admin/settings"
                             className="block p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-zinc-200 dark:border-zinc-700"
                         >

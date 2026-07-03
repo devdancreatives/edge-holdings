@@ -71,8 +71,14 @@ const getAvailableBalance = async (client: any, userId: string) => {
   // 3. Sum investments (Amount for ACTIVE only, Fee for ALL)
   const { data: investments } = await client
     .from("investments")
-    .select("amount, fee, status")
+    .select("amount, fee, status, id")
     .eq("user_id", userId);
+
+  const activeOrPausedIds = new Set(
+    investments
+      ?.filter((i: any) => i.status === "active" || i.status === "paused")
+      .map((i: any) => i.id) || []
+  );
 
   const activeInvestmentsAmount =
     investments
@@ -82,13 +88,19 @@ const getAvailableBalance = async (client: any, userId: string) => {
   const totalInvestmentFees =
     investments?.reduce((a: number, b: any) => a + (b.fee || 0), 0) || 0;
 
-  // 4. Sum profits
+  // 4. Sum profits (excluding active/paused investments)
   const { data: roi } = await client
     .from("roi_snapshots")
-    .select("profit_amount")
+    .select("profit_amount, investment_id")
     .eq("user_id", userId);
+
   const totalProfit =
-    roi?.reduce((a: number, b: any) => a + b.profit_amount, 0) || 0;
+    roi?.reduce((sum: number, r: any) => {
+      if (r.investment_id && activeOrPausedIds.has(r.investment_id)) {
+        return sum; // Skip active/paused investment profits
+      }
+      return sum + parseFloat(r.profit_amount);
+    }, 0) || 0;
 
   // 5. Sum pending or processed withdrawals
   const { data: withdrawals } = await client
@@ -437,6 +449,62 @@ export const resolvers = {
       return { companyWalletAddress: data?.value || "" };
     },
 
+    investmentPlans: async (_: any, __: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      const serviceClient = getServiceClient();
+      const { data, error } = await serviceClient
+        .from("investment_plans")
+        .select("*")
+        .eq("is_active", true)
+        .order("duration_months", { ascending: true });
+
+      if (error) throw new Error(error.message);
+      return (data || []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        durationMonths: p.duration_months,
+        roiRate: parseFloat(p.roi_rate),
+        minAmount: parseFloat(p.min_amount),
+        planType: p.plan_type,
+        isActive: p.is_active,
+        createdAt: p.created_at,
+      }));
+    },
+
+    adminInvestmentPlans: async (_: any, __: any, context: any) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const serviceClient = getServiceClient();
+      const { data, error } = await serviceClient
+        .from("investment_plans")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw new Error(error.message);
+      return (data || []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        durationMonths: p.duration_months,
+        roiRate: parseFloat(p.roi_rate),
+        minAmount: parseFloat(p.min_amount),
+        planType: p.plan_type,
+        isActive: p.is_active,
+        createdAt: p.created_at,
+      }));
+    },
+
     adminWithdrawals: async (_: any, __: any, context: any) => {
       const client = getClient(context);
       const user = await getUser(client);
@@ -520,19 +588,18 @@ export const resolvers = {
       // Optimization: In prod, maybe limit by date or cache current ROI index.
       const { data: snapshots } = await serviceClient
         .from("roi_snapshots")
-        .select("user_id, created_at, roi_percentage")
+        .select("user_id, created_at, roi_percentage, investment_id")
         .order("created_at", { ascending: true });
 
       // Map investments with calculated stats
       return investments?.map((inv: any) => {
         // Find all snapshots that happened AFTER this investment started
-        // and BEFORE this investment ended (if it ended? No, if active or completed)
-        // For active, it's just start_date to now.
+        // and BEFORE this investment ended
         const relevantSnapshots =
           snapshots?.filter(
             (s: any) => 
               s.user_id === inv.user_id && 
-              new Date(s.created_at) >= new Date(inv.start_date),
+              (s.investment_id === inv.id || (!s.investment_id && new Date(s.created_at) >= new Date(inv.start_date))),
           ) || [];
 
         const totalRoiPercent = relevantSnapshots.reduce(
@@ -736,12 +803,51 @@ export const resolvers = {
     endDate: (parent: any) => parent.end_date,
     durationMonths: (parent: any) => parent.duration_months,
     createdAt: (parent: any) => parent.created_at,
-    profitPercent: (parent: any) => parent.profitPercent || 0,
-    expectedProfit: (parent: any) => parent.expectedProfit || 0,
+    profitPercent: async (parent: any) => {
+      if (parent.profitPercent !== undefined) return parent.profitPercent;
+      const serviceClient = getServiceClient();
+      const { data: snapshots } = await serviceClient
+        .from("roi_snapshots")
+        .select("roi_percentage, investment_id, created_at")
+        .eq("user_id", parent.user_id);
+      const relevant = (snapshots || []).filter((s: any) => {
+        if (s.investment_id === parent.id) return true;
+        if (!s.investment_id) {
+          return new Date(s.created_at) >= new Date(parent.start_date);
+        }
+        return false;
+      });
+      return relevant.reduce((acc: number, s: any) => acc + parseFloat(s.roi_percentage as any), 0);
+    },
+    expectedProfit: async (parent: any) => {
+      if (parent.expectedProfit !== undefined) return parent.expectedProfit;
+      const serviceClient = getServiceClient();
+      const { data: snapshots } = await serviceClient
+        .from("roi_snapshots")
+        .select("roi_percentage, investment_id, created_at")
+        .eq("user_id", parent.user_id);
+      const relevant = (snapshots || []).filter((s: any) => {
+        if (s.investment_id === parent.id) return true;
+        if (!s.investment_id) {
+          return new Date(s.created_at) >= new Date(parent.start_date);
+        }
+        return false;
+      });
+      const totalRoi = relevant.reduce((acc: number, s: any) => acc + parseFloat(s.roi_percentage as any), 0);
+      return parent.amount * (totalRoi / 100);
+    },
     planType: (parent: any) => parent.plan_type,
     roiRate: (parent: any) => parent.roi_rate,
     isPaused: (parent: any) => parent.is_paused || false,
     pausedAt: (parent: any) => parent.paused_at,
+  },
+  InvestmentPlan: {
+    durationMonths: (parent: any) => parent.durationMonths ?? parent.duration_months,
+    roiRate: (parent: any) => parent.roiRate ?? parent.roi_rate,
+    minAmount: (parent: any) => parent.minAmount ?? parent.min_amount,
+    planType: (parent: any) => parent.planType ?? parent.plan_type,
+    isActive: (parent: any) => parent.isActive ?? parent.is_active,
+    createdAt: (parent: any) => parent.createdAt ?? parent.created_at,
   },
   Transaction: {
     createdAt: (parent: any) => parent.created_at,
@@ -848,15 +954,43 @@ export const resolvers = {
   Mutation: {
     createInvestment: async (
       _: any,
-      { amount, durationMonths, durationHours, planType, roiRate }: any,
+      { amount, durationMonths, durationHours, planType, roiRate, planId }: any,
       context: any,
     ) => {
       const client = getClient(context);
       const user = await getUser(client);
       if (!user) throw new Error("Unauthorized");
 
+      const serviceClient = getServiceClient();
+
+      let finalDurationMonths = durationMonths;
+      let finalPlanType = planType || "standard";
+      let finalRoiRate = roiRate || 2.0;
+      let minRequiredAmount = 500;
+
+      if (planId) {
+        // Fetch plan from database
+        const { data: plan, error: planError } = await serviceClient
+          .from("investment_plans")
+          .select("*")
+          .eq("id", planId)
+          .single();
+
+        if (planError || !plan) {
+          throw new Error("Selected investment plan not found");
+        }
+        if (!plan.is_active) {
+          throw new Error("This investment plan is no longer active");
+        }
+
+        finalDurationMonths = plan.duration_months;
+        finalPlanType = plan.plan_type;
+        finalRoiRate = parseFloat(plan.roi_rate);
+        minRequiredAmount = parseFloat(plan.min_amount);
+      }
+
       // Check for Admin only for durationHours, unless it's a PIF plan
-      if (durationHours !== undefined && planType !== "PIF") {
+      if (durationHours !== undefined && finalPlanType !== "PIF") {
         const { data: profile } = await client
           .from("users")
           .select("role")
@@ -875,8 +1009,8 @@ export const resolvers = {
       const fee = amount * FEE_PERCENTAGE;
       const totalDeduction = amount + fee;
 
-      if (amount < 500)
-        throw new Error("Minimum investment amount is $500");
+      if (amount < minRequiredAmount)
+        throw new Error(`Minimum investment amount for this plan is $${minRequiredAmount}`);
 
       const balance = await getAvailableBalance(client, user.id);
       if (balance < totalDeduction)
@@ -890,7 +1024,7 @@ export const resolvers = {
       if (durationHours !== undefined) {
         endDate.setHours(endDate.getHours() + durationHours);
       } else {
-        endDate.setMonth(endDate.getMonth() + durationMonths);
+        endDate.setMonth(endDate.getMonth() + finalDurationMonths);
       }
 
       const { data, error } = await client
@@ -899,13 +1033,13 @@ export const resolvers = {
           user_id: user.id,
           amount,
           fee: fee, // Record the fee separately
-          duration_months: durationHours !== undefined ? 0 : durationMonths,
+          duration_months: durationHours !== undefined ? 0 : finalDurationMonths,
           start_date: startDate.toISOString(),
           end_date: endDate.toISOString(),
           last_payout_date: startDate.toISOString(),
           status: "active",
-          plan_type: planType || "standard",
-          roi_rate: roiRate || 2.0,
+          plan_type: finalPlanType,
+          roi_rate: finalRoiRate,
         })
         .select()
         .single();
@@ -998,6 +1132,7 @@ export const resolvers = {
       if (profit > 0) {
         await serviceClient.from("roi_snapshots").insert({
           user_id: inv.user_id,
+          investment_id: inv.id,
           date: new Date().toISOString(),
           profit_amount: profit,
           roi_percentage: roiPercentageTotal * 100,
@@ -2242,6 +2377,214 @@ export const resolvers = {
         .neq("address", normalizedAddress); // only update rows that differ
 
       return { companyWalletAddress: normalizedAddress };
+    },
+
+    adminCreateInvestmentPlan: async (
+      _: any,
+      { name, durationMonths, roiRate, minAmount, planType = 'standard' }: any,
+      context: any,
+    ) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      if (!name?.trim()) throw new Error("Plan name is required");
+      if (durationMonths < 0) throw new Error("Duration months must be >= 0");
+      if (roiRate < 0) throw new Error("ROI rate must be >= 0");
+      if (minAmount < 0) throw new Error("Minimum amount must be >= 0");
+
+      const serviceClient = getServiceClient();
+      const { data, error } = await serviceClient
+        .from("investment_plans")
+        .insert({
+          name: name.trim(),
+          duration_months: durationMonths,
+          roi_rate: roiRate,
+          min_amount: minAmount,
+          plan_type: planType,
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
+    },
+
+    adminUpdateInvestmentPlan: async (
+      _: any,
+      { id, name, durationMonths, roiRate, minAmount, planType }: any,
+      context: any,
+    ) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      if (!name?.trim()) throw new Error("Plan name is required");
+      if (durationMonths < 0) throw new Error("Duration months must be >= 0");
+      if (roiRate < 0) throw new Error("ROI rate must be >= 0");
+      if (minAmount < 0) throw new Error("Minimum amount must be >= 0");
+
+      const serviceClient = getServiceClient();
+      const { data, error } = await serviceClient
+        .from("investment_plans")
+        .update({
+          name: name.trim(),
+          duration_months: durationMonths,
+          roi_rate: roiRate,
+          min_amount: minAmount,
+          plan_type: planType,
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
+    },
+
+    adminToggleInvestmentPlan: async (
+      _: any,
+      { id }: { id: string },
+      context: any,
+    ) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const serviceClient = getServiceClient();
+      // Fetch current status
+      const { data: current, error: fetchErr } = await serviceClient
+        .from("investment_plans")
+        .select("is_active")
+        .eq("id", id)
+        .single();
+
+      if (fetchErr || !current) throw new Error("Plan not found");
+
+      const { data, error } = await serviceClient
+        .from("investment_plans")
+        .update({ is_active: !current.is_active })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
+    },
+
+    adminDeleteInvestmentPlan: async (
+      _: any,
+      { id }: { id: string },
+      context: any,
+    ) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      const serviceClient = getServiceClient();
+      const { error } = await serviceClient
+        .from("investment_plans")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw new Error(error.message);
+      return true;
+    },
+
+    adminAdjustInvestmentProfit: async (
+      _: any,
+      { investmentId, amount, description }: { investmentId: string; amount: number; description: string },
+      context: any,
+    ) => {
+      const client = getClient(context);
+      const user = await getUser(client);
+      if (!user) throw new Error("Unauthorized");
+
+      const { data: profile } = await client
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (profile?.role !== "admin") throw new Error("Admin only");
+
+      if (!description?.trim()) throw new Error("Description is required");
+
+      const serviceClient = getServiceClient();
+      // Fetch investment
+      const { data: inv, error: fetchErr } = await serviceClient
+        .from("investments")
+        .select("*")
+        .eq("id", investmentId)
+        .single();
+
+      if (fetchErr || !inv) throw new Error("Investment not found");
+
+      const roiPercentage = (amount / inv.amount) * 100;
+
+      // 1. Insert into roi_snapshots
+      const { error: snapshotErr } = await serviceClient
+        .from("roi_snapshots")
+        .insert({
+          user_id: inv.user_id,
+          investment_id: inv.id,
+          date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+          profit_amount: amount,
+          roi_percentage: roiPercentage,
+        });
+
+      if (snapshotErr) throw new Error("Failed to record profit snapshot: " + snapshotErr.message);
+
+      // 2. Insert transaction log
+      const { error: txErr } = await serviceClient
+        .from("transactions")
+        .insert({
+          user_id: inv.user_id,
+          type: "profit_payout",
+          amount: amount,
+          description: `Profit Adjustment: ${description.trim()} (Investment: ${inv.id.substring(0, 8)}...)`,
+        });
+
+      if (txErr) {
+        console.error("Failed to log transaction for profit adjustment:", txErr);
+      }
+
+      // 3. Send Push Notification to user
+      await sendPushNotification(inv.user_id, {
+        title: "Profit Adjusted",
+        body: `Admin adjusted your investment profit by ${amount >= 0 ? '+' : ''}${amount.toFixed(2)} USDT.`,
+        url: "/dashboard/investments",
+      });
+
+      return inv;
     },
   },
 };

@@ -58,6 +58,17 @@ export const typeDefs = `
     pausedAt: DateTime
   }
 
+  type InvestmentPlan {
+    id: ID!
+    name: String!
+    durationMonths: Int!
+    roiRate: Float!
+    minAmount: Float!
+    planType: String!
+    isActive: Boolean!
+    createdAt: DateTime!
+  }
+
   type ROISnapshot {
     date: String!
     profitAmount: Float!
@@ -164,6 +175,10 @@ export const typeDefs = `
 
     # App Config
     appSettings: AppSettings!
+    
+    # Investment Plans
+    investmentPlans: [InvestmentPlan!]!
+    adminInvestmentPlans: [InvestmentPlan!]!
   }
 
   type PlatformFee {
@@ -197,7 +212,7 @@ export const typeDefs = `
   }
 
   type Mutation {
-    createInvestment(amount: Float!, durationMonths: Int!, durationHours: Int, planType: String, roiRate: Float): Investment
+    createInvestment(amount: Float!, durationMonths: Int, durationHours: Int, planType: String, roiRate: Float, planId: ID): Investment
     closeInvestment(id: ID!, includeRoi: Boolean): Investment
     toggleInvestmentPause(id: ID!): Investment
     simulateDeposit(amount: Float!, txHash: String!): Deposit
@@ -224,6 +239,11 @@ export const typeDefs = `
     adminApproveDeposit(id: ID!): Deposit!
     adminDeclineDeposit(id: ID!, reason: String!): Deposit!
     adminUpdateAppWallet(address: String!): AppSettings!
+    adminCreateInvestmentPlan(name: String!, durationMonths: Int!, roiRate: Float!, minAmount: Float!, planType: String): InvestmentPlan!
+    adminUpdateInvestmentPlan(id: ID!, name: String!, durationMonths: Int!, roiRate: Float!, minAmount: Float!, planType: String!): InvestmentPlan!
+    adminToggleInvestmentPlan(id: ID!): InvestmentPlan!
+    adminDeleteInvestmentPlan(id: ID!): Boolean!
+    adminAdjustInvestmentProfit(investmentId: ID!, amount: Float!, description: String!): Investment!
 
     # Push Notifications
     savePushSubscription(endpoint: String!, authKey: String!, p256dhKey: String!): Boolean

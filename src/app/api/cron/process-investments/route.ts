@@ -56,23 +56,16 @@ export async function GET(request: Request) {
         for (let i = 0; i < daysToPay; i++) {
           totalDailyProfit += dailyProfit;
           
-          // Record ROI Snapshot for each day
+          // Record ROI Snapshot for each day (linked to investment_id)
           const payoutDate = new Date(lastPayout);
           payoutDate.setDate(payoutDate.getDate() + i + 1);
 
           await supabase.from("roi_snapshots").insert({
             user_id: inv.user_id,
+            investment_id: inv.id,
             date: payoutDate.toISOString().split("T")[0],
             profit_amount: dailyProfit,
             roi_percentage: (rateToUse / 30) * 100,
-          });
-
-          // Log Transaction
-          await supabase.from("transactions").insert({
-            user_id: inv.user_id,
-            type: "profit_payout",
-            amount: dailyProfit,
-            description: `Daily ROI Payout for ${inv.duration_months === 0 ? "test" : inv.duration_months + "-month"} investment`,
           });
         }
 
@@ -90,6 +83,15 @@ export async function GET(request: Request) {
 
       // 3. Check if matured
       if (now >= endDate) {
+        const ROI_PERCENTAGE_PER_MONTH_DEFAULT = 2.0;
+        const rateToUse = inv.roi_rate || ROI_PERCENTAGE_PER_MONTH_DEFAULT;
+        let totalProfit = 0;
+        if (inv.duration_months === 0) {
+          totalProfit = inv.amount * 0.001; // test
+        } else {
+          totalProfit = inv.amount * rateToUse * inv.duration_months;
+        }
+
         // Update Investment Status -> completed
         const { error: updateError } = await supabase
           .from("investments")
@@ -97,6 +99,16 @@ export async function GET(request: Request) {
           .eq("id", inv.id);
 
         if (!updateError) {
+          // Log single consolidated profit payout transaction at maturity
+          if (totalProfit > 0) {
+            await supabase.from("transactions").insert({
+              user_id: inv.user_id,
+              type: "profit_payout",
+              amount: totalProfit,
+              description: `Total ROI Payout for matured ${inv.duration_months === 0 ? "test" : inv.duration_months + "-month"} investment`,
+            });
+          }
+
           // Return Principal
           await supabase.from("transactions").insert({
             user_id: inv.user_id,
