@@ -401,6 +401,7 @@ export const GET_ADMIN_USERS = gql`
       role
       balance
       availableBalance
+      totalProfit
       createdAt
       wallet {
         address
@@ -535,6 +536,8 @@ export const ADMIN_UPDATE_USER = gql`
       fullName
       role
       balance
+      availableBalance
+      totalProfit
     }
   }
 `;

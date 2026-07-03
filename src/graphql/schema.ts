@@ -14,6 +14,7 @@ export const typeDefs = `
     deposits: [Deposit]
     transactions: [Transaction]
     availableBalance: Float
+    totalProfit: Float
     createdAt: DateTime
   }
 
@@ -209,6 +210,7 @@ export const typeDefs = `
     balance: Float
     transactionTitle: String
     transactionDescription: String
+    profitAdjustment: Float
   }
 
   type Mutation {

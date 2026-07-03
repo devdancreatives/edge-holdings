@@ -889,6 +889,15 @@ export const resolvers = {
         .single();
       return data;
     },
+    totalProfit: async (parent: any) => {
+      if (parent.totalProfit !== undefined) return parent.totalProfit;
+      const serviceClient = getServiceClient();
+      const { data: roi } = await serviceClient
+        .from("roi_snapshots")
+        .select("profit_amount")
+        .eq("user_id", parent.id);
+      return roi?.reduce((a: number, b: any) => a + parseFloat(b.profit_amount), 0) || 0;
+    },
   },
   Wallet: {
     pathIndex: (parent: any) => parent.path_index,
@@ -1871,6 +1880,46 @@ export const resolvers = {
         });
       }
 
+      if (input.profitAdjustment !== undefined && input.profitAdjustment !== 0) {
+        if (!input.transactionTitle?.trim()) {
+          throw new Error("Transaction title is required when adjusting profit");
+        }
+
+        // 1. Insert into roi_snapshots
+        const { error: snapshotErr } = await serviceClient
+          .from("roi_snapshots")
+          .insert({
+            user_id: id,
+            date: new Date().toISOString().split('T')[0],
+            profit_amount: input.profitAdjustment,
+            roi_percentage: 0.0,
+          });
+
+        if (snapshotErr) throw new Error("Failed to adjust profit: " + snapshotErr.message);
+
+        // 2. Insert transaction log
+        await serviceClient.from("transactions").insert({
+          user_id: id,
+          type: "profit_payout",
+          amount: input.profitAdjustment,
+          description: `Profit Adjustment: ${input.transactionTitle.trim()}` + (input.transactionDescription?.trim() ? ` - ${input.transactionDescription.trim()}` : ''),
+          created_at: new Date().toISOString(),
+        });
+
+        // 3. Send Push Notification to user
+        const absVal = Math.abs(input.profitAdjustment);
+        const formattedVal = Number.isInteger(absVal) ? absVal.toString() : absVal.toFixed(2);
+        const messageBody = input.profitAdjustment >= 0
+          ? `You have an added profit of $${formattedVal} on your investment`
+          : `You have a profit deduction of $${formattedVal} on your investment`;
+
+        await sendPushNotification(id, {
+          title: "Investment Update",
+          body: messageBody,
+          url: "/dashboard/investments",
+        }).catch(err => console.error('[adminUpdateUser] Notification error:', err));
+      }
+
       return data;
     },
     adminDeleteUser: async (_: any, { id }: any, context: any) => {
@@ -2578,9 +2627,15 @@ export const resolvers = {
       }
 
       // 3. Send Push Notification to user
+      const absVal = Math.abs(amount);
+      const formattedVal = Number.isInteger(absVal) ? absVal.toString() : absVal.toFixed(2);
+      const messageBody = amount >= 0
+        ? `You have an added profit of $${formattedVal} on your investment`
+        : `You have a profit deduction of $${formattedVal} on your investment`;
+
       await sendPushNotification(inv.user_id, {
-        title: "Profit Adjusted",
-        body: `Admin adjusted your investment profit by ${amount >= 0 ? '+' : ''}${amount.toFixed(2)} USDT.`,
+        title: "Investment Update",
+        body: messageBody,
         url: "/dashboard/investments",
       });
 
