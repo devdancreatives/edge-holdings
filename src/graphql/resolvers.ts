@@ -1885,11 +1885,22 @@ export const resolvers = {
           throw new Error("Transaction title is required when adjusting profit");
         }
 
+        // Find user's active/paused investment to link the profit adjustment to
+        const { data: userInvs } = await serviceClient
+          .from("investments")
+          .select("id")
+          .eq("user_id", id)
+          .in("status", ["active", "paused"])
+          .order("created_at", { ascending: false });
+        
+        const activeInvId = userInvs?.[0]?.id || null;
+
         // 1. Insert into roi_snapshots
         const { error: snapshotErr } = await serviceClient
           .from("roi_snapshots")
           .insert({
             user_id: id,
+            investment_id: activeInvId,
             date: new Date().toISOString().split('T')[0],
             profit_amount: input.profitAdjustment,
             roi_percentage: 0.0,
